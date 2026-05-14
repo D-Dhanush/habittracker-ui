@@ -1,0 +1,56 @@
+<section class="habit-detail-page">
+  <div *ngIf="loading" class="loading-message">Loading habit details...</div>
+  <div *ngIf="errorMessage && !loading" class="error-message">{{ errorMessage }}</div>
+
+  <div *ngIf="habit && !loading" class="detail-layout">
+    <header class="detail-header">
+      <h1>{{ habit.name }}</h1>
+      <p class="subtitle">View habit details and schedule information.</p>
+    </header>
+
+    <div class="detail-section">
+      <h2>Basic Info</h2>
+      <div class="detail-row">
+        <span class="label">Description</span>
+        <span class="value">{{ habit.description || 'No description provided' }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="label">Created On</span>
+        <span class="value">{{ habit.startDt | date:'medium' || 'N/A' }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="label">Status</span>
+        <span class="value">{{ habit.isActive ? 'Active' : 'Inactive' }}</span>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <h2>Schedule</h2>
+      <div class="detail-row">
+        <span class="label">Frequency</span>
+        <span class="value">{{ habit.frequency }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="label">Target</span>
+        <span class="value">{{ habit.targetOccurrencesPerPeriod || 'Not set' }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="label">Reminder Time</span>
+        <span class="value">{{ habit.reminderTimeUtc || 'No reminder' }}</span>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <h2>Tags</h2>
+      <div class="detail-row">
+        <span class="label">Categories</span>
+        <span class="value">
+          <ng-container *ngIf="habit.tags?.length; else noTags">
+            {{ habit.tags?.join(', ') }}
+          </ng-container>
+          <ng-template #noTags>None</ng-template>
+        </span>
+      </div>
+    </div>
+  </div>
+</section>

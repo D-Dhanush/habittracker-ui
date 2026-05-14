@@ -1,0 +1,34 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.sidenav-container {
+  height: 100vh;
+}
+
+.sidenav {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  padding: 1rem 0;
+}
+
+.mat-nav-list {
+  padding: 0;
+}
+
+.bottom-nav {
+    // margin-bottom: -100px;
+  margin-top: 270px;
+}
+
+a[mat-list-item] {
+  justify-content: center;
+  min-height: 56px;
+}
+
+a[mat-list-item] mat-icon {
+  font-size: 24px;
+}

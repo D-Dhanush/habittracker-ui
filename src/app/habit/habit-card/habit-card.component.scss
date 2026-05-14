@@ -1,0 +1,46 @@
+.habit-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 16px;
+  background-color: #f9f9f9;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  flex: 1 1 calc(20% - 16px);
+  max-width: calc(20% - 16px);
+  min-width: 240px;
+  min-height: 260px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  overflow: hidden;
+}
+
+.description-row {
+  min-height: 24px;
+  margin: 8px 0;
+}
+
+.description-text-placeholder {
+  color: #999;
+}
+
+.habit-card h3 {
+  margin-top: 0;
+  color: #333;
+}
+
+.habit-card p {
+  margin: 8px 0;
+  color: #666;
+}
+
+.description-text {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.habit-card strong {
+  color: #333;
+}

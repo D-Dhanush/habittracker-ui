@@ -1,0 +1,14 @@
+<div class="habit-card" *ngIf="habit" (click)="onCardClick()">
+  <h3>{{ habit.name }}</h3>
+  <p><strong>Frequency:</strong> {{ habit.frequency }}</p>
+  <p *ngIf="habit.targetOccurrencesPerPeriod"><strong>Target:</strong> {{ habit.targetOccurrencesPerPeriod }}</p>
+  <p *ngIf="habit.tags && habit.tags.length > 0"><strong>Tags:</strong> {{ habit.tags.join(', ') }}</p>
+  <p *ngIf="habit.startDt"><strong>Started:</strong> {{ habit.startDt | date }}</p>
+  <p class="description-row">
+    <strong>Description:</strong>
+    <span class="description-text" *ngIf="habit.description">
+      {{ habit.description | slice:0:20 }}<span *ngIf="habit.description && habit.description.length > 20">...</span>
+    </span>
+    <span class="description-text-placeholder" *ngIf="!habit.description">&mdash;</span>
+  </p>
+</div>

@@ -1,0 +1,12 @@
+<div class="habits-list">
+  <h2>All Habits</h2>
+  <div class="habits-container">
+    <app-habit-card *ngFor="let habit of pagedHabits" [habit]="habit"></app-habit-card>
+  </div>
+
+  <div class="pagination" *ngIf="totalPages > 1">
+    <button class="page-btn" (click)="prevPage()" [disabled]="currentPage === 1">Previous</button>
+    <span class="page-info">Page {{ currentPage }} of {{ totalPages }}</span>
+    <button class="page-btn" (click)="nextPage()" [disabled]="currentPage === totalPages">Next</button>
+  </div>
+</div>

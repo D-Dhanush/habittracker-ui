@@ -1,0 +1,58 @@
+<form [formGroup]="habitForm" (ngSubmit)="addHabit()" novalidate>
+  <div class="form-group">
+    <label for="name">Habit Name</label>
+    <input 
+      id="name" 
+      type="text" 
+      formControlName="Name" 
+      class="form-control" 
+      placeholder="Enter habit name" 
+      required>
+    <div *ngIf="habitForm.get('Name')?.invalid && habitForm.get('Name')?.touched" class="error-message">
+      <span *ngIf="habitForm.get('Name')?.errors?.['required']">Habit name is required.</span>
+      <span *ngIf="habitForm.get('Name')?.errors?.['minlength']">Habit name must be at least 3 characters.</span>
+    </div>
+  </div>
+  
+  <div class="form-group">
+    <label for="description">Description (Optional)</label>
+    <textarea 
+      id="description" 
+      formControlName="Description" 
+      class="form-control" 
+      placeholder="Describe your habit" 
+      rows="3"></textarea>
+  </div>
+  
+  <div class="form-group">
+    <label for="tags">Tags</label>
+    <select id="tags" formControlName="Tags" class="form-control" multiple>
+      <option value="health">Health</option>
+      <option value="productivity">Productivity</option>
+      <option value="learning">Learning</option>
+      <option value="other">Other</option>
+    </select>
+  </div>
+  
+  <div class="form-group">
+    <label for="frequency">Frequency</label>
+    <select id="frequency" formControlName="Frequency" class="form-control">
+      <option value="Daily">Daily</option>
+      <option value="Weekly">Weekly</option>
+      <option value="Monthly">Monthly</option>
+    </select>
+  </div>
+  
+  <div class="form-group">
+    <label for="isActive">
+      <input 
+        id="isActive" 
+        type="checkbox" 
+        formControlName="IsActive">
+      Is Active
+    </label>
+  </div>
+  
+  <button type="submit" [disabled]="habitForm.invalid" class="btn btn-primary">Add Habit</button>
+</form>
+
