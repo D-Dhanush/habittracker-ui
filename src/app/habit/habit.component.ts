@@ -10,7 +10,7 @@ import { HabitDto } from '../models/Habit.dto';
   standalone: true,
   imports: [ReactiveFormsModule, CommonModule, HabitCardComponent],
   templateUrl: './habit.component.html',
-  styleUrl: './habit.component.scss'
+  styleUrls: ['./habit.component.scss']
 })
 export class HabitComponent implements OnInit {
   habitForm!: FormGroup;

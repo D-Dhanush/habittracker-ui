@@ -38,4 +38,20 @@ $HabitTracker-theme: mat.define-light-theme((
 /* You can add global styles to this file, and also import other style files */
 
 html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  background: radial-gradient(circle at top, #0c4d81 0%, #1465a0 35%, #166caa 70%, #0f4168 100%);
+  color: #f8fbff;
+}
+
+app-root {
+  display: block;
+  min-height: 100%;
+  background: transparent;
+  color: #f8fbff;
+}
+
+* {
+  box-sizing: border-box;
+}

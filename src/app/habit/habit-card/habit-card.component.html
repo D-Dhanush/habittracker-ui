@@ -1,5 +1,4 @@
-<div class="habit-card" *ngIf="habit" (click)="onCardClick()">
-  <h3>{{ habit.name }}</h3>
+<div class="habit-card" *ngIf="habit" (click)="onCardClick()">  <div class="glitter"></div>  <h3>{{ habit.name }}</h3>
   <p><strong>Frequency:</strong> {{ habit.frequency }}</p>
   <p *ngIf="habit.targetOccurrencesPerPeriod"><strong>Target:</strong> {{ habit.targetOccurrencesPerPeriod }}</p>
   <p *ngIf="habit.tags && habit.tags.length > 0"><strong>Tags:</strong> {{ habit.tags.join(', ') }}</p>

@@ -13,6 +13,7 @@
   justify-content: space-between;
   height: 100%;
   padding: 1rem 0;
+  background: linear-gradient(180deg, #102f64 0%, #1a4b88 100%);
 }
 
 .mat-nav-list {
@@ -20,15 +21,22 @@
 }
 
 .bottom-nav {
-    // margin-bottom: -100px;
   margin-top: 270px;
 }
 
 a[mat-list-item] {
   justify-content: center;
   min-height: 56px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+a[mat-list-item].active-link,
+a[mat-list-item]:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
 }
 
 a[mat-list-item] mat-icon {
   font-size: 24px;
+  color: #ffffff;
 }
