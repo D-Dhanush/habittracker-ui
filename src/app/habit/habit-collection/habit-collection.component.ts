@@ -25,6 +25,15 @@ export class HabitCollectionComponent implements OnInit {
     this.loadHabits();
   }
 
+  onHabitDeleted(id: string): void {
+    this.habits = this.habits.filter(habit => habit.id !== id);
+    this.totalPages = Math.max(1, Math.ceil(this.habits.length / this.pageSize));
+    if (this.currentPage > this.totalPages) {
+      this.currentPage = this.totalPages;
+    }
+    this.updatePagedHabits();
+  }
+
   loadHabits(): void {
     this.habitService.getAllHabits().subscribe({
       next: (habits: HabitDto[]) => {

@@ -5,30 +5,30 @@
     <!-- Top nav items -->
     <mat-nav-list>
       <a mat-list-item routerLink="/" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}" matTooltip="Dashboard" matTooltipPosition="right">
-      <mat-icon>dashboard</mat-icon>
+        <mat-icon>dashboard</mat-icon>
       </a>
       <a mat-list-item routerLink="/habits" routerLinkActive="active-link" matTooltip="My Habits" matTooltipPosition="right">
-      <mat-icon>list</mat-icon>
+        <mat-icon>list</mat-icon>
       </a>
       <a mat-list-item routerLink="/add-habit" routerLinkActive="active-link" matTooltip="Add Habit" matTooltipPosition="right">
-      <mat-icon>add_circle</mat-icon>
+        <mat-icon>add_circle</mat-icon>
       </a>
       <a mat-list-item routerLink="/progress" routerLinkActive="active-link" matTooltip="Progress" matTooltipPosition="right">
-      <mat-icon>trending_up</mat-icon>
+        <mat-icon>trending_up</mat-icon>
       </a>
     </mat-nav-list>
 
     <!-- Bottom nav items -->
     <mat-nav-list class="bottom-nav">
       <a mat-list-item routerLink="/help" routerLinkActive="active-link" matTooltip="Help" matTooltipPosition="right">
-      <mat-icon>help</mat-icon>
+        <mat-icon>help</mat-icon>
       </a>
       
       <a mat-list-item routerLink="/settings" routerLinkActive="active-link" matTooltip="Settings" matTooltipPosition="right">
-      <mat-icon>settings</mat-icon>
+        <mat-icon>settings</mat-icon>
       </a>
       <a mat-list-item routerLink="/profile" routerLinkActive="active-link" matTooltip="Profile" matTooltipPosition="right">
-      <mat-icon>person</mat-icon>
+        <mat-icon>person</mat-icon>
       </a>
     </mat-nav-list>
 
@@ -36,7 +36,11 @@
 
   <!-- Main content -->
   <mat-sidenav-content>
-    <router-outlet></router-outlet>
+    <div class="main-view">
+      <div class="page-shell">
+        <router-outlet></router-outlet>
+      </div>
+    </div>
   </mat-sidenav-content>
 
 </mat-sidenav-container>

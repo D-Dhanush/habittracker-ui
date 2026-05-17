@@ -1,7 +1,7 @@
 <div class="habits-list">
   <h2>All Habits</h2>
   <div class="habits-container">
-    <app-habit-card *ngFor="let habit of pagedHabits" [habit]="habit"></app-habit-card>
+    <app-habit-card *ngFor="let habit of pagedHabits" [habit]="habit" (deleted)="onHabitDeleted($event)"></app-habit-card>
   </div>
 
   <div class="pagination" *ngIf="totalPages > 1">

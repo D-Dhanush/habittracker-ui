@@ -23,4 +23,8 @@ export class HabitService {
   getAllHabits(): Observable<HabitDto[]> {
     return this.http.get<HabitDto[]>(this.apiUrl);
   }
+
+  deleteHabit(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
 }

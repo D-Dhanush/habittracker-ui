@@ -12,8 +12,8 @@
 // Define the palettes for your theme using the Material Design palettes available in palette.scss
 // (imported above). For each palette, you can optionally specify a default, lighter, and darker
 // hue. Available color palettes: https://material.io/design/color/
-$HabitTracker-primary: mat.define-palette(mat.$indigo-palette);
-$HabitTracker-accent: mat.define-palette(mat.$pink-palette, A200, A100, A400);
+$HabitTracker-primary: mat.define-palette(mat.$blue-palette, 700, 500, 900);
+$HabitTracker-accent: mat.define-palette(mat.$yellow-palette, A200, A100, A400);
 
 // The warn palette is optional (defaults to red).
 $HabitTracker-warn: mat.define-palette(mat.$red-palette);
@@ -37,21 +37,66 @@ $HabitTracker-theme: mat.define-light-theme((
 
 /* You can add global styles to this file, and also import other style files */
 
+:root {
+  --brand-blue: #4aa7ff;
+  --brand-gold: #ecd46d;
+  --brand-gold-soft: #f4dea3;
+  --brand-dark: #020408;
+  --surface-dark: #020306;
+  --surface-soft: rgba(14, 24, 43, 0.9);
+  --text-hero: #f8fbff;
+  --text-muted: #d6e1ff;
+  --border-soft: rgba(236, 212, 109, 0.14);
+}
+
 html, body { height: 100%; }
 body {
   margin: 0;
   font-family: Roboto, "Helvetica Neue", sans-serif;
-  background: radial-gradient(circle at top, #0c4d81 0%, #1465a0 35%, #166caa 70%, #0f4168 100%);
-  color: #f8fbff;
+  background: radial-gradient(circle at top left, rgba(74, 167, 255, 0.12), transparent 18%),
+              radial-gradient(circle at bottom right, rgba(100, 196, 255, 0.08), transparent 20%),
+              linear-gradient(180deg, #2d5ba0 0%, #1f4c8a 45%, #122c53 100%);
+  background-attachment: fixed;
+  color: var(--text-hero);
+}
+
+body.light-theme {
+  background: linear-gradient(180deg, #f4f9ff 0%, #dfeeff 45%, #c7d9f5 100%);
+  color: #10203a;
+}
+
+body.light-theme .app-header,
+body.light-theme .sidenav,
+body.light-theme .app-shell,
+body.light-theme .profile-card,
+body.light-theme .section-card,
+body.light-theme .help-section {
+  background: rgba(255, 255, 255, 0.88) !important;
+  color: #10203a !important;
+  border-color: rgba(16, 32, 58, 0.12) !important;
+}
+
+body.light-theme button,
+body.light-theme input,
+body.light-theme select,
+body.light-theme textarea {
+  color: #10203a;
 }
 
 app-root {
   display: block;
   min-height: 100%;
   background: transparent;
-  color: #f8fbff;
+  color: var(--text-hero);
 }
 
 * {
   box-sizing: border-box;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
 }

@@ -5,8 +5,45 @@
   <div *ngIf="habit && !loading" class="detail-layout">
     <header class="detail-header">
       <h1>{{ habit.name }}</h1>
-      <p class="subtitle">View habit details and schedule information.</p>
+      <p class="subtitle">View habit details, streaks, progress, and your habit strategy.</p>
     </header>
+
+    <div class="detail-summary-grid">
+      <div class="summary-card">
+        <span class="summary-label">Current Streak</span>
+        <strong>{{ currentStreak }} days</strong>
+      </div>
+      <div class="summary-card">
+        <span class="summary-label">Goal Plan</span>
+        <strong>{{ goalDays }} days</strong>
+      </div>
+      <div class="summary-card">
+        <span class="summary-label">Level</span>
+        <strong>Lvl {{ level }}</strong>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <h2>Level Up Strategy</h2>
+      <p class="detail-note">Follow the plan below to reach the next level — keep your streak alive and complete habit sessions consistently.</p>
+      <div class="progress-bar">
+        <div class="progress-fill" [style.width.%]="levelProgress * 100"></div>
+      </div>
+      <div class="progress-meta">
+        <span>{{ (levelProgress * 100) | number:'1.0-0' }}% to next level</span>
+        <span>{{ habit.targetOccurrencesPerPeriod || 0 }} sessions per period</span>
+      </div>
+    </div>
+
+    <div class="detail-section calendar-section">
+      <h2>30-Day Habit Calendar</h2>
+      <div class="calendar-grid">
+        <div class="calendar-day" *ngFor="let day of calendarDays" [class.completed]="day.completed">
+          {{ day.day }}
+        </div>
+      </div>
+      <p class="calendar-note">Completed days are highlighted. Track progress toward your habit goal.</p>
+    </div>
 
     <div class="detail-section">
       <h2>Basic Info</h2>

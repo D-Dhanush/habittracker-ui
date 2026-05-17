@@ -1,9 +1,8 @@
 .habit-detail-page {
-  padding: 2rem 1.5rem;
-  max-width: 960px;
-  margin: 0 auto;
-  background: radial-gradient(circle at top, #0a3b6e 0%, #0e4f8b 40%, #082f58 100%);
+  padding: 2rem 2.5rem;
+  width: 100%;
   min-height: calc(100vh - 2rem);
+  background: transparent;
   color: #f8fbff;
 }
 
@@ -27,10 +26,10 @@
 
 .detail-header {
   padding: 1.5rem 1.75rem;
-  border: 1px solid rgba(255, 218, 123, 0.25);
+  border: 1px solid rgba(82, 154, 234, 0.25);
   border-radius: 1rem;
-  background: rgba(255, 215, 100, 0.08);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.20);
+  background: rgba(33, 80, 142, 0.36);
+  box-shadow: 0 18px 40px rgba(20, 44, 71, 0.28);
 }
 
 .detail-header h1 {
@@ -46,10 +45,10 @@
 
 .detail-section {
   padding: 1.5rem 1.75rem;
-  border: 1px solid rgba(255, 215, 90, 0.22);
+  border: 1px solid rgba(90, 170, 255, 0.22);
   border-radius: 1rem;
-  background: rgba(15, 10, 4, 0.72);
-  box-shadow: inset 0 0 0 1px rgba(255, 224, 141, 0.05);
+  background: rgba(19, 60, 110, 0.34);
+  box-shadow: inset 0 0 0 1px rgba(122, 189, 255, 0.08);
 }
 
 .detail-section h2 {

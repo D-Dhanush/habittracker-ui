@@ -13,7 +13,8 @@
   justify-content: space-between;
   height: 100%;
   padding: 1rem 0;
-  background: linear-gradient(180deg, #102f64 0%, #1a4b88 100%);
+  background: linear-gradient(180deg, #051530 0%, #143b67 45%, #275e92 100%);
+  border-right: 1px solid rgba(236, 212, 109, 0.14);
 }
 
 .mat-nav-list {
@@ -21,22 +22,50 @@
 }
 
 .bottom-nav {
-  margin-top: 270px;
+  margin-top: 2rem;
 }
 
 a[mat-list-item] {
   justify-content: center;
   min-height: 56px;
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba(250, 250, 252, 0.82);
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
 a[mat-list-item].active-link,
 a[mat-list-item]:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: #ffffff;
+  background: rgba(236, 212, 109, 0.16);
+  color: #f8f4dc;
 }
 
 a[mat-list-item] mat-icon {
   font-size: 24px;
-  color: #ffffff;
+  color: #f8f4dc;
+}
+
+.mat-sidenav-content {
+  background: linear-gradient(180deg, rgba(24, 82, 149, 0.95), rgba(11, 36, 72, 0.95));
+  color: #f8fbff;
+}
+
+.main-view {
+  min-height: calc(100vh - 0px);
+  padding: 2rem 2.5rem;
+}
+
+.page-shell {
+  min-height: 100%;
+  margin: 0 auto;
+  max-width: 1280px;
+  border-radius: 30px;
+  overflow: hidden;
+  background: transparent;
+}
+
+.page-shell ::ng-deep .mat-card {
+  background: rgba(10, 16, 24, 0.7);
+}
+
+.page-shell ::ng-deep .mat-tab-group {
+  background: transparent;
 }
