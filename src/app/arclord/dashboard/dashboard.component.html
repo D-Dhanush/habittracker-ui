@@ -1,0 +1,125 @@
+<div class="dashboard">
+  <!-- Page Header -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <h1>Welcome Back</h1>
+      <p>Master your habits and unlock your full potential</p>
+    </div>
+  </section>
+
+  <!-- Main Stats Grid -->
+  <section class="stats-grid" *ngIf="stats$ | async as stats">
+    <app-stat-card
+      label="Total Habits"
+      [value]="stats.totalHabits"
+      icon="target"
+      [large]="true"
+      valueClass="text-gold">
+    </app-stat-card>
+
+    <app-stat-card
+      label="Current XP"
+      [value]="stats.currentXp"
+      icon="lightning_bolt"
+      valueClass="text-gold">
+    </app-stat-card>
+
+    <app-stat-card
+      label="Current Streak"
+      [value]="stats.currentStreak"
+      icon="local_fire_department"
+      valueClass="text-warning">
+    </app-stat-card>
+
+    <app-stat-card
+      label="Completion Rate"
+      [value]="stats.completionPercentage + '%'"
+      icon="trending_up"
+      valueClass="text-success">
+    </app-stat-card>
+
+    <app-stat-card
+      label="Active Habits"
+      [value]="stats.activeHabits"
+      icon="play_circle"
+      valueClass="text-blue">
+    </app-stat-card>
+
+    <app-stat-card
+      label="Longest Streak"
+      [value]="stats.longestStreak"
+      icon="emoji_events"
+      valueClass="text-gold">
+    </app-stat-card>
+  </section>
+
+  <!-- Ranking & Progress Section -->
+  <section class="ranking-section" *ngIf="stats$ | async as stats">
+    <div class="rank-card">
+      <div class="rank-header">
+        <h3>Your Rank</h3>
+        <p class="rank-label" [ngClass]="getRankColor(stats.currentXp)">{{ getRankFromXp(stats.currentXp) }}</p>
+      </div>
+      <div class="rank-progress">
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="getProgressToNextLevel(stats.currentXp)"></div>
+        </div>
+        <p class="progress-label">{{ getProgressToNextLevel(stats.currentXp) | number:'1.0-0' }}% to next level</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Calendar Heatmap -->
+  <section class="calendar-section" *ngIf="calendarData$ | async as calendarData">
+    <app-calendar-heatmap [calendarData]="calendarData">
+    </app-calendar-heatmap>
+  </section>
+
+  <!-- Charts and Activity -->
+  <section class="charts-section">
+    <!-- Weekly Progress -->
+    <div class="chart-card" *ngIf="weeklyData$ | async as weeklyData">
+      <div class="card-header">
+        <h3>Weekly Progress</h3>
+        <p>Completion rate trends</p>
+      </div>
+      <div class="bar-chart">
+        <div class="bar-item" *ngFor="let week of weeklyData">
+          <div class="bar-container">
+            <div class="bar">
+              <div class="bar-fill" [style.width.%]="week.completionPercentage"></div>
+            </div>
+            <span class="bar-label">{{ week.week }}</span>
+          </div>
+          <span class="bar-value">{{ week.completionPercentage }}%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="activity-card" *ngIf="recentActivity$ | async as activities">
+      <div class="card-header">
+        <h3>Recent Activity</h3>
+        <p>Latest habit completions</p>
+      </div>
+      <div class="activity-list">
+        <div class="activity-item" *ngFor="let activity of activities">
+          <div class="activity-icon">
+            <mat-icon>{{ activity.icon }}</mat-icon>
+          </div>
+          <div class="activity-content">
+            <p class="activity-title">{{ activity.title }}</p>
+            <p class="activity-description">{{ activity.habitName }}</p>
+            <p class="activity-time">{{ activity.timestamp | date:'short' }}</p>
+          </div>
+          <div class="activity-xp">
+            <span class="xp-badge">+{{ activity.xpEarned }} XP</span>
+          </div>
+        </div>
+        <div class="no-activity" *ngIf="activities.length === 0">
+          <p>No recent activity yet. Start completing habits!</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

@@ -1,0 +1,119 @@
+:host {
+  display: block;
+}
+
+.quest-card {
+  border: 1px solid rgba(236, 212, 109, 0.18);
+  background: linear-gradient(180deg, rgba(10, 10, 13, 0.98), rgba(19, 18, 26, 0.96));
+  color: #f5ebc7;
+  transition: transform 0.26s ease, box-shadow 0.26s ease;
+}
+
+.quest-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+}
+
+.card-top {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.icon-shell {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  background: rgba(236, 212, 109, 0.12);
+  color: #f8e8a0;
+}
+
+.icon-shell mat-icon {
+  font-size: 28px;
+}
+
+.primary-info {
+  flex: 1;
+}
+
+.quest-name {
+  font-size: 1.06rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.metadata {
+  font-size: 0.82rem;
+  color: rgba(245, 235, 199, 0.7);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.3rem;
+}
+
+.divider {
+  opacity: 0.7;
+}
+
+.status-chip {
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.status-chip.active {
+  background: rgba(72, 205, 160, 0.12);
+  color: #c6f3d1;
+}
+
+.status-chip.paused {
+  background: rgba(255, 193, 7, 0.12);
+  color: #ffe8a0;
+}
+
+.status-chip.completed {
+  background: rgba(236, 212, 109, 0.16);
+  color: #f8ead2;
+}
+
+.progress-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 0.8rem;
+}
+
+.score {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  color: rgba(245, 235, 199, 0.82);
+}
+
+.score .label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.score strong {
+  font-size: 1rem;
+}
+
+.card-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+mat-progress-bar {
+  height: 10px;
+  border-radius: 999px;
+  margin-top: 0.4rem;
+}

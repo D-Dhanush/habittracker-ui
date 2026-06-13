@@ -27,6 +27,23 @@
   align-items: start;
 }
 
+.habit-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  font-size: 1.6rem;
+  margin-right: 0.65rem;
+  flex: 0 0 auto;
+}
+
+.habit-icon.star { background: linear-gradient(135deg,#fff6d1,#ffd24d); color: #5a3d00; }
+.habit-icon.diamond { background: linear-gradient(135deg,#eef6fa,#cfefff); color: #052032; }
+.habit-icon.medal { background: linear-gradient(135deg,#fbe7d2,#e19b4a); color: #2b1200; }
+.habit-icon.medal-silver { background: linear-gradient(135deg,#f0f5f8,#d8e1e8); color: #052036; }
+.habit-icon.emerald { background: linear-gradient(135deg,#e6fff3,#32c67a); color: #02331a; }
+
 .habit-header h3 {
   margin: 0 0 0.8rem 0;
   font-size: 1.35rem;

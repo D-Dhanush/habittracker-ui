@@ -1,0 +1,133 @@
+@use '../../../../styles/theme' as *;
+:host {
+  display: block;
+}
+
+.stat-card {
+  @include glass-morphism-strong;
+  border-radius: $border-radius-lg;
+  padding: $spacing-lg;
+  position: relative;
+  overflow: hidden;
+  transition: all $transition-standard;
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  background: linear-gradient(135deg, rgba(13, 27, 42, 0.6) 0%, rgba(30, 58, 95, 0.3) 100%);
+
+  &:hover {
+    background: linear-gradient(135deg, rgba(13, 27, 42, 0.8) 0%, rgba(30, 58, 95, 0.5) 100%);
+    border-color: rgba(212, 175, 55, 0.4);
+    box-shadow: 
+      $shadow-elevation-3,
+      0 0 30px rgba(212, 175, 55, 0.4),
+      0 0 50px rgba(77, 217, 255, 0.2);
+    transform: translateY(-4px);
+  }
+
+  &.large {
+    padding: $spacing-xl;
+    grid-column: span 2;
+
+    .stat-value {
+      font-size: 2.5rem;
+    }
+
+    @media (max-width: $breakpoint-md) {
+      grid-column: span 1;
+    }
+  }
+
+  .stat-content {
+    position: relative;
+    z-index: 2;
+  }
+
+  .stat-header {
+    @include flex-between;
+    margin-bottom: $spacing-md;
+  }
+
+  .stat-label {
+    font-size: 0.85rem;
+    color: $color-text-secondary;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .stat-icon {
+    color: $color-primary-gold;
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    opacity: 0.7;
+  }
+
+  .stat-value-wrapper {
+    display: flex;
+    align-items: baseline;
+    gap: $spacing-sm;
+    margin-bottom: $spacing-md;
+  }
+
+  .stat-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    
+    &.text-gold {
+      color: $color-primary-gold;
+      text-shadow: $glow-gold;
+    }
+
+    &.text-blue {
+      color: $color-accent-light-blue;
+      text-shadow: $glow-blue;
+    }
+
+    &.text-success {
+      color: $color-success;
+    }
+
+    &.text-warning {
+      color: $color-warning;
+    }
+  }
+
+  .stat-unit {
+    font-size: 0.85rem;
+    color: $color-text-tertiary;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .stat-description {
+    font-size: 0.8rem;
+    color: $color-text-tertiary;
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  .stat-glow {
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(212, 175, 55, 0.1) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity $transition-standard;
+    pointer-events: none;
+  }
+
+  &:hover .stat-glow {
+    opacity: 1;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    padding: $spacing-md;
+
+    .stat-value {
+      font-size: 1.5rem;
+    }
+  }
+}

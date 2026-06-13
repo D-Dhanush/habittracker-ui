@@ -1,0 +1,343 @@
+@use '../../../../styles/theme' as *;
+
+// =============================================
+// GOLD GLITTER CARD — Playing Card Aesthetic
+// =============================================
+
+.habit-card {
+  position: relative;
+  border-radius: 22px;
+  padding: 24px;
+  overflow: hidden;
+  cursor: pointer;
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  transition: transform 260ms ease, box-shadow 260ms ease, border-color 260ms ease;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+
+  background: linear-gradient(
+    145deg,
+    #fee087 0%,
+    #f7c925 22%,
+    #ffd21e 45%,
+    #e0a800 68%,
+    #c98a00 85%,
+    #b8750a 100%
+  );
+
+  border: 1px solid rgba(255, 220, 100, 0.6);
+  box-shadow:
+    0 24px 64px rgba(160, 100, 0, 0.45),
+    0 0 32px rgba(255, 195, 40, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+
+  color: #1a0f00;
+
+  &:hover {
+    transform: translateY(-5px) scale(1.01);
+    box-shadow:
+      0 34px 88px rgba(180, 120, 0, 0.58),
+      0 0 55px rgba(255, 210, 60, 0.32),
+      inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    border-color: rgba(255, 232, 120, 0.9);
+  }
+}
+
+// =============================================
+// GLITTER — falling gold snow
+// =============================================
+
+.glitter {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: 22px;
+  overflow: hidden;
+  z-index: 0;
+
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 220, 0.98) 2px,   transparent 2px),
+    radial-gradient(circle, rgba(255, 230, 60,  0.92) 2px,   transparent 2px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.95) 1.5px, transparent 1.5px),
+    radial-gradient(circle, rgba(200, 148, 0,   0.82) 2px,   transparent 2px),
+    radial-gradient(circle, rgba(255, 245, 140, 0.90) 1.5px, transparent 1.5px),
+    radial-gradient(circle, rgba(255, 215, 50,  0.85) 1px,   transparent 1px),
+    radial-gradient(circle, rgba(255, 255, 180, 0.72) 1px,   transparent 1px);
+
+  background-size:
+    68px  68px,
+    112px 112px,
+    44px  44px,
+    88px  88px,
+    56px  56px,
+    36px  36px,
+    24px  24px;
+
+  background-position:
+    4px   0px,
+    28px  18px,
+    14px  38px,
+    52px  8px,
+    22px  52px,
+    8px   28px,
+    42px  44px;
+
+  animation: glitterSnow 5s linear infinite;
+  opacity: 0.88;
+  filter: brightness(1.15);
+}
+
+@keyframes glitterSnow {
+  0% {
+    background-position:
+      4px   -68px,
+      28px  -112px,
+      14px  -44px,
+      52px  -88px,
+      22px  -56px,
+      8px   -36px,
+      42px  -24px;
+    opacity: 0.65;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    background-position:
+      4px   68px,
+      28px  112px,
+      14px  44px,
+      52px  88px,
+      22px  56px,
+      8px   36px,
+      42px  24px;
+    opacity: 0.65;
+  }
+}
+
+// =============================================
+// SHINE SWEEP
+// =============================================
+
+.habit-card::after {
+  content: '';
+  position: absolute;
+  top: -150%;
+  left: -60%;
+  width: 28%;
+  height: 320%;
+  background: linear-gradient(
+    118deg,
+    transparent,
+    rgba(255, 255, 255, 0.16),
+    transparent
+  );
+  transform: rotate(22deg);
+  animation: cardShine 5s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes cardShine {
+  0%   { left: -60%; }
+  100% { left: 170%; }
+}
+
+// =============================================
+// CONTENT — above glitter
+// =============================================
+
+.habit-header,
+.badges-row,
+.description-row,
+.delete-button,
+.delete-confirm {
+  position: relative;
+  z-index: 2;
+}
+
+.habit-card h3,
+.habit-card p,
+.habit-card strong {
+  position: relative;
+  z-index: 2;
+}
+
+.habit-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+
+.habit-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-size: 1.5rem;
+  flex: 0 0 auto;
+  margin-right: 0.5rem;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+
+  &.star         { background: linear-gradient(135deg, #fff6d1, #ffd24d); color: #5a3d00; }
+  &.diamond      { background: linear-gradient(135deg, #eef6fa, #cfefff); color: #052032; }
+  &.medal        { background: linear-gradient(135deg, #fbe7d2, #e19b4a); color: #2b1200; }
+  &.medal-silver { background: linear-gradient(135deg, #f0f5f8, #d8e1e8); color: #052036; }
+  &.emerald      { background: linear-gradient(135deg, #e6fff3, #32c67a); color: #02331a; }
+}
+
+.habit-card h3 {
+  margin: 0 0 10px 0;
+  padding-bottom: 10px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1a0800;
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.5),
+    0 0 8px rgba(255, 200, 0, 0.3);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+  flex: 1;
+}
+
+.habit-card p {
+  margin: 5px 0;
+  font-size: 0.83rem;
+  color: rgba(30, 12, 0, 0.82);
+  letter-spacing: 0.2px;
+}
+
+.habit-card strong {
+  color: rgba(10, 4, 0, 0.95);
+  font-weight: 700;
+}
+
+// =============================================
+// BADGES
+// =============================================
+
+.badges-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.32rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.77rem;
+  font-weight: 700;
+
+  &.streak {
+    background: rgba(255, 255, 255, 0.85);
+    color: #4a2c00;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+  }
+
+  &.level {
+    background: rgba(10, 20, 55, 0.82);
+    color: #4dd9ff;
+    border: 1px solid rgba(77, 217, 255, 0.4);
+  }
+}
+
+// =============================================
+// DESCRIPTION
+// =============================================
+
+.description-row {
+  min-height: 20px;
+  margin: 8px 0;
+  display: flex;
+  gap: 0.4rem;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
+.description-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+  color: rgba(35, 15, 0, 0.78);
+}
+
+.description-text-placeholder {
+  color: rgba(30, 12, 0, 0.42);
+  font-style: italic;
+}
+
+// =============================================
+// DELETE
+// =============================================
+
+.delete-button {
+  background: rgba(255, 255, 255, 0.82);
+  color: #7a1015;
+  border: 1px solid rgba(120, 20, 25, 0.45);
+  padding: 0.4rem 0.55rem;
+  border-radius: 999px;
+  cursor: pointer;
+  align-self: flex-start;
+  flex-shrink: 0;
+  line-height: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(180, 30, 35, 0.18);
+    transform: translateY(-1px);
+  }
+}
+
+.delete-confirm {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 14px;
+  background: rgba(4, 10, 24, 0.94);
+  border: 1px solid rgba(77, 217, 255, 0.2);
+  backdrop-filter: blur(10px);
+
+  p {
+    margin: 0 0 0.7rem;
+    color: #e8f4ff;
+    font-size: 0.85rem;
+  }
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 0.6rem;
+
+  button {
+    flex: 1;
+    border: none;
+    border-radius: 999px;
+    padding: 0.65rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 0.82rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+}
+
+.confirm-yes {
+  background: linear-gradient(135deg, #1560b0, #4dd9ff);
+  color: #03060f;
+}
+
+.confirm-no {
+  background: rgba(255, 255, 255, 0.15);
+  color: #e8f4ff;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+}

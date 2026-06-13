@@ -1,66 +1,216 @@
-<form [formGroup]="habitForm" (ngSubmit)="addHabit()" novalidate class="habit-form">
-  <div class="habit-form-header">
-    <h2>Create a Habit</h2>
-    <p>Build better rhythms with a clean, blue-gold habit form.</p>
-  </div>
-  <div class="form-grid">
-    <div class="form-group">
-      <label for="name">Habit Name</label>
-      <input
-        id="name"
-        type="text"
-        formControlName="Name"
-        class="form-control"
-        placeholder="Enter habit name"
-        required>
-      <div *ngIf="habitForm.get('Name')?.invalid && habitForm.get('Name')?.touched" class="error-message">
-        <span *ngIf="habitForm.get('Name')?.errors?.['required']">Habit name is required.</span>
-        <span *ngIf="habitForm.get('Name')?.errors?.['minlength']">Habit name must be at least 3 characters.</span>
+<div class="habit-form-page">
+  <!-- Header -->
+  <section class="form-header">
+    <div>
+      <h1>{{ isEditing ? 'Edit Habit' : 'Create New Habit' }}</h1>
+      <p>{{ isEditing ? 'Update your habit details and goals' : 'Start building better habits today' }}</p>
+    </div>
+  </section>
+
+  <!-- Form -->
+  <form [formGroup]="habitForm" (ngSubmit)="onSubmit()" class="habit-form">
+    <!-- Basic Information Section -->
+    <section class="form-section">
+      <h2>Basic Information</h2>
+      
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Habit Name *</mat-label>
+          <input matInput formControlName="name" placeholder="Enter habit name">
+          <mat-error *ngIf="habitForm.get('name')?.hasError('required')">
+            Habit name is required
+          </mat-error>
+          <mat-error *ngIf="habitForm.get('name')?.hasError('minlength')">
+            Must be at least 3 characters
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Subtitle (Optional)</mat-label>
+          <input matInput formControlName="subtitle" placeholder="Secondary description">
+        </mat-form-field>
       </div>
-    </div>
 
-    <div class="form-group full-width">
-      <label for="description">Description (Optional)</label>
-      <textarea
-        id="description"
-        formControlName="Description"
-        class="form-control"
-        placeholder="Describe your habit"
-        rows="4"></textarea>
-    </div>
+      <mat-form-field appearance="outline" class="form-field full-width">
+        <mat-label>Description (Optional)</mat-label>
+        <textarea matInput formControlName="description" placeholder="Describe your habit and goals" rows="4"></textarea>
+      </mat-form-field>
+    </section>
 
-    <div class="form-group">
-      <label for="tags">Tags</label>
-      <select id="tags" formControlName="Tags" class="form-control" multiple>
-        <option value="health">Health</option>
-        <option value="productivity">Productivity</option>
-        <option value="learning">Learning</option>
-        <option value="other">Other</option>
-      </select>
-    </div>
+    <!-- Configuration Section -->
+    <section class="form-section">
+      <h2>Configuration</h2>
 
-    <div class="form-group">
-      <label for="frequency">Frequency</label>
-      <select id="frequency" formControlName="Frequency" class="form-control">
-        <option value="Daily">Daily</option>
-        <option value="Weekly">Weekly</option>
-        <option value="Monthly">Monthly</option>
-      </select>
-    </div>
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Category *</mat-label>
+          <mat-select formControlName="category">
+            <mat-option *ngFor="let cat of categories" [value]="cat">
+              <mat-icon>{{ getCategoryIcon(cat) }}</mat-icon>
+              {{ getCategoryLabel(cat) }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
 
-    <div class="form-group checkbox-group full-width">
-      <label class="checkbox-label" for="isActive">
-        <input
-          id="isActive"
-          type="checkbox"
-          formControlName="IsActive">
-        Is Active
-      </label>
-    </div>
-  </div>
+        <mat-form-field appearance="outline" class="form-field" *ngIf="habitForm.get('category')?.value === 'custom'">
+          <mat-label>Custom Category Name</mat-label>
+          <input matInput formControlName="customCategory" placeholder="Enter custom category">
+        </mat-form-field>
 
-  <div class="form-actions">
-    <button type="submit" [disabled]="habitForm.invalid" class="btn btn-primary">Add Habit</button>
-  </div>
-</form>
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Frequency *</mat-label>
+          <mat-select formControlName="frequency">
+            <mat-option *ngFor="let freq of frequencies" [value]="freq">
+              {{ freq | titlecase }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Status *</mat-label>
+          <mat-select formControlName="status">
+            <mat-option *ngFor="let status of statuses" [value]="status">
+              {{ status | titlecase }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>XP Reward *</mat-label>
+          <input matInput type="number" formControlName="xpReward" min="10" max="500">
+          <mat-hint>Points earned for completion</mat-hint>
+        </mat-form-field>
+      </div>
+    </section>
+
+    <!-- Date Section -->
+    <section class="form-section">
+      <h2>Timeline</h2>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Start Date *</mat-label>
+          <input matInput [matDatepicker]="startDatePicker" formControlName="startDate">
+          <mat-datepicker-toggle matIconSuffix [for]="startDatePicker"></mat-datepicker-toggle>
+          <mat-datepicker #startDatePicker></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>End Date (Optional)</mat-label>
+          <input matInput [matDatepicker]="endDatePicker" formControlName="endDate">
+          <mat-datepicker-toggle matIconSuffix [for]="endDatePicker"></mat-datepicker-toggle>
+          <mat-datepicker #endDatePicker></mat-datepicker>
+        </mat-form-field>
+      </div>
+    </section>
+
+    <!-- Colors & Icon Section -->
+    <section class="form-section">
+      <h2>Appearance</h2>
+
+      <div class="form-row">
+        <div class="color-picker-group">
+          <label>Primary Color</label>
+          <div class="color-options">
+            <div 
+              *ngFor="let color of colorOptions"
+              class="color-option"
+              [style.background]="color.value"
+              [class.selected]="habitForm.get('primaryColor')?.value === color.value"
+              (click)="habitForm.get('primaryColor')?.setValue(color.value)"
+              [title]="color.name">
+            </div>
+          </div>
+        </div>
+
+        <div class="color-picker-group">
+          <label>Secondary Color</label>
+          <div class="color-options">
+            <div 
+              *ngFor="let color of colorOptions"
+              class="color-option"
+              [style.background]="color.value"
+              [class.selected]="habitForm.get('secondaryColor')?.value === color.value"
+              (click)="habitForm.get('secondaryColor')?.setValue(color.value)"
+              [title]="color.name">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="icon-picker-group">
+          <label>Icon</label>
+          <div class="icon-options">
+            <button 
+              *ngFor="let icon of materialIcons"
+              type="button"
+              class="icon-option"
+              [class.selected]="habitForm.get('icon')?.value === icon"
+              (click)="habitForm.get('icon')?.setValue(icon)"
+              [title]="icon">
+              <mat-icon>{{ icon }}</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tasks Section -->
+    <section class="form-section">
+      <div class="section-header">
+        <h2>Tasks/Checklist (Optional)</h2>
+        <button type="button" mat-stroked-button (click)="addTask()">
+          <mat-icon>add</mat-icon>
+          Add Task
+        </button>
+      </div>
+
+      <div class="tasks-list" [formArrayName]="'tasks'">
+        <div 
+          *ngFor="let task of tasksArray.controls; let i = index"
+          class="task-form-item"
+          [formGroupName]="i">
+          <div class="task-inputs">
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Task Name *</mat-label>
+              <input matInput formControlName="name" placeholder="Task name">
+              <mat-error *ngIf="task.get('name')?.hasError('required')">
+                Task name is required
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Description</mat-label>
+              <input matInput formControlName="description" placeholder="Task description">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>XP Reward</mat-label>
+              <input matInput type="number" formControlName="xpReward" min="5" max="100">
+            </mat-form-field>
+
+            <button type="button" mat-icon-button (click)="removeTask(i)" class="remove-btn">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Actions -->
+    <section class="form-actions">
+      <button type="submit" mat-flat-button class="btn-primary">
+        <mat-icon>{{ isEditing ? 'update' : 'add' }}</mat-icon>
+        {{ isEditing ? 'Update Habit' : 'Create Habit' }}
+      </button>
+      <button type="button" mat-stroked-button (click)="onCancel()">
+        <mat-icon>close</mat-icon>
+        Cancel
+      </button>
+    </section>
+  </form>
+</div>
 

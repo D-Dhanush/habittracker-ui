@@ -1,0 +1,38 @@
+<mat-card class="quest-card" [ngClass]="{ completed: quest.status === 'Completed' }">
+  <div class="card-top">
+    <div class="icon-shell" [style.boxShadow]="'0 0 24px rgba(236,212,109,0.32)'">
+      <mat-icon>{{ quest.icon }}</mat-icon>
+    </div>
+    <div class="primary-info">
+      <div class="quest-name">{{ quest.name }}</div>
+      <div class="metadata">
+        <span>{{ quest.category }}</span>
+        <span class="divider">•</span>
+        <span>{{ quest.difficulty }}</span>
+      </div>
+    </div>
+    <div class="status-chip" [ngClass]="quest.status.toLowerCase()">{{ quest.status }}</div>
+  </div>
+
+  <div class="progress-row">
+    <div class="score">
+      <span class="label">XP</span>
+      <strong>{{ quest.xp }}</strong>
+    </div>
+    <div class="score">
+      <span class="label">Streak</span>
+      <strong>{{ quest.streak }}d</strong>
+    </div>
+    <div class="score">
+      <span class="label">Complete</span>
+      <strong>{{ quest.completionRate }}%</strong>
+    </div>
+  </div>
+
+  <mat-progress-bar mode="determinate" [value]="quest.completionRate" color="accent"></mat-progress-bar>
+
+  <div class="card-actions">
+    <button mat-stroked-button color="primary" (click)="onEdit()">Edit</button>
+    <button mat-stroked-button color="warn" (click)="onDelete()">Delete</button>
+  </div>
+</mat-card>

@@ -13,8 +13,8 @@
   justify-content: space-between;
   height: 100%;
   padding: 1rem 0;
-  background: linear-gradient(180deg, #051530 0%, #143b67 45%, #275e92 100%);
-  border-right: 1px solid rgba(236, 212, 109, 0.14);
+  background: linear-gradient(180deg, #09070d 0%, #120f18 42%, #1f172c 100%);
+  border-right: 1px solid rgba(236, 212, 109, 0.18);
 }
 
 .mat-nav-list {
@@ -28,24 +28,26 @@
 a[mat-list-item] {
   justify-content: center;
   min-height: 56px;
-  color: rgba(250, 250, 252, 0.82);
-  transition: background 0.3s ease, color 0.3s ease;
+  color: rgba(245, 235, 199, 0.82);
+  transition: background 0.24s ease, color 0.24s ease, transform 0.24s ease;
 }
 
 a[mat-list-item].active-link,
 a[mat-list-item]:hover {
   background: rgba(236, 212, 109, 0.16);
-  color: #f8f4dc;
+  color: #fff5d1;
+  transform: translateX(4px);
 }
 
 a[mat-list-item] mat-icon {
   font-size: 24px;
-  color: #f8f4dc;
+  color: #f4dd92;
 }
 
 .mat-sidenav-content {
-  background: linear-gradient(180deg, rgba(24, 82, 149, 0.95), rgba(11, 36, 72, 0.95));
-  color: #f8fbff;
+  background: radial-gradient(circle at top left, rgba(236, 212, 109, 0.05), transparent 18%),
+              linear-gradient(180deg, rgba(5, 8, 18, 0.98), rgba(11, 12, 24, 0.98));
+  color: #f8f7ec;
 }
 
 .main-view {
@@ -56,14 +58,14 @@ a[mat-list-item] mat-icon {
 .page-shell {
   min-height: 100%;
   margin: 0 auto;
-  max-width: 1280px;
+  max-width: 1320px;
   border-radius: 30px;
   overflow: hidden;
   background: transparent;
 }
 
 .page-shell ::ng-deep .mat-card {
-  background: rgba(10, 16, 24, 0.7);
+  background: rgba(11, 12, 20, 0.78);
 }
 
 .page-shell ::ng-deep .mat-tab-group {

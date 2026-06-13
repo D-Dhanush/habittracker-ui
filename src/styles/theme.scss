@@ -1,0 +1,145 @@
+// ARCLORD Theme — Igris Edition (Blue-Black dominant, Gold accent only)
+
+// Gold — accent only
+$color-primary-gold: #c9a227;
+$color-primary-gold-light: #ddb830;
+$color-primary-gold-dark: #9a7a18;
+
+// Blue — dominant
+$color-primary-blue: #4dd9ff;
+$color-primary-blue-dim: #1a8fb5;
+$color-primary-blue-deep: #0a4a6e;
+
+// Backgrounds — deep navy/black
+$color-bg-dark: #060c18;
+$color-bg-darker: #03060f;
+$color-bg-card: rgba(5, 12, 28, 0.78);
+$color-bg-card-hover: rgba(8, 18, 42, 0.92);
+
+// Secondary blues
+$color-secondary-blue: #0a1628;
+$color-secondary-blue-light: #0f2040;
+$color-secondary-blue-dark: #020509;
+
+// Accent
+$color-accent-light-blue: #4dd9ff;
+$color-accent-light-blue-dark: #2ba8d1;
+$color-accent-cyan: #00c8ff;
+
+// Text — cool blue-white tones
+$color-text-primary: #ddf0ff;
+$color-text-secondary: #6a9bbf;
+$color-text-tertiary: #2e5872;
+
+// Status
+$color-success: #3dba6e;
+$color-warning: #e8920a;
+$color-danger: #e03535;
+$color-info: #2196f3;
+
+// Gradients
+$gradient-gold-blue: linear-gradient(135deg, $color-primary-gold, $color-accent-light-blue);
+$gradient-blue-dark: linear-gradient(160deg, #0f2040 0%, #03060f 100%);
+$gradient-igris: linear-gradient(180deg, #081428 0%, #050e1c 50%, #03060f 100%);
+
+// Shadows
+$shadow-elevation-1: 0 2px 10px rgba(0, 0, 0, 0.65);
+$shadow-elevation-2: 0 4px 22px rgba(0, 0, 0, 0.75);
+$shadow-elevation-3: 0 8px 42px rgba(0, 0, 0, 0.85);
+
+// Glows — blue dominant
+$glow-blue: 0 0 12px rgba(77, 217, 255, 0.45), 0 0 24px rgba(77, 217, 255, 0.22);
+$glow-blue-strong: 0 0 20px rgba(77, 217, 255, 0.85), 0 0 45px rgba(0, 200, 255, 0.4), 0 0 70px rgba(0, 150, 220, 0.15);
+$glow-gold: 0 0 10px rgba(201, 162, 39, 0.45), 0 0 20px rgba(201, 162, 39, 0.22);
+$glow-gold-strong: 0 0 14px rgba(201, 162, 39, 0.75), 0 0 28px rgba(201, 162, 39, 0.38);
+
+// Spacing
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 16px;
+$spacing-lg: 24px;
+$spacing-xl: 32px;
+$spacing-xxl: 48px;
+
+// Border Radius
+$border-radius-sm: 4px;
+$border-radius-md: 8px;
+$border-radius-lg: 12px;
+$border-radius-xl: 16px;
+
+// Transitions
+$transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+$transition-standard: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+$transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+
+// Breakpoints
+$breakpoint-xs: 0;
+$breakpoint-sm: 576px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 992px;
+$breakpoint-xl: 1200px;
+$breakpoint-xxl: 1400px;
+
+// Mixins — blue-tinted glass, not gold
+@mixin glass-morphism {
+  background: rgba(5, 14, 32, 0.68);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(77, 217, 255, 0.10);
+}
+
+@mixin glass-morphism-strong {
+  background: rgba(5, 14, 32, 0.88);
+  backdrop-filter: blur(18px);
+  border: 1px solid rgba(77, 217, 255, 0.20);
+}
+
+@mixin premium-card {
+  @include glass-morphism;
+  border-radius: $border-radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-elevation-2;
+  transition: all $transition-standard;
+
+  &:hover {
+    @include glass-morphism-strong;
+    box-shadow: $shadow-elevation-3, $glow-blue;
+    transform: translateY(-4px);
+  }
+}
+
+@mixin glow-border {
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -2px; left: -2px; right: -2px; bottom: -2px;
+    background: $gradient-gold-blue;
+    border-radius: $border-radius-lg;
+    z-index: -1;
+    opacity: 0.35;
+    transition: opacity $transition-standard;
+  }
+
+  &:hover::before { opacity: 0.85; }
+}
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

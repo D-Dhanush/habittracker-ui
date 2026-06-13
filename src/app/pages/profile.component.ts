@@ -13,7 +13,7 @@ import { CommonModule } from '@angular/common';
           <h2>Avery Strong</h2>
           <p class="profile-role">Habit Champion</p>
           <div class="profile-meta">
-            <div><span>Email</span><strong>avery@example.com</strong></div>
+            <div><span>Email</span><strong>avery&#64;example.com</strong></div>
             <div><span>Member since</span><strong>Feb 2025</strong></div>
             <div><span>Habits completed</span><strong>28</strong></div>
             <div><span>Current streak</span><strong>9 days</strong></div>

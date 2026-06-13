@@ -18,8 +18,12 @@
   </div>
 </div>
 
-<div class="app-shell">
+<div *ngIf="showMainShell" class="app-shell">
   <app-leftnav></app-leftnav>
 </div>
+
+<main class="app-main">
+  <router-outlet></router-outlet>
+</main>
 
 <app-toast></app-toast>

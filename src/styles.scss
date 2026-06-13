@@ -1,63 +1,52 @@
-
-// Custom Theming for Angular Material
-// For more information: https://material.angular.io/guide/theming
 @use '@angular/material' as mat;
-// Plus imports for other components in your app.
+@use 'styles/theme' as *;
+@use 'styles/globals';
 
-// Include the common styles for Angular Material. We include this here so that you only
-// have to load a single css file for Angular Material in your app.
-// Be sure that you only ever include this mixin once!
-@include mat.core();
+html {
+  @include mat.theme((
+    color: (
+      theme-type: dark,
+      primary: mat.$cyan-palette,
+      tertiary: mat.$yellow-palette,
+    ),
+    density: 0
+  ));
+}
 
-// Define the palettes for your theme using the Material Design palettes available in palette.scss
-// (imported above). For each palette, you can optionally specify a default, lighter, and darker
-// hue. Available color palettes: https://material.io/design/color/
-$HabitTracker-primary: mat.define-palette(mat.$blue-palette, 700, 500, 900);
-$HabitTracker-accent: mat.define-palette(mat.$yellow-palette, A200, A100, A400);
+.mat-mdc-button,
+.mat-mdc-raised-button {
+  &.mat-primary {
+    background-color: $color-accent-light-blue !important;
+    color: $color-bg-darker !important;
+  }
 
-// The warn palette is optional (defaults to red).
-$HabitTracker-warn: mat.define-palette(mat.$red-palette);
-
-// Create the theme object. A theme consists of configurations for individual
-// theming systems such as "color" or "typography".
-$HabitTracker-theme: mat.define-light-theme((
-  color: (
-    primary: $HabitTracker-primary,
-    accent: $HabitTracker-accent,
-    warn: $HabitTracker-warn,
-  ),
-  typography: mat.define-typography-config(),
-  density: 0
-));
-
-// Include theme styles for core and each component used in your app.
-// Alternatively, you can import and @include the theme mixins for each component
-// that you are using.
-@include mat.all-component-themes($HabitTracker-theme);
-
-/* You can add global styles to this file, and also import other style files */
+  &.mat-accent {
+    background-color: rgba($color-primary-gold, 0.2) !important;
+    color: $color-primary-gold !important;
+  }
+}
 
 :root {
-  --brand-blue: #4aa7ff;
-  --brand-gold: #ecd46d;
-  --brand-gold-soft: #f4dea3;
-  --brand-dark: #020408;
-  --surface-dark: #020306;
-  --surface-soft: rgba(14, 24, 43, 0.9);
-  --text-hero: #f8fbff;
-  --text-muted: #d6e1ff;
-  --border-soft: rgba(236, 212, 109, 0.14);
+  --brand-gold: #c9a227;
+  --brand-blue: #4dd9ff;
+  --brand-black: #03060f;
+  --surface-dark: #060c18;
+  --surface-soft: rgba(77, 217, 255, 0.05);
+  --text-bright: #ddf0ff;
+  --text-muted: rgba(106, 155, 191, 0.85);
 }
 
 html, body { height: 100%; }
+
 body {
   margin: 0;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
-  background: radial-gradient(circle at top left, rgba(74, 167, 255, 0.12), transparent 18%),
-              radial-gradient(circle at bottom right, rgba(100, 196, 255, 0.08), transparent 20%),
-              linear-gradient(180deg, #2d5ba0 0%, #1f4c8a 45%, #122c53 100%);
+  font-family: 'Poppins', sans-serif;
+  background:
+    radial-gradient(ellipse 80% 40% at 50% 0%, rgba(10, 40, 90, 0.65) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 30% at 80% 100%, rgba(0, 60, 100, 0.25) 0%, transparent 55%),
+    linear-gradient(180deg, #03060f 0%, #060c18 40%, #08101e 100%);
   background-attachment: fixed;
-  color: var(--text-hero);
+  color: var(--text-bright);
 }
 
 body.light-theme {
@@ -65,38 +54,15 @@ body.light-theme {
   color: #10203a;
 }
 
-body.light-theme .app-header,
-body.light-theme .sidenav,
-body.light-theme .app-shell,
-body.light-theme .profile-card,
-body.light-theme .section-card,
-body.light-theme .help-section {
-  background: rgba(255, 255, 255, 0.88) !important;
-  color: #10203a !important;
-  border-color: rgba(16, 32, 58, 0.12) !important;
-}
-
-body.light-theme button,
-body.light-theme input,
-body.light-theme select,
-body.light-theme textarea {
-  color: #10203a;
-}
-
 app-root {
   display: block;
   min-height: 100%;
   background: transparent;
-  color: var(--text-hero);
+  color: var(--text-bright);
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
-button,
-input,
-select,
-textarea {
-  font: inherit;
-}
+button, input, select, textarea { font: inherit; }
+
+::selection { background: rgba(77, 217, 255, 0.22); }

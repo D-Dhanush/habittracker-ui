@@ -28,6 +28,18 @@ export class HabitCardComponent implements OnInit, OnChanges {
     private toastService: ToastService
   ) {}
 
+  getIconSymbol(icon?: string | null): string {
+    switch (icon) {
+      case 'diamond': return '💎';
+      case 'medal': return '🏅';
+      case 'medal-silver': return '🥈';
+      case 'emerald': return '💚';
+      case 'star':
+      default:
+        return '⭐';
+    }
+  }
+
   ngOnInit(): void {
     if (this.habitId && !this.habit) {
       this.habitService.getHabitById(this.habitId).subscribe({
