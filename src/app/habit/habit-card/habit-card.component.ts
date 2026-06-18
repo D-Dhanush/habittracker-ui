@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HabitService } from '../../habit.service';
-import { HabitDto } from '../../models/Habit.dto';
+import { HabitService } from '../../services/habit.service';
+import { HabitDto } from '../../models/habitdto';
 import { Router } from '@angular/router';
 import { ToastService } from '../../toast.service';
 

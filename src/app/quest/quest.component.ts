@@ -4,7 +4,7 @@ import { FormArray, FormBuilder, ReactiveFormsModule, Validators } from '@angula
 import { RouterModule } from '@angular/router';
 import { ToastService } from '../toast.service';
 import { HabitService } from '../habit.service';
-import { CreateHabitDto } from '../models/CreateHabit.dto';
+import { CreateHabitDto } from '../models/createhabitdto';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -16,7 +16,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { HabitDto } from '../models/Habit.dto';
+import { HabitDto } from '../models/habitdto';
 
 @Component({
   selector: 'app-quest',

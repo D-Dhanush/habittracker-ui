@@ -1,6 +1,5 @@
-import { HabitDto } from '../../models/Habit.dto';
-import { HabitService } from '../../habit.service';
-
+import { HabitDto } from '../../models/habitdto';
+import { HabitService } from '../../services/habit.service';
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HabitCardComponent } from '../habit-card/habit-card.component';

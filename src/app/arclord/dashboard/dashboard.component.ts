@@ -2,11 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
-import { HabitService } from '../../services/habit.service';
+import { HabitService, HabitStatsDto } from '../../services/habit.service';
 import { AnalyticsService } from '../../services/analytics.service';
 import { StatCardComponent } from '../components/stat-card/stat-card.component';
 import { CalendarHeatmapComponent } from '../components/calendar-heatmap/calendar-heatmap.component';
-import { HabitStats, HabitCompletion } from '../../models/habit.model';
+import { HabitCompletion } from '../../models/habit.model';
 import { CalendarData, RecentActivity } from '../../models/analytics.model';
 import { Observable } from 'rxjs';
 
@@ -24,7 +24,7 @@ import { Observable } from 'rxjs';
   styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent implements OnInit {
-  stats$!: Observable<HabitStats>;
+  stats$!: Observable<HabitStatsDto>;
   recentActivity$!: Observable<RecentActivity[]>;
   calendarData$!: Observable<CalendarData>;
   weeklyData$!: Observable<any[]>;

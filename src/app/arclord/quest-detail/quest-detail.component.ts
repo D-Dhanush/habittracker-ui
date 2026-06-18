@@ -7,8 +7,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { HabitService } from '../../services/habit.service';
-import { Habit } from '../../models/habit.model';
 import { Observable } from 'rxjs';
+import { HabitCompletionDto, HabitDto } from '../../models/habitdto';
 
 @Component({
   selector: 'app-quest-detail',
@@ -26,16 +26,18 @@ import { Observable } from 'rxjs';
   styleUrls: ['./quest-detail.component.scss']
 })
 export class QuestDetailComponent implements OnInit {
-  habit$!: Observable<Habit | undefined>;
+  habit$!: Observable<HabitDto>;
   currentStreak = 0;
   completionPercentage = 0;
   completedTasks = 0;
   totalTasks = 0;
+  
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private habitService: HabitService
+    
   ) {}
 
   ngOnInit(): void {
@@ -52,74 +54,85 @@ export class QuestDetailComponent implements OnInit {
     });
   }
 
-  private calculateStats(habit: Habit): void {
-    // Calculate completion percentage
-    const completed = habit.completions.filter(c => c.completed).length;
-    this.completionPercentage = habit.completions.length > 0 
-      ? Math.round((completed / habit.completions.length) * 100)
+private calculateStats(habit: HabitDto): void {
+  const completions = habit.recentCompletions ?? [];
+  const tasks = habit.tasks ?? [];
+
+  const completed = completions.filter(c => c.completed).length;
+
+  this.completionPercentage =
+    completions.length > 0
+      ? Math.round((completed / completions.length) * 100)
       : 0;
 
-    // Calculate current streak
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    let streak = 0;
-    let currentDate = new Date(today);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
-    for (let i = 0; i < 365; i++) {
-      const completion = habit.completions.find(c => {
-        const cDate = new Date(c.date);
-        cDate.setHours(0, 0, 0, 0);
-        return cDate.getTime() === currentDate.getTime();
-      });
+  let streak = 0;
+  let currentDate = new Date(today);
 
-      if (completion?.completed) {
-        streak++;
-        currentDate.setDate(currentDate.getDate() - 1);
-      } else {
-        break;
-      }
+  for (let i = 0; i < 365; i++) {
+    const completion = completions.find(c => {
+      const cDate = new Date(c.date);
+      cDate.setHours(0, 0, 0, 0);
+      return cDate.getTime() === currentDate.getTime();
+    });
+
+    if (completion?.completed) {
+      streak++;
+      currentDate.setDate(currentDate.getDate() - 1);
+    } else {
+      break;
     }
-
-    this.currentStreak = streak;
-
-    // Calculate task stats
-    this.totalTasks = habit.tasks.length;
-    this.completedTasks = habit.tasks.filter(t => t.completed).length;
   }
+
+  this.currentStreak = streak;
+
+  this.totalTasks = tasks.length;
+  this.completedTasks = tasks.filter(t => t.completed).length;
+}
 
   onBack(): void {
     this.router.navigate(['/quests']);
   }
 
-  onEdit(habit: Habit): void {
+  onEdit(habit: HabitDto): void {
     // Navigate to edit page
     this.router.navigate(['/add-habit', habit.id]);
   }
 
-  onComplete(habit: Habit): void {
-    this.habitService.completeHabit(habit.id, habit.xpReward);
-  }
+onComplete(habit: HabitDto): void {
+  this.habitService.completeHabit(
+    habit.id,
+    {
+      xpEarned: habit.xpReward ?? 0
+    }
+  ).subscribe();
+}
 
-  getCategoryLabel(habit: Habit): string {
-    return habit.customCategory || habit.category;
-  }
+getCategoryLabel(habit: HabitDto): string {
+  return habit.customCategory || habit.category || 'General';
+}
 
   getFrequencyLabel(frequency: string): string {
     return frequency.charAt(0).toUpperCase() + frequency.slice(1);
   }
 
-  getRecentCompletions(habit: Habit): any[] {
-    return habit.completions
-      .filter(c => c.completed)
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-      .slice(0, 10);
-  }
-
-  formatDate(date: Date): string {
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  }
+getRecentCompletions(habit: HabitDto): HabitCompletionDto[] {
+  return (habit.recentCompletions ?? [])
+    .filter(c => c.completed)
+    .sort(
+      (a, b) =>
+        new Date(b.date).getTime() -
+        new Date(a.date).getTime()
+    )
+    .slice(0, 10);
 }
+
+formatDate(date: string | Date): string {
+  return new Date(date).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  });
+}}

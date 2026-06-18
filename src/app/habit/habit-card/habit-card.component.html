@@ -19,7 +19,7 @@
 
   <p><strong>Frequency:</strong> {{ habit.frequency }}</p>
   <p *ngIf="habit.targetOccurrencesPerPeriod"><strong>Target:</strong> {{ habit.targetOccurrencesPerPeriod }}</p>
-  <p *ngIf="habit.tags && habit.tags.length > 0"><strong>Tags:</strong> {{ habit.tags.join(', ') }}</p>
+  <p *ngIf="habit.tagsList && habit.tagsList.length > 0"><strong>Tags:</strong> {{ habit.tagsList.join(', ') }}</p>
   <p *ngIf="habit.startDt"><strong>Started:</strong> {{ habit.startDt | date }}</p>
   <p><strong>Completed:</strong> {{ completedDays }} days</p>
 

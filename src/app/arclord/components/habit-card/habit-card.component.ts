@@ -1,88 +1,190 @@
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnInit,
+  Output,
+  SimpleChanges
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+import { HabitDto } from '../../../models/habitdto';
+import { ToastService } from '../../../toast.service';
+import { HabitService } from '../../../services/habit.service';
 import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { Habit, HabitCompletion } from '../../../models/habit.model';
 
 @Component({
   selector: 'app-habit-card',
   standalone: true,
-  imports: [CommonModule, MatIconModule, MatTooltipModule],
+  imports: [CommonModule,MatIconModule],
   templateUrl: './habit-card.component.html',
   styleUrls: ['./habit-card.component.scss']
 })
-export class HabitCardComponent implements OnInit {
-  @Input() habit!: Habit;
+export class HabitCardComponent implements OnInit, OnChanges {
+  @Input() habitId!: string;
+  @Input() habit: HabitDto | null = null;
+
+  @Output() deleted = new EventEmitter<string>();
   @Output() habitClick = new EventEmitter<string>();
 
+  confirmDelete = false;
+
+  streak = 0;
+  level = 1;
+  completedDays = 0;
   completionPercentage = 0;
-  currentStreak = 0;
+
+  constructor(
+    private habitService: HabitService,
+    private router: Router,
+    private toastService: ToastService
+  ) {}
 
   ngOnInit(): void {
-    this.calculateStats();
+    if (this.habitId && !this.habit) {
+      this.habitService.getHabitById(this.habitId).subscribe({
+        next: habit => {
+          this.habit = habit;
+          this.updateStats();
+        },
+        error: err => console.error(err)
+      });
+    } else {
+      this.updateStats();
+    }
   }
 
-  ngOnChanges(): void {
-    this.calculateStats();
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['habit']) {
+      this.updateStats();
+    }
   }
 
-  private calculateStats(): void {
+  updateStats(): void {
     if (!this.habit) return;
 
-    // Calculate completion percentage
-    const completed = this.habit.completions.filter((c: HabitCompletion) => c.completed).length;
-    this.completionPercentage = this.habit.completions.length > 0 
-      ? Math.round((completed / this.habit.completions.length) * 100)
-      : 0;
+    const completions = this.habit.recentCompletions ?? [];
 
-    // Calculate current streak
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    let streak = 0;
-    let currentDate = new Date(today);
+    const completed = completions.filter(c => c.completed).length;
 
-    for (let i = 0; i < 365; i++) {
-      const completion = this.habit.completions.find((c: HabitCompletion) => {
-        const cDate = new Date(c.date);
-        cDate.setHours(0, 0, 0, 0);
-        return cDate.getTime() === currentDate.getTime();
-      });
+    this.completionPercentage =
+      completions.length > 0
+        ? Math.round((completed / completions.length) * 100)
+        : 0;
 
-      if (completion?.completed) {
-        streak++;
-        currentDate.setDate(currentDate.getDate() - 1);
-      } else {
-        break;
+    this.streak = Math.max(
+      1,
+      Math.min(
+        30,
+        Math.round(
+          (this.habit.targetOccurrencesPerPeriod ?? 7) * 0.65
+        )
+      )
+    );
+
+    this.level = Math.max(
+      1,
+      Math.min(
+        10,
+        Math.ceil(
+          (this.habit.targetOccurrencesPerPeriod ?? 7) / 2
+        )
+      )
+    );
+
+    this.completedDays = Math.min(
+      this.streak,
+      new Date().getDate()
+    );
+  }
+
+onCardClick(): void {
+  if (!this.habit || this.confirmDelete) return;
+
+  this.habitClick.emit(this.habit.id);
+  this.router.navigate(['/habit', this.habit.id]);
+}
+  promptDelete(event: MouseEvent): void {
+    event.stopPropagation();
+    this.confirmDelete = true;
+  }
+
+  cancelDelete(event: MouseEvent): void {
+    event.stopPropagation();
+    this.confirmDelete = false;
+  }
+
+  confirmDeleteHabit(event: MouseEvent): void {
+    event.stopPropagation();
+
+    if (!this.habit) return;
+
+    this.habitService.deleteHabit(this.habit.id).subscribe({
+      next: () => {
+        this.toastService.show('Habit deleted', 'success');
+        this.deleted.emit(this.habit!.id);
+      },
+      error: () => {
+        this.toastService.show(
+          'Delete failed. Try again.',
+          'failure'
+        );
       }
-    }
-
-    this.currentStreak = streak;
-  }
-
-  onCardClick(): void {
-    this.habitClick.emit(this.habit.id);
-  }
-
-  getStatusBadgeClass(): string {
-    switch (this.habit.status) {
-      case 'active':
-        return 'badge-success';
-      case 'paused':
-        return 'badge-warning';
-      case 'completed':
-        return 'badge-blue';
-      case 'archived':
-        return 'badge-tertiary';
-      default:
-        return '';
-    }
+    });
   }
 
   getStatusLabel(): string {
-    return this.habit.status.charAt(0).toUpperCase() + this.habit.status.slice(1);
+    if (!this.habit?.status) {
+      return 'Active';
+    }
+
+    return (
+      this.habit.status.charAt(0).toUpperCase() +
+      this.habit.status.slice(1)
+    );
   }
 
   getCategoryLabel(): string {
-    return this.habit.customCategory || this.habit.category;
+    return (
+      this.habit?.customCategory ??
+      this.habit?.category ??
+      'General'
+    );
   }
+
+  getIconSymbol(icon?: string | null): string {
+    switch (icon) {
+      case 'diamond':
+        return '💎';
+
+      case 'medal':
+        return '🏅';
+
+      case 'medal-silver':
+        return '🥈';
+
+      case 'emerald':
+        return '💚';
+
+      default:
+        return '⭐';
+    }
+  }
+
+  getStatusBadgeClass(): string {
+  switch (this.habit?.status?.toLowerCase()) {
+    case 'completed':
+      return 'badge-success';
+
+    case 'paused':
+      return 'badge-warning';
+
+    case 'archived':
+      return 'badge-secondary';
+
+    default:
+      return 'badge-active';
+  }
+}
 }

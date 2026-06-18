@@ -5,8 +5,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { HabitService } from '../../services/habit.service';
-import { Habit } from '../../models/habit.model';
 import { HabitCardComponent } from '../components/habit-card/habit-card.component';
+import { HabitDto } from '../../models/habitdto';
 
 @Component({
   selector: 'app-quests',
@@ -22,8 +22,8 @@ import { HabitCardComponent } from '../components/habit-card/habit-card.componen
   styleUrls: ['./quests.component.scss']
 })
 export class QuestsComponent implements OnInit {
-  habits: Habit[] = [];
-  displayedHabits: Habit[] = [];
+  habits: HabitDto[] = [];
+  displayedHabits: HabitDto[] = [];
   filteredStatus = 'all';
 
   constructor(

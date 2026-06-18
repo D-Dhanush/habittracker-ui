@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
-import { HabitService } from '../../habit.service';
-import { HabitDto } from '../../models/Habit.dto';
+import { HabitService } from '../../services/habit.service';
+import { HabitDto } from '../../models/habitdto';
 
 interface CalendarDay {
   day: number;

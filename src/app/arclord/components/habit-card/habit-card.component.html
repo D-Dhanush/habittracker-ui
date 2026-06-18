@@ -1,52 +1,86 @@
-<div class="habit-card" [style.--primary-color]="habit.primaryColor" [style.--secondary-color]="habit.secondaryColor">
+<div
+  *ngIf="habit as h"
+  class="habit-card"
+  [style.--primary-color]="h.primaryColor"
+  [style.--secondary-color]="h.secondaryColor">
+
   <div class="card-content" (click)="onCardClick()">
+
     <!-- Header -->
     <div class="card-header">
       <div class="icon-wrapper">
-        <mat-icon class="habit-icon">{{ habit.icon }}</mat-icon>
+        <span class="habit-icon">
+          {{ getIconSymbol(h.primaryIcon) }}
+        </span>
       </div>
+
       <div class="header-info">
-        <h3 class="habit-name">{{ habit.name }}</h3>
-        <p class="habit-subtitle" *ngIf="habit.subtitle">{{ habit.subtitle }}</p>
+        <h3 class="habit-name">{{ h.name }}</h3>
+
+        <p
+          class="habit-subtitle"
+          *ngIf="h.subtitle">
+          {{ h.subtitle }}
+        </p>
       </div>
     </div>
 
     <!-- Category & Status -->
     <div class="card-meta">
-      <span class="badge badge-gold">{{ getCategoryLabel() }}</span>
-      <span class="badge" [ngClass]="getStatusBadgeClass()">{{ getStatusLabel() }}</span>
+      <span class="badge badge-gold">
+        {{ getCategoryLabel() }}
+      </span>
+
+      <span class="badge">
+        {{ getStatusLabel() }}
+      </span>
     </div>
 
     <!-- Stats Grid -->
     <div class="stats-grid">
+
       <div class="stat-item">
         <span class="stat-label">Streak</span>
-        <span class="stat-value text-gold">{{ currentStreak }}</span>
+        <span class="stat-value text-gold">
+          {{ streak }}
+        </span>
       </div>
+
       <div class="stat-item">
         <span class="stat-label">Completion</span>
-        <span class="stat-value text-blue">{{ completionPercentage }}%</span>
+        <span class="stat-value text-blue">
+          {{ completionPercentage }}%
+        </span>
       </div>
+
       <div class="stat-item">
         <span class="stat-label">XP Reward</span>
-        <span class="stat-value text-gold">+{{ habit.xpReward }}</span>
+        <span class="stat-value text-gold">
+          +{{ h.xpReward ?? 0 }}
+        </span>
       </div>
+
     </div>
 
-    <!-- Progress Bar -->
+    <!-- Progress -->
     <div class="progress-container">
       <div class="progress-bar">
-        <div class="progress-fill" [style.width.%]="completionPercentage"></div>
+        <div
+          class="progress-fill"
+          [style.width.%]="completionPercentage">
+        </div>
       </div>
     </div>
 
-    <!-- Frequency Badge -->
+    <!-- Frequency -->
     <div class="frequency-badge">
-      <mat-icon>schedule</mat-icon>
-      <span>{{ habit.frequency | uppercase }}</span>
+      <span>⏰</span>
+      <span>
+        {{ h.frequency | uppercase }}
+      </span>
     </div>
 
-    <!-- Shiny Gradient Overlay -->
     <div class="shine-effect"></div>
+
   </div>
 </div>

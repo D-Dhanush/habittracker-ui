@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, map } from 'rxjs';
-import { Habit } from '../models/habit.model';
+import { HabitDto } from '../models/habitdto';
 import { 
   DailyCompletionData, 
   WeeklyCompletionData, 
@@ -34,7 +34,7 @@ export class AnalyticsService {
           let total = 0;
 
           habits.forEach(habit => {
-            habit.completions.forEach(completion => {
+            (habit.recentCompletions ?? []).forEach(completion => {
               const compDate = new Date(completion.date);
               if (compDate >= weekStart && compDate <= weekEnd) {
                 total++;
@@ -73,7 +73,7 @@ export class AnalyticsService {
           let pending = 0;
 
           habits.forEach(habit => {
-            const completion = habit.completions.find(c => {
+            const completion = (habit.recentCompletions ?? []).find(c => {
               const cDate = new Date(c.date);
               cDate.setHours(0, 0, 0, 0);
               return cDate.getTime() === date.getTime();
@@ -107,13 +107,13 @@ export class AnalyticsService {
         const categoryMap = new Map<string, { completed: number; total: number }>();
 
         habits.forEach(habit => {
-          const category = habit.customCategory || habit.category;
+          const category = habit.customCategory ?? habit.category ?? 'General';
           if (!categoryMap.has(category)) {
             categoryMap.set(category, { completed: 0, total: 0 });
           }
 
           const stats = categoryMap.get(category)!;
-          habit.completions.forEach(completion => {
+          (habit.recentCompletions ?? []).forEach(completion => {
             stats.total++;
             if (completion.completed) {
               stats.completed++;
@@ -141,7 +141,7 @@ export class AnalyticsService {
         today.setHours(0, 0, 0, 0);
 
         habits.forEach(habit => {
-          const todayCompletion = habit.completions.find(c => {
+          const todayCompletion = (habit.recentCompletions ?? []).find(c => {
             const cDate = new Date(c.date);
             cDate.setHours(0, 0, 0, 0);
             return cDate.getTime() === today.getTime();
@@ -170,7 +170,7 @@ export class AnalyticsService {
 
         habits.forEach(habit => {
           // Add completions
-          const recentCompletions = habit.completions
+          const recentCompletions = (habit.recentCompletions ?? [])
             .filter(c => c.completed)
             .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
             .slice(0, 3);
@@ -190,7 +190,7 @@ export class AnalyticsService {
           });
 
           // Add milestones
-          habit.milestones.forEach(milestone => {
+          (habit.milestones ?? []).forEach(milestone => {
             if (milestone.achieved && milestone.achievedDate) {
               activities.push({
                 id: milestone.id,
@@ -200,7 +200,7 @@ export class AnalyticsService {
                 title: 'Milestone Achieved',
                 description: `${milestone.name} - ${milestone.description}`,
                 xpEarned: milestone.xpReward,
-                timestamp: milestone.achievedDate,
+                 timestamp: new Date(milestone.achievedDate),
                 icon: 'emoji_events'
               });
             }
@@ -243,7 +243,7 @@ export class AnalyticsService {
               let dayTotal = 0;
 
               habits.forEach(habit => {
-                const completion = habit.completions.find(c => {
+                const completion = (habit.recentCompletions ?? []).find(c => {
                   const cDate = new Date(c.date);
                   cDate.setHours(0, 0, 0, 0);
                   return cDate.getTime() === dayDateNormalized.getTime();
@@ -291,10 +291,10 @@ export class AnalyticsService {
       map(habit => {
         if (!habit) return { achieved: 0, total: 0 };
         
-        const achieved = habit.milestones.filter(m => m.achieved).length;
+        const achieved = (habit.milestones ?? []).filter(m => m.achieved).length;
         return {
           achieved,
-          total: habit.milestones.length
+          total: (habit.milestones ?? []).length
         };
       })
     );

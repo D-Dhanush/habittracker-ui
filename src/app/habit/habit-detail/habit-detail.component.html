@@ -82,8 +82,8 @@
       <div class="detail-row">
         <span class="label">Categories</span>
         <span class="value">
-          <ng-container *ngIf="habit.tags?.length; else noTags">
-            {{ habit.tags?.join(', ') }}
+          <ng-container *ngIf="habit.tagsList?.length; else noTags">
+          {{ habit.tagsList?.join(', ') }}
           </ng-container>
           <ng-template #noTags>None</ng-template>
         </span>

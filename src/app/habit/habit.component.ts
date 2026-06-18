@@ -12,8 +12,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { HabitService } from '../services/habit.service';
-import { Habit, CATEGORY_ICONS, CATEGORY_LABELS, HabitStatus, HabitFrequency } from '../models/habit.model';
-
+import { HabitDto } from '../models/habitdto';
 @Component({
   selector: 'app-habit',
   standalone: true,
@@ -37,14 +36,23 @@ export class HabitComponent implements OnInit {
   habitForm!: FormGroup;
   isEditing = false;
   editingHabitId: string | null = null;
-  existingHabit: Habit | null = null;
+  existingHabit: HabitDto | null = null;
 
-  categories = Object.keys(CATEGORY_LABELS);
-  frequencies: HabitFrequency[] = ['daily', 'weekly', 'bi-weekly', 'monthly'];
-  statuses: HabitStatus[] = ['active', 'paused', 'completed', 'archived'];
-  categoryIcons = CATEGORY_ICONS;
-  categoryLabels = CATEGORY_LABELS;
+categories = [
+  'health',
+  'fitness',
+  'spiritual',
+  'finance',
+  'study',
+  'productivity',
+  'mindset',
+  'lifestyle'
+];
+frequencies = ['daily', 'weekly', 'bi-weekly', 'monthly'];
+statuses = ['active', 'paused', 'completed', 'archived'];
 
+categoryIcons: { [key: string]: string } = {};
+categoryLabels: { [key: string]: string } = {};
   colorOptions = [
     { name: 'Gold', value: '#d4af37' },
     { name: 'Blue', value: '#4dd9ff' },
@@ -109,16 +117,16 @@ export class HabitComponent implements OnInit {
     });
   }
 
-  private populateForm(habit: Habit): void {
+private populateForm(habit: HabitDto): void{
     this.habitForm.patchValue({
       name: habit.name,
       subtitle: habit.subtitle || '',
       description: habit.description || '',
-      category: habit.category,
+      category: habit.category || 'health',
       customCategory: habit.customCategory || '',
       frequency: habit.frequency,
-      endDate: habit.endDate ? new Date(habit.endDate) : '',
-      status: habit.status,
+      endDate: habit.endDt ?? '',
+      status: habit.status ?? 'active',
       xpReward: habit.xpReward,
       primaryColor: habit.primaryColor || '#d4af37',
       secondaryColor: habit.secondaryColor || '#4dd9ff',
@@ -127,8 +135,8 @@ export class HabitComponent implements OnInit {
 
     const tasksArray = this.habitForm.get('tasks') as FormArray;
     tasksArray.clear();
-    habit.tasks.forEach(task => {
-      tasksArray.push(this.fb.group({
+(habit.tasks ?? []).forEach(task => {      
+  tasksArray.push(this.fb.group({
         name: [task.name, Validators.required],
         description: [task.description || ''],
         xpReward: [task.xpReward || 10]
@@ -154,56 +162,84 @@ export class HabitComponent implements OnInit {
     tasksArray.removeAt(index);
   }
 
-  onSubmit(): void {
-    if (this.habitForm.invalid) {
-      this.habitForm.markAllAsTouched();
-      return;
-    }
+onSubmit(): void {
+  if (this.habitForm.invalid) {
+    this.habitForm.markAllAsTouched();
+    return;
+  }
 
-    const formValue = this.habitForm.value;
-    const habit: Omit<Habit, 'id' | 'createdDate' | 'updatedDate'> = {
+  const formValue = this.habitForm.value;
+
+  if (this.isEditing && this.editingHabitId) {
+
+    const updateInput = {
       name: formValue.name,
       subtitle: formValue.subtitle,
       description: formValue.description,
-      category: formValue.category,
-      customCategory: formValue.customCategory,
       frequency: formValue.frequency,
-      startDate: new Date(formValue.startDate),
-      endDate: formValue.endDate ? new Date(formValue.endDate) : undefined,
-      status: formValue.status,
+      endDateUtc: formValue.endDate
+        ? new Date(formValue.endDate).toISOString()
+        : undefined,
       icon: formValue.icon,
       primaryColor: formValue.primaryColor,
       secondaryColor: formValue.secondaryColor,
-      xpReward: formValue.xpReward,
-      tasks: formValue.tasks.map((task: any) => ({
-        id: Date.now().toString() + Math.random(),
-        name: task.name,
-        description: task.description,
-        completed: false,
-        xpReward: task.xpReward
-      })),
-      completions: this.existingHabit?.completions || [],
-      milestones: this.existingHabit?.milestones || []
+      notes: '',
+      isActive: true
     };
 
-    if (this.isEditing && this.editingHabitId) {
-      this.habitService.updateHabit(this.editingHabitId, habit);
-    } else {
-      this.habitService.createHabit(habit);
-    }
+    this.habitService
+      .updateHabit(this.editingHabitId, updateInput)
+      .subscribe({
+        next: () => this.router.navigate(['/quests']),
+        error: err => console.error(err)
+      });
 
+  } else {
+
+  const createHabitDto = {
+  Name: formValue.name,
+  Description: formValue.description,
+
+  StartDateUtc: formValue.startDate
+    ? new Date(formValue.startDate).toISOString()
+    : undefined,
+
+  EndDateUtc: formValue.endDate
+    ? new Date(formValue.endDate).toISOString()
+    : undefined,
+
+  Frequency: formValue.frequency,
+
+  TargetOccurrencesPerPeriod: 1,
+
+  IsActive: true,
+
+  Type: formValue.category,
+
+  PrimaryIcon: formValue.icon,
+
+  SecondaryIcon: '',
+
+  CustomName: formValue.customCategory,
+
+  Tags: []
+};
+
+this.habitService.createHabit(createHabitDto)
+  .subscribe(() => {
+    this.router.navigate(['/quests']);
+  });
+
+  }
+}  onCancel(): void {
     this.router.navigate(['/quests']);
   }
 
-  onCancel(): void {
-    this.router.navigate(['/quests']);
-  }
+getCategoryIcon(category: string): string {
+  return 'target';
+}
 
-  getCategoryIcon(category: string): string {
-    return CATEGORY_ICONS[category] || 'target';
-  }
-
-  getCategoryLabel(category: string): string {
-    return CATEGORY_LABELS[category] || category;
-  }
+getCategoryLabel(category: string): string {
+  return category;
+}
 }
