@@ -1,18 +1,21 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { HabitService } from '../../services/habit.service';
+import { ToastService } from '../../toast.service';
+import { getCategoryIcon, getCategoryLabel } from '../../models/category-constants';
+import { QuestCardComponent } from '../../arclord/components/quest-card/quest-card.component';
 import { HabitDto } from '../../models/habitdto';
 
 interface CalendarDay {
-  day: number;
+  date: Date;
   completed: boolean;
 }
 
 @Component({
   selector: 'app-habit-detail',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule, QuestCardComponent],
   templateUrl: './habit-detail.component.html',
   styleUrls: ['./habit-detail.component.scss']
 })
@@ -20,15 +23,15 @@ export class HabitDetailComponent implements OnInit {
   habit?: HabitDto;
   loading = true;
   errorMessage = '';
-  currentStreak = 0;
-  level = 1;
-  levelProgress = 0;
-  goalDays = 30;
   calendarDays: CalendarDay[] = [];
+
+  readonly calendarWindowDays = 30;
 
   constructor(
     private route: ActivatedRoute,
-    private habitService: HabitService
+    private router: Router,
+    private habitService: HabitService,
+    private toast: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -38,14 +41,15 @@ export class HabitDetailComponent implements OnInit {
       this.errorMessage = 'Habit ID is missing.';
       return;
     }
+    this.loadHabit(id);
+  }
 
+  loadHabit(id: string): void {
+    this.loading = true;
     this.habitService.getHabitById(id).subscribe({
       next: (habit) => {
         this.habit = habit;
-        this.currentStreak = this.calculateCurrentStreak(habit);
-        this.level = this.calculateLevel(habit);
-        this.levelProgress = this.calculateProgress(habit);
-        this.calendarDays = this.buildCalendar(this.currentStreak);
+        this.calendarDays = this.buildCalendarFromRealCompletions(habit);
         this.loading = false;
       },
       error: () => {
@@ -55,34 +59,60 @@ export class HabitDetailComponent implements OnInit {
     });
   }
 
-  private calculateCurrentStreak(habit: HabitDto): number {
-    const base = habit.targetOccurrencesPerPeriod ?? 7;
-    return Math.min(30, Math.max(1, Math.round(base * 0.7)));
+  get categoryIcon(): string { return getCategoryIcon(this.habit?.category); }
+  get categoryLabel(): string { return getCategoryLabel(this.habit?.category); }
+  get quests() { return this.habit?.quests ?? []; }
+
+  onQuestClick(questId: string): void {
+    if (!this.habit) return;
+    this.router.navigate(['/habit', this.habit.id, 'quest', questId]);
   }
 
-  private calculateLevel(habit: HabitDto): number {
-    const base = habit.targetOccurrencesPerPeriod ?? 7;
-    return Math.min(10, Math.max(1, Math.ceil(base / 2)));
+  onNewQuest(): void {
+    if (!this.habit) return;
+    this.router.navigate(['/habit', this.habit.id, 'quest', 'new']);
   }
 
-  private calculateProgress(habit: HabitDto): number {
-    const target = habit.targetOccurrencesPerPeriod ?? 7;
-    const progress = this.currentStreak / Math.max(target, 1);
-    return Math.min(1, progress);
+  // ── Added: navigates to the edit form for this habit ──────────────
+  editHabit(): void {
+    if (!this.habit) return;
+    this.router.navigate(['/habit', this.habit.id, 'edit']);
   }
 
-  private calculateCompletedDays(habit: HabitDto): number {
-    const started = habit.startDt ? new Date(habit.startDt) : new Date();
+  deleteHabit(): void {
+    if (!this.habit) return;
+    const confirmed = window.confirm(
+      `Delete "${this.habit.name}"? This will also remove all its Quests and Tasks and cannot be undone.`
+    );
+    if (!confirmed) return;
+
+    this.habitService.deleteHabit(this.habit.id).subscribe({
+      next: () => {
+        this.toast.show('Habit deleted.', 'success');
+        this.router.navigate(['/habits']);
+      },
+      error: () => this.toast.show('Could not delete habit.', 'failure')
+    });
+  }
+
+  private buildCalendarFromRealCompletions(habit: HabitDto): CalendarDay[] {
+    const completions = habit.recentCompletions ?? [];
     const today = new Date();
-    const daysSinceStart = Math.max(0, Math.floor((today.getTime() - started.getTime()) / 86400000));
-    return Math.min(this.currentStreak, daysSinceStart + 1, this.goalDays);
-  }
+    today.setHours(0, 0, 0, 0);
 
-  private buildCalendar(streak: number): CalendarDay[] {
-    const completedDays = Math.min(streak, this.calculateCompletedDays(this.habit!));
-    return Array.from({ length: this.goalDays }, (_, index) => ({
-      day: index + 1,
-      completed: index < completedDays
-    }));
+    const days: CalendarDay[] = [];
+    for (let i = this.calendarWindowDays - 1; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+
+      const completed = completions.some(c => {
+        const cDate = new Date(c.completionDate);
+        cDate.setHours(0, 0, 0, 0);
+        return cDate.getTime() === date.getTime() && c.completed;
+      });
+
+      days.push({ date, completed });
+    }
+    return days;
   }
 }

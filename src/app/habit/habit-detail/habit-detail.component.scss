@@ -1,87 +1,220 @@
+@use '../../../styles/theme' as *;
+
 .habit-detail-page {
-  padding: 2rem 2.5rem;
+  padding: $spacing-xl $spacing-xl;
   width: 100%;
   min-height: calc(100vh - 2rem);
   background: transparent;
-  color: #f8fbff;
+  color: $color-text-primary;
+
+  @media (max-width: $breakpoint-md) {
+    padding: $spacing-lg;
+  }
 }
 
 .loading-message,
 .error-message {
-  color: #e9f5ff;
+  color: $color-text-primary;
   font-size: 1rem;
   text-align: center;
-  padding: 1rem 0;
+  padding: $spacing-lg 0;
 }
 
 .error-message {
-  color: #8bc2ff;
+  color: $color-danger;
 }
 
 .detail-layout {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: $spacing-lg;
 }
 
+// Header
 .detail-header {
-  padding: 1.5rem 1.75rem;
-  border: 1px solid rgba(82, 154, 234, 0.25);
-  border-radius: 1rem;
-  background: rgba(33, 80, 142, 0.36);
-  box-shadow: 0 18px 40px rgba(20, 44, 71, 0.28);
+  @include glass-morphism;
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  padding: $spacing-lg;
+  border-radius: $border-radius-lg;
+
+  h1 {
+    margin: 0 0 $spacing-xs;
+    font-size: 2rem;
+  }
+
+  .subtitle {
+    margin: 0;
+    color: $color-text-secondary;
+  }
 }
 
-.detail-header h1 {
-  margin: 0 0 0.35rem;
-  font-size: 2rem;
-  color: #fff9df;
+.header-icon {
+  @include flex-center;
+  flex: 0 0 auto;
+  width: 56px;
+  height: 56px;
+  border-radius: $border-radius-md;
+  background: rgba($color-accent-light-blue, 0.12);
+  border: 1px solid rgba($color-accent-light-blue, 0.3);
+  color: $color-accent-light-blue;
+  font-size: 1.75rem;
 }
 
-.detail-header .subtitle {
-  margin: 0;
-  color: rgba(255, 245, 200, 0.85);
+.delete-habit-btn {
+  margin-left: auto;
+  padding: $spacing-sm $spacing-md;
+  border-radius: $border-radius-md;
+  background: rgba($color-danger, 0.12);
+  color: $color-danger;
+  border: 1px solid rgba($color-danger, 0.35);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  &:hover {
+    background: rgba($color-danger, 0.22);
+  }
 }
 
+// Summary cards
+.detail-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: $spacing-md;
+
+  @media (max-width: $breakpoint-md) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.summary-card {
+  @include glass-morphism;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+  padding: $spacing-md;
+  border-radius: $border-radius-md;
+  text-align: center;
+
+  strong {
+    font-size: 1.4rem;
+  }
+}
+
+.summary-label {
+  color: $color-text-secondary;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+// Sections
 .detail-section {
-  padding: 1.5rem 1.75rem;
-  border: 1px solid rgba(90, 170, 255, 0.22);
-  border-radius: 1rem;
-  background: rgba(19, 60, 110, 0.34);
-  box-shadow: inset 0 0 0 1px rgba(122, 189, 255, 0.08);
+  @include glass-morphism;
+  padding: $spacing-lg;
+  border-radius: $border-radius-lg;
+
+  h2 {
+    margin: 0 0 $spacing-md;
+    font-size: 1.2rem;
+  }
 }
 
-.detail-section h2 {
-  margin: 0 0 1rem;
-  font-size: 1.2rem;
-  color: #fff9df;
+.section-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+
+  h2 {
+    margin: 0;
+  }
 }
 
+.new-quest-btn {
+  padding: $spacing-sm $spacing-md;
+  border-radius: $border-radius-md;
+  background: rgba($color-accent-light-blue, 0.15);
+  color: $color-accent-light-blue;
+  border: 1px solid rgba($color-accent-light-blue, 0.35);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  &:hover {
+    background: rgba($color-accent-light-blue, 0.25);
+    box-shadow: $glow-blue;
+  }
+}
+
+.quests-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: $spacing-md;
+}
+
+.empty-state {
+  color: $color-text-secondary;
+  text-align: center;
+  padding: $spacing-lg 0;
+  margin: 0;
+}
+
+// Calendar
+.calendar-section {
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(14px, 1fr));
+    gap: 4px;
+    margin-bottom: $spacing-sm;
+  }
+
+  .calendar-day {
+    aspect-ratio: 1;
+    border-radius: 3px;
+    background: rgba($color-accent-light-blue, 0.08);
+
+    &.completed {
+      background: $color-accent-light-blue;
+      box-shadow: $glow-blue;
+    }
+  }
+
+  .calendar-note {
+    margin: 0;
+    color: $color-text-tertiary;
+    font-size: 0.8rem;
+  }
+}
+
+// Basic info / schedule / tags rows
 .detail-row {
   display: flex;
   justify-content: space-between;
-  gap: 0.75rem;
-  padding: 0.85rem 0;
-  border-bottom: 1px solid rgba(255, 214, 140, 0.12);
-}
+  gap: $spacing-sm;
+  padding: $spacing-sm 0;
+  border-bottom: 1px solid rgba($color-accent-light-blue, 0.10);
 
-.detail-row:last-child {
-  border-bottom: none;
+  &:last-child {
+    border-bottom: none;
+  }
 }
 
 .label {
   flex: 0 0 40%;
-  color: rgba(255, 234, 170, 0.85);
+  color: $color-text-secondary;
   font-weight: 600;
 }
 
 .value {
   flex: 1;
   text-align: right;
-  color: #fff;
+  color: $color-text-primary;
 }
 
-@media (max-width: 640px) {
+@media (max-width: $breakpoint-sm) {
   .detail-row {
     flex-direction: column;
     align-items: flex-start;
@@ -89,5 +222,27 @@
 
   .value {
     text-align: left;
+  }
+}
+
+.header-actions {
+  display: flex;
+  gap: $spacing-sm;
+  margin-left: auto;
+}
+
+.edit-habit-btn {
+  padding: $spacing-sm $spacing-md;
+  border-radius: $border-radius-md;
+  background: rgba($color-accent-light-blue, 0.12);
+  color: $color-accent-light-blue;
+  border: 1px solid rgba($color-accent-light-blue, 0.35);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  &:hover {
+    background: rgba($color-accent-light-blue, 0.22);
+    box-shadow: $glow-blue;
   }
 }

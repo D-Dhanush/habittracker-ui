@@ -1,7 +1,22 @@
 <div class="habits-list">
-  <h2>All Habits</h2>
-  <div class="habits-container">
-    <app-habit-card *ngFor="let habit of pagedHabits" [habit]="habit" (deleted)="onHabitDeleted($event)"></app-habit-card>
+  <div class="list-header">
+    <h2>All Habits</h2>
+    <a routerLink="/add-habit" class="new-habit-link">+ New Habit</a>
+  </div>
+
+  <div class="state-message" *ngIf="loading">Loading habits...</div>
+
+  <div class="state-message empty" *ngIf="!loading && habits.length === 0">
+    No habits yet. <a routerLink="/add-habit">Create your first one.</a>
+  </div>
+
+  <div class="habits-container" *ngIf="!loading && habits.length > 0">
+    <app-habit-card
+      *ngFor="let habit of pagedHabits"
+      [habit]="habit"
+      (habitClick)="onHabitClick($event)"
+      (deleteConfirmed)="onHabitDeleteConfirmed($event)">
+    </app-habit-card>
   </div>
 
   <div class="pagination" *ngIf="totalPages > 1">

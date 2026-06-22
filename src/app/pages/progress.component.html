@@ -1,0 +1,129 @@
+<section class="progress-shell">
+  <div class="progress-header">
+    <div>
+      <h1>Progress</h1>
+      <p>Your completion trends, XP, and streak history across every habit.</p>
+    </div>
+  </div>
+
+  <div class="state-message" *ngIf="loading">Loading your progress...</div>
+
+  <div class="state-message state-error" *ngIf="error && !loading">
+    Could not load progress data.
+    <button type="button" (click)="ngOnInit()">Retry</button>
+  </div>
+
+  <ng-container *ngIf="!loading && !error && stats && rankInfo">
+
+    <!-- Top metric tiles -->
+    <div class="metric-grid">
+      <mat-card class="metric-card">
+        <div class="metric-icon"><mat-icon>bolt</mat-icon></div>
+        <div>
+          <div class="metric-label">Total XP</div>
+          <div class="metric-value text-gold">{{ stats.totalXpEarned }}</div>
+          <div class="metric-subtitle">Lifetime: {{ rankInfo.currentXp }}</div>
+        </div>
+      </mat-card>
+
+      <mat-card class="metric-card">
+        <div class="metric-icon"><mat-icon>military_tech</mat-icon></div>
+        <div>
+          <div class="metric-label">Rank</div>
+          <div class="metric-value text-blue">{{ rankInfo.rank }}</div>
+          <div class="metric-subtitle">Level {{ rankInfo.currentLevel }}</div>
+        </div>
+      </mat-card>
+
+      <mat-card class="metric-card">
+        <div class="metric-icon"><mat-icon>whatshot</mat-icon></div>
+        <div>
+          <div class="metric-label">Streak</div>
+          <div class="metric-value text-blue">{{ stats.currentStreak }}d</div>
+          <div class="metric-subtitle">Best: {{ stats.longestStreak }}d</div>
+        </div>
+      </mat-card>
+    </div>
+
+    <div class="analytics-grid">
+      <!-- Real per-habit trends -->
+      <mat-card class="analytics-card">
+        <div class="card-title">
+          <h2>Habit Completion Trends</h2>
+        </div>
+        <div class="trend-list" *ngIf="habitTrends.length > 0">
+          <div class="trend-row" *ngFor="let trend of habitTrends">
+            <span>{{ trend.habit }}</span>
+            <strong class="text-blue">{{ trend.score }}%</strong>
+          </div>
+        </div>
+        <p class="empty-state" *ngIf="habitTrends.length === 0">
+          Set a target per period on a habit to see its completion trend here.
+        </p>
+      </mat-card>
+
+      <!-- Real consistency metrics -->
+      <mat-card class="analytics-card">
+        <div class="card-title">
+          <h2>Consistency Metrics</h2>
+        </div>
+        <div class="consistency-stat">
+          <div>
+            <strong class="text-blue">{{ weeklyAdherence }}%</strong>
+            <span>4-week adherence</span>
+          </div>
+          <div>
+            <strong class="text-blue">{{ stats.currentStreak }} days</strong>
+            <span>Current streak</span>
+          </div>
+          <div>
+            <strong class="text-purple">{{ stats.longestStreak }} days</strong>
+            <span>Longest streak</span>
+          </div>
+        </div>
+      </mat-card>
+    </div>
+
+    <div class="analytics-grid">
+      <!-- Real XP progression -->
+      <mat-card class="analytics-card wide-card">
+        <div class="card-title">
+          <h2>XP Progression</h2>
+        </div>
+        <div class="progress-stack">
+          <div class="progress-entry">
+            <span>Progress to Level {{ rankInfo.currentLevel + 1 }}</span>
+            <strong class="text-gold">{{ rankInfo.xpProgress }}%</strong>
+          </div>
+          <mat-progress-bar mode="determinate" [value]="rankInfo.xpProgress"></mat-progress-bar>
+          <div class="progress-entry last">
+            <span>XP to next level</span>
+            <strong class="text-gold">{{ rankInfo.xpToNextLevel }}</strong>
+          </div>
+        </div>
+      </mat-card>
+
+      <!-- Real rank advancement -->
+      <mat-card class="analytics-card wide-card">
+        <div class="card-title">
+          <h2>Rank Advancement</h2>
+        </div>
+        <div class="rank-grid">
+          <div class="rank-cell">
+            <strong>Current</strong>
+            <span class="text-blue">{{ rankInfo.rank }}</span>
+          </div>
+          <div class="rank-cell">
+            <strong>Level</strong>
+            <span class="text-purple">{{ rankInfo.currentLevel }}</span>
+          </div>
+          <div class="rank-cell">
+            <strong>To next level</strong>
+            <span class="text-gold">{{ rankInfo.xpProgress }}%</span>
+          </div>
+        </div>
+        <mat-progress-bar mode="determinate" [value]="rankInfo.xpProgress"></mat-progress-bar>
+      </mat-card>
+    </div>
+  </ng-container>
+</section>

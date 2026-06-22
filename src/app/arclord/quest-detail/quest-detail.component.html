@@ -1,154 +1,117 @@
-<div class="habit-detail" *ngIf="habit$ | async as habit">
-  <section class="detail-header">
-    <button class="back-button" (click)="onBack()" mat-icon-button aria-label="Go back">
-      <mat-icon>arrow_back</mat-icon>
-    </button>
+<div class="quest-detail-page">
 
-    <div class="header-content">
-      <h1>{{ habit.name }}</h1>
-      <p *ngIf="habit.subtitle" class="subtitle">{{ habit.subtitle }}</p>
-      <p class="description">{{ habit.description }}</p>
+  <button type="button" class="back-button" (click)="goBackToHabit()">
+    <span class="material-icons">arrow_back</span>
+    Back to Habit
+  </button>
+
+  <div *ngIf="loading" class="state-message">Loading quest...</div>
+
+  <div *ngIf="error && !loading" class="state-message state-error">
+    Could not load this quest.
+    <button type="button" (click)="loadQuest()">Retry</button>
+  </div>
+
+  <ng-container *ngIf="quest && !loading">
+
+    <header class="quest-header-block">
+      <span class="material-icons quest-big-icon">{{ quest.icon || 'flag' }}</span>
+      <div>
+        <h1 class="quest-title">{{ quest.name }}</h1>
+        <p class="quest-subtitle" *ngIf="quest.description">{{ quest.description }}</p>
+      </div>
+      <span class="badge status-badge" [ngClass]="'status-' + quest.status.toLowerCase()">{{ quest.status }}</span>
+    </header>
+
+    <div class="quest-stats-row">
+      <div class="stat-pill">
+        <span class="stat-label">XP earned</span>
+        <span class="stat-value text-gold">{{ quest.currentXP }}</span>
+      </div>
+      <div class="stat-pill">
+        <span class="stat-label">Progress</span>
+        <span class="stat-value text-blue">{{ quest.completionPercent }}%</span>
+      </div>
+      <div class="stat-pill">
+        <span class="stat-label">Tasks</span>
+        <span class="stat-value text-purple">{{ quest.completedTasks }}/{{ quest.totalTasks }}</span>
+      </div>
     </div>
 
-    <div class="header-actions">
-      <button mat-stroked-button (click)="onEdit(habit)">
-        <mat-icon>edit</mat-icon>
-        Edit
-      </button>
-      <button mat-flat-button class="btn-primary" (click)="onComplete(habit)">
-        <mat-icon>check_circle</mat-icon>
-        Mark Complete
-      </button>
+    <div class="progress-bar-large">
+      <div class="progress-fill" [style.width.%]="quest.completionPercent"></div>
     </div>
-  </section>
 
-  <section class="quick-stats">
-    <div class="stat">
-      <span class="stat-label">Streak</span>
-      <span class="stat-value text-gold">{{ currentStreak }} days</span>
-    </div>
-    <div class="stat">
-      <span class="stat-label">Completion Rate</span>
-      <span class="stat-value text-blue">{{ completionPercentage }}%</span>
-    </div>
-    <div class="stat">
-      <span class="stat-label">XP Reward</span>
-      <span class="stat-value text-gold">+{{ habit.xpReward }}</span>
-    </div>
-    <div class="stat">
-      <span class="stat-label">Category</span>
-      <span class="stat-value text-tertiary">{{ getCategoryLabel(habit) }}</span>
-    </div>
-    <div class="stat">
-      <span class="stat-label">Frequency</span>
-      <span class="stat-value text-tertiary">{{ getFrequencyLabel(habit.frequency) }}</span>
-    </div>
-    <div class="stat">
-      <span class="stat-label">Status</span>
-      <mat-chip [class]="'chip-' + habit.status">{{ habit.status | uppercase }}</mat-chip>
-    </div>
-  </section>
+    <!-- Pending tasks -->
+    <section class="task-section">
+      <h2 class="section-title">Tasks</h2>
 
-  <section class="detail-tabs">
-    <mat-tab-group>
-      <mat-tab>
-        <ng-template mat-tab-label>
-          <mat-icon>checklist</mat-icon>
-          Tasks ({{ completedTasks }}/{{ totalTasks }})
-        </ng-template>
+      <div class="task-list">
+        <div *ngFor="let task of pendingTasks" class="task-row">
+          <button
+            type="button"
+            class="task-checkbox"
+            [class.loading]="completingTaskId === task.id"
+            [disabled]="completingTaskId === task.id"
+            (click)="completeTask(task)"
+            title="Complete this task">
+            <span class="material-icons" *ngIf="completingTaskId !== task.id">radio_button_unchecked</span>
+            <span class="spinner" *ngIf="completingTaskId === task.id"></span>
+          </button>
 
-        <div class="tab-content">
-          <div *ngIf="(habit.tasks?.length || 0) > 0" class="tasks-list">
-            <div class="task-item" *ngFor="let task of habit.tasks" [class.completed]="task.completed">
-              <div class="task-header">
-                <mat-icon>{{ task.completed ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
-                <div class="task-info">
-                  <h4>{{ task.name }}</h4>
-                  <p *ngIf="task.description">{{ task.description }}</p>
-                </div>
-              </div>
-              <div *ngIf="task.xpReward" class="task-xp">+{{ task.xpReward }} XP</div>
-            </div>
+          <div class="task-info">
+            <span class="task-name">{{ task.name }}</span>
+            <span class="task-description" *ngIf="task.description">{{ task.description }}</span>
           </div>
 
-          <div *ngIf="(habit.tasks?.length || 0) === 0" class="empty-message">
-            <p>No tasks defined for this habit</p>
-          </div>
+          <span class="task-xp text-gold">+{{ task.xpReward }} XP</span>
+
+          <button type="button" class="task-delete" (click)="deleteTask(task)" title="Remove task">
+            <span class="material-icons">close</span>
+          </button>
         </div>
-      </mat-tab>
 
-      <mat-tab>
-        <ng-template mat-tab-label>
-          <mat-icon>history</mat-icon>
-          History
-        </ng-template>
+        <p class="empty-state" *ngIf="pendingTasks.length === 0 && completedTasks.length === 0">
+          No tasks yet. Add one below to start earning XP toward this quest.
+        </p>
+      </div>
 
-        <div class="tab-content">
-          <div class="completion-history">
-            <div *ngFor="let completion of getRecentCompletions(habit)" class="history-item">
-              <div class="history-date">{{ formatDate(completion.date) }}</div>
-              <div class="history-status">
-                <mat-icon [class.completed]="completion.completed">
-                  {{ completion.completed ? 'check_circle' : 'close_circle' }}
-                </mat-icon>
-              </div>
-              <div class="history-xp">+{{ completion.xpEarned }} XP</div>
-              <div *ngIf="completion.notes" class="history-notes">{{ completion.notes }}</div>
-            </div>
-
-            <div *ngIf="getRecentCompletions(habit).length === 0" class="empty-message">
-              <p>No completion history</p>
-            </div>
+      <!-- Completed tasks -->
+      <div class="task-list completed-list" *ngIf="completedTasks.length > 0">
+        <h3 class="subsection-title">Completed</h3>
+        <div *ngFor="let task of completedTasks" class="task-row completed">
+          <span class="task-checkbox done">
+            <span class="material-icons">check_circle</span>
+          </span>
+          <div class="task-info">
+            <span class="task-name">{{ task.name }}</span>
           </div>
+          <span class="task-xp text-gold">+{{ task.xpReward }} XP</span>
         </div>
-      </mat-tab>
+      </div>
 
-      <mat-tab>
-        <ng-template mat-tab-label>
-          <mat-icon>emoji_events</mat-icon>
-          Milestones
-        </ng-template>
+      <!-- Add task -->
+      <form class="add-task-form" (ngSubmit)="addTask()">
+        <input
+          type="text"
+          name="newTaskName"
+          placeholder="New task name..."
+          [(ngModel)]="newTaskName"
+          [disabled]="addingTask"
+          required>
+        <input
+          type="number"
+          name="newTaskXp"
+          min="1"
+          max="500"
+          [(ngModel)]="newTaskXp"
+          [disabled]="addingTask"
+          title="XP reward">
+        <button type="submit" [disabled]="addingTask || !newTaskName.trim()">
+          {{ addingTask ? 'Adding...' : 'Add Task' }}
+        </button>
+      </form>
+    </section>
 
-        <div class="tab-content">
-          <div *ngIf="(habit.milestones?.length || 0) > 0" class="milestones-list">
-            <div class="milestone-item" *ngFor="let milestone of habit.milestones" [class.achieved]="milestone.achieved">
-              <div class="milestone-icon">
-                <mat-icon>{{ milestone.icon }}</mat-icon>
-              </div>
-              <div class="milestone-info">
-                <h4>{{ milestone.name }}</h4>
-                <p>{{ milestone.description }}</p>
-                <span class="milestone-target">{{ milestone.target }} days</span>
-              </div>
-              <div class="milestone-status">
-                <mat-icon *ngIf="milestone.achieved">check_circle</mat-icon>
-                <span class="milestone-xp">+{{ milestone.xpReward }} XP</span>
-              </div>
-            </div>
-          </div>
-
-          <div *ngIf="(habit.milestones?.length || 0) === 0" class="empty-message">
-            <p>No milestones defined</p>
-          </div>
-        </div>
-      </mat-tab>
-
-      <mat-tab>
-        <ng-template mat-tab-label>
-          <mat-icon>notes</mat-icon>
-          Notes
-        </ng-template>
-
-        <div class="tab-content">
-          <div *ngIf="habit.notes" class="notes-display">
-            <p>{{ habit.notes }}</p>
-          </div>
-
-          <div *ngIf="!habit.notes" class="empty-message">
-            <p>No notes added</p>
-          </div>
-        </div>
-      </mat-tab>
-    </mat-tab-group>
-  </section>
+  </ng-container>
 </div>

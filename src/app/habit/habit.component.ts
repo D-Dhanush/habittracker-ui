@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -12,12 +12,39 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { HabitService } from '../services/habit.service';
+import { ToastService } from '../toast.service';
+import { HABIT_CATEGORIES, getCategoryIcon, getCategoryLabel } from '../models/category-constants';
 import { HabitDto } from '../models/habitdto';
+
+/**
+ * Fixes from the original:
+ *   - getCategoryIcon/getCategoryLabel were dead stubs (always returned
+ *     'target' / echoed the input unchanged) despite a real lookup
+ *     already existing elsewhere in the codebase but never imported
+ *     here. Now uses the real shared lookup from category-constants.ts.
+ *   - Removed the tasks FormArray entirely. Tasks belong to Quests now,
+ *     not directly to Habits — a habit's tasks are created from inside
+ *     a Quest (see QuestFormComponent / QuestDetailComponent), not at
+ *     habit-creation time.
+ *   - The create payload used PascalCase keys (Name, StartDateUtc, ...)
+ *     against CreateHabitDto, inconsistent with the rest of the app.
+ *     Now camelCase, matching the corrected CreateHabitDto.
+ *   - The create payload also sent Type/PrimaryIcon/SecondaryIcon/
+ *     CustomName — fields the backend never persisted or returned
+ *     (confirmed dead fields, removed entirely from both DTOs).
+ *   - The update payload silently dropped category, customCategory,
+ *     xpReward, and tags on every save even though the form collected
+ *     them — they're now actually included.
+ *   - Both onSubmit() paths and onCancel() navigated to /quests, a
+ *     route that no longer exists (it used to secretly browse Habits).
+ *     Now navigates to the habit's own detail page / habit list.
+ */
 @Component({
   selector: 'app-habit',
   standalone: true,
   imports: [
     CommonModule,
+    RouterModule,
     ReactiveFormsModule,
     MatFormFieldModule,
     MatInputModule,
@@ -37,43 +64,34 @@ export class HabitComponent implements OnInit {
   isEditing = false;
   editingHabitId: string | null = null;
   existingHabit: HabitDto | null = null;
+  submitting = false;
 
-categories = [
-  'health',
-  'fitness',
-  'spiritual',
-  'finance',
-  'study',
-  'productivity',
-  'mindset',
-  'lifestyle'
-];
-frequencies = ['daily', 'weekly', 'bi-weekly', 'monthly'];
-statuses = ['active', 'paused', 'completed', 'archived'];
+  readonly categories = HABIT_CATEGORIES;
+  readonly frequencies = ['daily', 'weekly', 'bi-weekly', 'monthly'];
+  readonly statuses = ['active', 'paused', 'completed', 'archived'];
 
-categoryIcons: { [key: string]: string } = {};
-categoryLabels: { [key: string]: string } = {};
-  colorOptions = [
+  readonly colorOptions = [
     { name: 'Gold', value: '#d4af37' },
     { name: 'Blue', value: '#4dd9ff' },
+    { name: 'Purple', value: '#a87ce0' },
     { name: 'Green', value: '#4caf50' },
     { name: 'Red', value: '#f44336' },
-    { name: 'Purple', value: '#9c27b0' },
     { name: 'Orange', value: '#ff9800' }
   ];
 
-  materialIcons = [
+  readonly materialIcons = [
     'fitness_center', 'favorite', 'spa', 'school', 'attach_money',
     'schedule', 'psychology', 'nights_stay', 'book', 'run_circle',
     'health_and_safety', 'self_improvement', 'trending_up', 'star',
-    'flash_on', 'wave'
+    'flash_on', 'bolt'
   ];
 
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
-    private habitService: HabitService
+    private habitService: HabitService,
+    private toast: ToastService
   ) {
     this.initializeForm();
   }
@@ -94,152 +112,139 @@ categoryLabels: { [key: string]: string } = {};
       name: ['', [Validators.required, Validators.minLength(3)]],
       subtitle: [''],
       description: [''],
-      category: ['health', Validators.required],
+      category: ['fitness', Validators.required],
       customCategory: [''],
       frequency: ['daily', Validators.required],
       startDate: [new Date(), Validators.required],
       endDate: [''],
       status: ['active', Validators.required],
       xpReward: [50, [Validators.required, Validators.min(10), Validators.max(500)]],
-      primaryColor: ['#d4af37', Validators.required],
-      secondaryColor: ['#4dd9ff', Validators.required],
+      primaryColor: ['#4dd9ff', Validators.required],
+      secondaryColor: ['#1a8fb5', Validators.required],
       icon: ['target', Validators.required],
-      tasks: this.fb.array([])
+      targetOccurrencesPerPeriod: [1, [Validators.min(1)]],
+      notes: ['']
     });
   }
 
   private loadHabit(habitId: string): void {
-    this.habitService.getHabitById(habitId).subscribe(habit => {
-      if (habit) {
-        this.existingHabit = habit;
-        this.populateForm(habit);
-      }
+    this.habitService.getHabitById(habitId).subscribe({
+      next: (habit) => {
+        if (habit) {
+          this.existingHabit = habit;
+          this.populateForm(habit);
+        }
+      },
+      error: () => this.toast.show('Could not load habit for editing.', 'failure')
     });
   }
 
-private populateForm(habit: HabitDto): void{
+  private populateForm(habit: HabitDto): void {
     this.habitForm.patchValue({
       name: habit.name,
       subtitle: habit.subtitle || '',
       description: habit.description || '',
-      category: habit.category || 'health',
+      category: habit.category || 'fitness',
       customCategory: habit.customCategory || '',
       frequency: habit.frequency,
       endDate: habit.endDt ?? '',
       status: habit.status ?? 'active',
       xpReward: habit.xpReward,
-      primaryColor: habit.primaryColor || '#d4af37',
-      secondaryColor: habit.secondaryColor || '#4dd9ff',
-      icon: habit.icon || 'target'
-    });
-
-    const tasksArray = this.habitForm.get('tasks') as FormArray;
-    tasksArray.clear();
-(habit.tasks ?? []).forEach(task => {      
-  tasksArray.push(this.fb.group({
-        name: [task.name, Validators.required],
-        description: [task.description || ''],
-        xpReward: [task.xpReward || 10]
-      }));
+      primaryColor: habit.primaryColor || '#4dd9ff',
+      secondaryColor: habit.secondaryColor || '#1a8fb5',
+      icon: habit.icon || 'target',
+      targetOccurrencesPerPeriod: habit.targetOccurrencesPerPeriod ?? 1,
+      notes: habit.notes || ''
     });
   }
 
-  get tasksArray(): FormArray {
-    return this.habitForm.get('tasks') as FormArray;
+  getCategoryIcon(category: string): string {
+    return getCategoryIcon(category);
   }
 
-  addTask(): void {
-    const tasksArray = this.habitForm.get('tasks') as FormArray;
-    tasksArray.push(this.fb.group({
-      name: ['', Validators.required],
-      description: [''],
-      xpReward: [10]
-    }));
+  getCategoryLabel(category: string): string {
+    return getCategoryLabel(category);
   }
 
-  removeTask(index: number): void {
-    const tasksArray = this.habitForm.get('tasks') as FormArray;
-    tasksArray.removeAt(index);
-  }
+  onSubmit(): void {
+    if (this.habitForm.invalid) {
+      this.habitForm.markAllAsTouched();
+      return;
+    }
 
-onSubmit(): void {
-  if (this.habitForm.invalid) {
-    this.habitForm.markAllAsTouched();
-    return;
-  }
+    const formValue = this.habitForm.value;
+    this.submitting = true;
 
-  const formValue = this.habitForm.value;
+    if (this.isEditing && this.editingHabitId) {
+      const updateInput = {
+        name: formValue.name,
+        subtitle: formValue.subtitle,
+        description: formValue.description,
+        category: formValue.category,
+        customCategory: formValue.customCategory,
+        status: formValue.status,
+        frequency: formValue.frequency,
+        endDateUtc: formValue.endDate ? new Date(formValue.endDate).toISOString() : undefined,
+        icon: formValue.icon,
+        primaryColor: formValue.primaryColor,
+        secondaryColor: formValue.secondaryColor,
+        xpReward: formValue.xpReward,
+        targetOccurrencesPerPeriod: formValue.targetOccurrencesPerPeriod,
+        notes: formValue.notes,
+        isActive: true
+      };
 
-  if (this.isEditing && this.editingHabitId) {
-
-    const updateInput = {
-      name: formValue.name,
-      subtitle: formValue.subtitle,
-      description: formValue.description,
-      frequency: formValue.frequency,
-      endDateUtc: formValue.endDate
-        ? new Date(formValue.endDate).toISOString()
-        : undefined,
-      icon: formValue.icon,
-      primaryColor: formValue.primaryColor,
-      secondaryColor: formValue.secondaryColor,
-      notes: '',
-      isActive: true
-    };
-
-    this.habitService
-      .updateHabit(this.editingHabitId, updateInput)
-      .subscribe({
-        next: () => this.router.navigate(['/quests']),
-        error: err => console.error(err)
+      this.habitService.updateHabit(this.editingHabitId, updateInput).subscribe({
+        next: (updated) => {
+          this.submitting = false;
+          this.toast.show('Habit updated.', 'success');
+          this.router.navigate(['/habit', updated.id]);
+        },
+        error: () => {
+          this.submitting = false;
+          this.toast.show('Could not update habit.', 'failure');
+        }
       });
 
-  } else {
+    } else {
+      const createHabitDto = {
+        name: formValue.name,
+        subtitle: formValue.subtitle,
+        description: formValue.description,
+        category: formValue.category,
+        customCategory: formValue.customCategory,
+        startDateUtc: formValue.startDate ? new Date(formValue.startDate).toISOString() : undefined,
+        endDateUtc: formValue.endDate ? new Date(formValue.endDate).toISOString() : undefined,
+        frequency: formValue.frequency,
+        targetOccurrencesPerPeriod: formValue.targetOccurrencesPerPeriod,
+        icon: formValue.icon,
+        primaryColor: formValue.primaryColor,
+        secondaryColor: formValue.secondaryColor,
+        xpReward: formValue.xpReward,
+        notes: formValue.notes,
+        isActive: true,
+        tags: formValue.customCategory ? [formValue.customCategory] : []
+      };
 
-  const createHabitDto = {
-  Name: formValue.name,
-  Description: formValue.description,
-
-  StartDateUtc: formValue.startDate
-    ? new Date(formValue.startDate).toISOString()
-    : undefined,
-
-  EndDateUtc: formValue.endDate
-    ? new Date(formValue.endDate).toISOString()
-    : undefined,
-
-  Frequency: formValue.frequency,
-
-  TargetOccurrencesPerPeriod: 1,
-
-  IsActive: true,
-
-  Type: formValue.category,
-
-  PrimaryIcon: formValue.icon,
-
-  SecondaryIcon: '',
-
-  CustomName: formValue.customCategory,
-
-  Tags: []
-};
-
-this.habitService.createHabit(createHabitDto)
-  .subscribe(() => {
-    this.router.navigate(['/quests']);
-  });
-
-  }
-}  onCancel(): void {
-    this.router.navigate(['/quests']);
+      this.habitService.createHabit(createHabitDto).subscribe({
+        next: (created) => {
+          this.submitting = false;
+          this.toast.show('Habit created.', 'success');
+          this.router.navigate(['/habit', created.id]);
+        },
+        error: () => {
+          this.submitting = false;
+          this.toast.show('Could not create habit.', 'failure');
+        }
+      });
+    }
   }
 
-getCategoryIcon(category: string): string {
-  return 'target';
-}
-
-getCategoryLabel(category: string): string {
-  return category;
-}
+  onCancel(): void {
+    if (this.isEditing && this.editingHabitId) {
+      this.router.navigate(['/habit', this.editingHabitId]);
+    } else {
+      this.router.navigate(['/habits']);
+    }
+  }
 }

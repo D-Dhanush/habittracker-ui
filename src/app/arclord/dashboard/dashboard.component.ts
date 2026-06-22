@@ -1,110 +1,84 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { MatIconModule } from '@angular/material/icon';
+import { Observable } from 'rxjs';
 import { HabitService, HabitStatsDto } from '../../services/habit.service';
 import { AnalyticsService } from '../../services/analytics.service';
-import { StatCardComponent } from '../components/stat-card/stat-card.component';
+import { UserService } from '../../services/user.service';
 import { CalendarHeatmapComponent } from '../components/calendar-heatmap/calendar-heatmap.component';
-import { HabitCompletion } from '../../models/habit.model';
-import { CalendarData, RecentActivity } from '../../models/analytics.model';
-import { Observable } from 'rxjs';
+import { StatCardComponent } from '../components/stat-card/stat-card.component';
+import {
+  CalendarData,
+  WeeklyCompletionData,
+  RecentActivity,
+  RankingInfo,
+  calculateRankProgress
+} from '../../models/analytics.model';
+import { UserProgressDto } from '../../models/quest.model';
 
+/**
+ * Rewritten from scratch. Removed entirely (confirmed dead code — never
+ * referenced by the template): summaryCards, completedHabits,
+ * pendingHabits, progressSeries, milestones, and a hardcoded
+ * recentActivity array with fake flavor text ("Defeated the Ivory
+ * Wraith"). Also removed getRankFromXp/getRankColor/getProgressToNextLevel,
+ * which hardcoded XP thresholds that disagreed with the mock data's
+ * "Elder Warden" rank AND with the backend's own rank function — there
+ * were three different rank systems across this one file. Now there is
+ * exactly one: Progress.UFN_RankFromXp server-side, mirrored by
+ * calculateRankProgress() in analytics.model.ts.
+ */
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [
-    CommonModule, 
-    RouterModule, 
-    MatIconModule,
-    StatCardComponent,
-    CalendarHeatmapComponent
-  ],
+  imports: [CommonModule, RouterModule, CalendarHeatmapComponent, StatCardComponent],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent implements OnInit {
   stats$!: Observable<HabitStatsDto>;
-  recentActivity$!: Observable<RecentActivity[]>;
   calendarData$!: Observable<CalendarData>;
-  weeklyData$!: Observable<any[]>;
+  weeklyData$!: Observable<WeeklyCompletionData[]>;
+  recentActivity$!: Observable<RecentActivity[]>;
 
-  currentMonth = new Date().getMonth();
-  currentYear = new Date().getFullYear();
+  userProgress: UserProgressDto | null = null;
+  rankInfo: RankingInfo | null = null;
+  loadingProgress = true;
 
   constructor(
     private habitService: HabitService,
-    private analyticsService: AnalyticsService
+    private analyticsService: AnalyticsService,
+    private userService: UserService
   ) {}
 
   ngOnInit(): void {
     this.stats$ = this.habitService.getStats();
-    this.recentActivity$ = this.analyticsService.getRecentActivity();
-    this.calendarData$ = this.analyticsService.getCalendarData(this.currentMonth, this.currentYear);
+
+    const now = new Date();
+    this.calendarData$ = this.analyticsService.getCalendarData(now.getMonth(), now.getFullYear());
     this.weeklyData$ = this.analyticsService.getWeeklyCompletionData();
+    this.recentActivity$ = this.analyticsService.getRecentActivity();
+
+    this.loadUserProgress();
   }
 
-  getRankFromXp(xp: number): string {
-    if (xp < 1000) return 'Novice';
-    if (xp < 5000) return 'Apprentice';
-    if (xp < 10000) return 'Adept';
-    if (xp < 25000) return 'Expert';
-    if (xp < 50000) return 'Master';
-    return 'Legend';
-  }
-
-  getRankColor(xp: number): string {
-    if (xp < 1000) return 'text-tertiary';
-    if (xp < 5000) return 'text-blue';
-    if (xp < 10000) return 'text-gold';
-    if (xp < 25000) return 'text-gold';
-    if (xp < 50000) return 'text-gold';
-    return 'text-gold';
-  }
-
-  getProgressToNextLevel(xp: number): number {
-    const levels = [1000, 5000, 10000, 25000, 50000];
-    let currentLevel = 0;
-    let nextLevel = levels[0];
-
-    for (let level of levels) {
-      if (xp >= level) {
-        currentLevel = level;
-        const nextIndex = levels.indexOf(level) + 1;
-        nextLevel = nextIndex < levels.length ? levels[nextIndex] : level + 50000;
+  private loadUserProgress(): void {
+    this.loadingProgress = true;
+    this.userService.getCurrentUserProgress().subscribe({
+      next: (progress) => {
+        this.userProgress = progress;
+        // The backend already computes currentLevel/rank from TotalXP via
+        // UFN_LevelFromXp/UFN_RankFromXp — but xpToNextLevel/xpProgress
+        // (needed for the progress ring) aren't part of UserProgressDto,
+        // so we derive the full display object client-side from the same
+        // total. Keeping ONE set of thresholds (see analytics.model.ts)
+        // means this can never disagree with what the backend already sent.
+        this.rankInfo = calculateRankProgress(progress.totalXP);
+        this.loadingProgress = false;
+      },
+      error: () => {
+        this.loadingProgress = false;
       }
-    }
-
-    return currentLevel === 0 ? (xp / nextLevel) * 100 : ((xp - currentLevel) / (nextLevel - currentLevel)) * 100;
-  }
-
-  summaryCards = [
-    { label: 'Current Rank', value: 'Elder Warden', icon: 'military_tech', accent: '#7bc37f' },
-    { label: 'Current Streak', value: '14 days', icon: 'whatshot', accent: '#f2a33c' }
-  ];
-
-  completedHabits = 18;
-  pendingHabits = 10;
-  progressSeries: { label: string; value: number }[] = [
-    { label: 'Week 1', value: 72 },
-    { label: 'Week 2', value: 86 },
-    { label: 'Week 3', value: 94 },
-    { label: 'Week 4', value: 78 }
-  ];
-
-  milestones = [
-    { title: 'Moonlit Vanguard', description: 'Complete 15 quests this month', reward: '150 XP', complete: true },
-    { title: 'Eternal Ember', description: 'Keep streak above 10 days', reward: 'Golden Sigil', complete: true },
-    { title: 'Shadow Tactician', description: 'Finish 3 elite quests', reward: 'Rank Surge', complete: false }
-  ];
-
-  recentActivity = [
-    { time: 'Just now', title: 'Defeated the Ivory Wraith', details: 'Quest completed +120 XP' },
-    { time: '2h ago', title: 'Forged a new ritual', details: 'Streak extended to 14 days' },
-    { time: 'Yesterday', title: 'Unlocked arcane milestone', details: 'Moonlit Vanguard achieved' }
-  ];
-
-  get completionRatio(): number {
-    return Math.round((this.completedHabits / (this.completedHabits + this.pendingHabits)) * 100);
+    });
   }
 }

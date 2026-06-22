@@ -18,11 +18,13 @@
   </div>
 </div>
 
+<!-- When logged in: leftnav owns the router-outlet (inside mat-sidenav-content) -->
 <div *ngIf="showMainShell" class="app-shell">
   <app-leftnav></app-leftnav>
 </div>
 
-<main class="app-main">
+<!-- Login / Unauthorized only: standalone outlet, no nav shell -->
+<main *ngIf="!showMainShell" class="app-main">
   <router-outlet></router-outlet>
 </main>
 

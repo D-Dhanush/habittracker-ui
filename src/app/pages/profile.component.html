@@ -1,0 +1,40 @@
+<div class="profile-shell">
+  <div class="state-message" *ngIf="loading">Loading profile...</div>
+
+  <div class="state-message state-error" *ngIf="error && !loading">
+    Could not load your profile.
+    <button type="button" (click)="loadProfile()">Retry</button>
+  </div>
+
+  <ng-container *ngIf="!loading && !error && user">
+    <section class="profile-card">
+      <div class="profile-avatar">
+        <img *ngIf="user.profileImageUrl" [src]="user.profileImageUrl" [alt]="user.displayName || user.email">
+        <span *ngIf="!user.profileImageUrl">{{ initials }}</span>
+      </div>
+
+      <div class="profile-details">
+        <h2>{{ user.displayName || user.email }}</h2>
+        <p class="profile-role">Habit Champion</p>
+
+        <div class="profile-meta" *ngIf="stats">
+          <div><span>Email</span><strong>{{ user.email }}</strong></div>
+          <div><span>Member since</span><strong>{{ memberSince }}</strong></div>
+          <div><span>Active habits</span><strong class="text-blue">{{ stats.totalHabits }}</strong></div>
+          <div><span>Completed today</span><strong class="text-gold">{{ stats.completedToday }}</strong></div>
+          <div><span>Current streak</span><strong class="text-blue">{{ stats.currentStreak }} days</strong></div>
+          <div><span>Longest streak</span><strong class="text-purple">{{ stats.longestStreak }} days</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="theme-panel">
+      <h3>Theme mode</h3>
+      <p>Choose a light or dark display mode for the app.</p>
+      <div class="theme-actions">
+        <button type="button" (click)="setTheme('dark')" [class.active]="activeTheme === 'dark'">Dark</button>
+        <button type="button" (click)="setTheme('light')" [class.active]="activeTheme === 'light'">Light</button>
+      </div>
+    </section>
+  </ng-container>
+</div>

@@ -5,6 +5,11 @@ $color-primary-gold: #c9a227;
 $color-primary-gold-light: #ddb830;
 $color-primary-gold-dark: #9a7a18;
 
+// Purple — secondary (difficulty-medium badges, quest-count badges, level stat color)
+$color-primary-purple: #a87ce0;
+$color-primary-purple-light: #c9a8f0;
+$color-primary-purple-dark: #7a52b0;
+
 // Blue — dominant
 $color-primary-blue: #4dd9ff;
 $color-primary-blue-dim: #1a8fb5;
@@ -39,6 +44,7 @@ $color-info: #2196f3;
 
 // Gradients
 $gradient-gold-blue: linear-gradient(135deg, $color-primary-gold, $color-accent-light-blue);
+$gradient-blue: linear-gradient(135deg, $color-primary-blue-dim, $color-accent-light-blue);
 $gradient-blue-dark: linear-gradient(160deg, #0f2040 0%, #03060f 100%);
 $gradient-igris: linear-gradient(180deg, #081428 0%, #050e1c 50%, #03060f 100%);
 
@@ -52,6 +58,8 @@ $glow-blue: 0 0 12px rgba(77, 217, 255, 0.45), 0 0 24px rgba(77, 217, 255, 0.22)
 $glow-blue-strong: 0 0 20px rgba(77, 217, 255, 0.85), 0 0 45px rgba(0, 200, 255, 0.4), 0 0 70px rgba(0, 150, 220, 0.15);
 $glow-gold: 0 0 10px rgba(201, 162, 39, 0.45), 0 0 20px rgba(201, 162, 39, 0.22);
 $glow-gold-strong: 0 0 14px rgba(201, 162, 39, 0.75), 0 0 28px rgba(201, 162, 39, 0.38);
+$glow-purple: 0 0 10px rgba(168, 124, 224, 0.45), 0 0 20px rgba(168, 124, 224, 0.22);
+$glow-purple-strong: 0 0 14px rgba(168, 124, 224, 0.75), 0 0 28px rgba(168, 124, 224, 0.38);
 
 // Spacing
 $spacing-xs: 4px;
@@ -107,16 +115,21 @@ $breakpoint-xxl: 1400px;
   }
 }
 
-@mixin glow-border {
+@mixin glow-border($variant: blue) {
   border: 2px solid transparent;
   background-clip: padding-box;
   position: relative;
+
+  $border-gradient: $gradient-blue;
+  @if $variant == gold {
+    $border-gradient: $gradient-gold-blue;
+  }
 
   &::before {
     content: '';
     position: absolute;
     top: -2px; left: -2px; right: -2px; bottom: -2px;
-    background: $gradient-gold-blue;
+    background: $border-gradient;
     border-radius: $border-radius-lg;
     z-index: -1;
     opacity: 0.35;

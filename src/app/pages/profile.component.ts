@@ -1,56 +1,73 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { forkJoin } from 'rxjs';
+import { UserService, UserDto } from '../services/user.service';
+import { HabitService, HabitStatsDto } from '../services/habit.service';
 
+/**
+ * Full rewrite. The original was 100% static mock data — "Avery Strong",
+ * a fake email, "28 habits completed", "9 day streak" — none of it backed
+ * by a single service call, despite UserService/HabitService already
+ * existing and providing exactly this data. Now pulls the real signed-in
+ * user (UserService.getCurrentUser — Phase 1's seeded default user, see
+ * login.component.ts for the full explanation of why there's no real
+ * credential check yet) and real stats.
+ */
 @Component({
   selector: 'app-profile',
   standalone: true,
   imports: [CommonModule],
-  template: `
-    <div class="profile-shell">
-      <section class="profile-card">
-        <div class="profile-avatar">AL</div>
-        <div class="profile-details">
-          <h2>Avery Strong</h2>
-          <p class="profile-role">Habit Champion</p>
-          <div class="profile-meta">
-            <div><span>Email</span><strong>avery&#64;example.com</strong></div>
-            <div><span>Member since</span><strong>Feb 2025</strong></div>
-            <div><span>Habits completed</span><strong>28</strong></div>
-            <div><span>Current streak</span><strong>9 days</strong></div>
-          </div>
-        </div>
-      </section>
-
-      <section class="theme-panel">
-        <h3>Theme mode</h3>
-        <p>Choose a light or dark display mode for the app.</p>
-        <div class="theme-actions">
-          <button type="button" (click)="setTheme('dark')" [class.active]="activeTheme === 'dark'">Dark</button>
-          <button type="button" (click)="setTheme('light')" [class.active]="activeTheme === 'light'">Light</button>
-        </div>
-      </section>
-    </div>
-  `,
-  styles: [
-    `.profile-shell { padding: 24px; display: grid; gap: 1.5rem; }`,
-    `.profile-card { display: flex; gap: 1.5rem; padding: 1.75rem; border-radius: 24px; background: rgba(20, 50, 88, 0.68); border: 1px solid rgba(106, 177, 255, 0.18); box-shadow: 0 26px 60px rgba(10, 21, 40, 0.24); }`,
-    `.profile-avatar { min-width: 96px; min-height: 96px; border-radius: 24px; background: linear-gradient(145deg, #4aa7ff, #82ccff); display: grid; place-items: center; color: #061325; font-size: 2.1rem; font-weight: 800; }`,
-    `.profile-details { display: grid; gap: 1rem; color: #eef6ff; }`,
-    `.profile-details h2 { margin: 0; font-size: 2rem; }`,
-    `.profile-role { margin: 0; color: #bae1ff; }`,
-    `.profile-meta { display: grid; gap: 0.85rem; }`,
-    `.profile-meta div { display: flex; justify-content: space-between; gap: 1rem; padding: 0.9rem 1.1rem; background: rgba(255, 255, 255, 0.05); border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.08); }`,
-    `.profile-meta span { color: rgba(207, 231, 255, 0.75); font-size: 0.9rem; }`,
-    `.profile-meta strong { color: #f8fbff; }`,
-    `.theme-panel { padding: 1.75rem; border-radius: 24px; background: rgba(20, 50, 88, 0.62); border: 1px solid rgba(106, 177, 255, 0.18); }`,
-    `.theme-panel h3 { margin: 0 0 0.5rem; color: #eef6ff; }`,
-    `.theme-actions { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1rem; }`,
-    `.theme-actions button { min-width: 100px; padding: 0.9rem 1.2rem; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 999px; background: rgba(255, 255, 255, 0.06); color: #eef6ff; cursor: pointer; transition: transform 0.18s ease, background 0.18s ease; }`,
-    `.theme-actions button.active, .theme-actions button:hover { background: rgba(74, 167, 255, 0.95); color: #061325; border-color: rgba(74, 167, 255, 0.95); transform: translateY(-1px); }`
-  ]
+  templateUrl: './profile.component.html',
+  styleUrls: ['./profile.component.scss']
 })
-export class ProfileComponent {
-  activeTheme = 'dark';
+export class ProfileComponent implements OnInit {
+  loading = true;
+  error = false;
+
+  user: UserDto | null = null;
+  stats: HabitStatsDto | null = null;
+  activeTheme: 'dark' | 'light' = 'dark';
+
+  ngOnInit(): void {
+    this.loadProfile();
+  }
+
+  constructor(
+    private userService: UserService,
+    private habitService: HabitService
+  ) {}
+
+  loadProfile(): void {
+    this.loading = true;
+    this.error = false;
+
+    forkJoin({
+      user: this.userService.getCurrentUser(),
+      stats: this.habitService.getStats()
+    }).subscribe({
+      next: ({ user, stats }) => {
+        this.user = user;
+        this.stats = stats;
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+        this.error = true;
+      }
+    });
+  }
+
+  get initials(): string {
+    const name = this.user?.displayName || this.user?.email || '?';
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  }
+
+  get memberSince(): string {
+    if (!this.user?.createdDt) return 'Unknown';
+    return new Date(this.user.createdDt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+  }
 
   setTheme(theme: 'light' | 'dark'): void {
     this.activeTheme = theme;

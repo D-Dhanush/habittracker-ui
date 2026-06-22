@@ -1,7 +1,11 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
-export type ToastType = 'success' | 'failure' | 'info';
+// Was missing 'warning' entirely — the product spec calls for four toast
+// colors (Success=Green, Error=Red, Warning=Yellow, Information=Blue) but
+// only three types existed. Added 'warning' without renaming 'failure',
+// since 'failure' is already the established name used across components.
+export type ToastType = 'success' | 'failure' | 'warning' | 'info';
 
 export interface ToastMessage {
   id: string;

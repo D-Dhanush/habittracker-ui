@@ -1,507 +1,304 @@
 @use '../../../styles/theme' as *;
+
+// Replaces a 507-line file that was confirmed to be two merged, conflicting
+// stylesheets — duplicate class names (.chart-card, .activity-item,
+// .bar-chart all defined twice) where the second, later-defined half used
+// hardcoded gold colors with zero design-token usage and silently won the
+// cascade. Full rewrite against real theme tokens, gold confined to the
+// rank/XP accents your spec calls for.
+
 :host {
   display: block;
 }
 
-.dashboard {
-  width: 100%;
+.dashboard-page {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  padding-bottom: 40px;
 }
 
-// Hero Section
-.hero-section {
-  margin-bottom: $spacing-xl;
-  padding: $spacing-xl;
-  background: linear-gradient(135deg, rgba(13, 27, 42, 0.5) 0%, rgba(30, 58, 95, 0.3) 100%);
-  border-radius: $border-radius-lg;
-  border: 1px solid rgba(212, 175, 55, 0.2);
-  animation: slide-in-top 0.6s ease-out;
-
-  .hero-content {
-    h1 {
-      margin: 0 0 $spacing-md 0;
-      font-size: 2.5rem;
-      background: $gradient-gold-blue;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    p {
-      margin: 0;
-      color: $color-text-secondary;
-      font-size: 1.1rem;
-    }
-
-    @media (max-width: $breakpoint-md) {
-      h1 {
-        font-size: 2rem;
-      }
-    }
-  }
-}
-
-// Stats Grid
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: $spacing-lg;
-  margin-bottom: $spacing-xl;
-  animation: fade-in 0.4s ease-out;
-
-  @media (max-width: $breakpoint-lg) {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  @media (max-width: $breakpoint-md) {
-    grid-template-columns: repeat(2, 1fr);
-    gap: $spacing-md;
-  }
-
-  @media (max-width: $breakpoint-sm) {
-    grid-template-columns: 1fr;
-  }
-}
-
-// Ranking Section
-.ranking-section {
-  margin-bottom: $spacing-xl;
-}
-
-.rank-card {
-  @include glass-morphism-strong;
-  border-radius: $border-radius-lg;
-  padding: $spacing-lg;
-  border: 1px solid rgba(212, 175, 55, 0.2);
-}
+// ─── Rank header ────────────────────────────────────────────
 
 .rank-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: $spacing-lg;
+  gap: 20px;
+  padding: 22px 26px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(13, 27, 42, 0.6) 0%, rgba(8, 16, 30, 0.7) 100%);
+  border: 1px solid rgba(77, 217, 255, 0.2);
+  box-shadow: 0 0 28px rgba(77, 217, 255, 0.08);
 
-  h3 {
-    margin: 0;
-    color: $color-text-primary;
+  &.loading {
+    color: rgba(232, 244, 255, 0.5);
+    justify-content: center;
+    padding: 40px;
   }
+}
 
-  .rank-label {
-    font-size: 1.5rem;
-    font-weight: 700;
+.rank-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.18), rgba(77, 217, 255, 0.18));
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  flex-shrink: 0;
 
-    &.text-gold {
-      color: $color-primary-gold;
-      text-shadow: $glow-gold;
-    }
-
-    &.text-blue {
-      color: $color-accent-light-blue;
-      text-shadow: $glow-blue;
-    }
-
-    &.text-tertiary {
-      color: $color-text-tertiary;
-    }
+  .material-icons {
+    color: $color-primary-gold;
+    font-size: 26px;
   }
+}
+
+.rank-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 120px;
+}
+
+.rank-label {
+  font-family: 'Cinzel', serif;
+  font-size: 20px;
+  font-weight: 700;
+
+  &.text-gold {
+    color: $color-primary-gold;
+    text-shadow: $glow-gold;
+  }
+}
+
+.level-label {
+  font-size: 13px;
+  color: rgba(232, 244, 255, 0.6);
 }
 
 .rank-progress {
-  .progress-bar {
-    width: 100%;
-    height: 8px;
-    background: rgba(212, 175, 55, 0.1);
-    border-radius: 4px;
-    overflow: hidden;
-    margin-bottom: $spacing-md;
-    border: 1px solid rgba(212, 175, 55, 0.2);
-
-    .progress-fill {
-      height: 100%;
-      background: $gradient-gold-blue;
-      transition: width $transition-slow;
-      box-shadow: $glow-gold;
-    }
-  }
-
-  .progress-label {
-    margin: 0;
-    font-size: 0.85rem;
-    color: $color-text-secondary;
-    font-weight: 500;
-  }
-}
-
-// Calendar Section
-.calendar-section {
-  margin-bottom: $spacing-xl;
-}
-
-// Charts Section
-.charts-section {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: $spacing-lg;
-
-  @media (max-width: $breakpoint-lg) {
-    grid-template-columns: 1fr;
-  }
-}
-
-.chart-card,
-.activity-card {
-  @include glass-morphism-strong;
-  border-radius: $border-radius-lg;
-  padding: $spacing-lg;
-  border: 1px solid rgba(212, 175, 55, 0.2);
-  animation: slide-in-bottom 0.6s ease-out;
-
-  .card-header {
-    margin-bottom: $spacing-lg;
-
-    h3 {
-      margin: 0 0 $spacing-xs 0;
-      color: $color-text-primary;
-      font-size: 1.25rem;
-    }
-
-    p {
-      margin: 0;
-      color: $color-text-secondary;
-      font-size: 0.9rem;
-    }
-  }
-}
-
-// Bar Chart
-.bar-chart {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: $spacing-lg;
+  gap: 6px;
 }
 
-.bar-item {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: $spacing-md;
-  align-items: center;
-}
-
-.bar-container {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-sm;
-}
-
-.bar {
+.rank-progress-bar {
   width: 100%;
-  height: 6px;
-  background: rgba(212, 175, 55, 0.1);
-  border-radius: 3px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(77, 217, 255, 0.1);
   overflow: hidden;
-  border: 1px solid rgba(212, 175, 55, 0.2);
+}
 
-  .bar-fill {
-    height: 100%;
-    background: $gradient-gold-blue;
-    transition: width $transition-slow;
-    box-shadow: $glow-gold;
-  }
+.rank-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #1a8fb5, #4dd9ff);
+  transition: width $transition-slow;
+}
+
+.rank-progress-label {
+  font-size: 12px;
+  color: rgba(232, 244, 255, 0.5);
+}
+
+// ─── Stat cards grid ────────────────────────────────────────
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+// ─── Generic dashboard sections ─────────────────────────────
+
+.dashboard-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.section-title {
+  font-family: 'Cinzel', serif;
+  font-size: 17px;
+  color: #f0f8ff;
+  margin: 0;
+}
+
+// ─── Weekly bars ────────────────────────────────────────────
+
+.weekly-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 18px;
+  padding: 20px;
+  border-radius: 18px;
+  background: rgba(13, 24, 44, 0.5);
+  border: 1px solid rgba(77, 217, 255, 0.12);
+  height: 160px;
+}
+
+.weekly-bar-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  height: 100%;
+}
+
+.bar-track {
+  flex: 1;
+  width: 28px;
+  border-radius: 999px;
+  background: rgba(77, 217, 255, 0.08);
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+
+.bar-fill {
+  width: 100%;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #4dd9ff, #1a8fb5);
+  transition: height $transition-slow;
+  min-height: 2px;
 }
 
 .bar-label {
-  font-size: 0.8rem;
-  color: $color-text-secondary;
+  font-size: 10px;
+  color: rgba(232, 244, 255, 0.45);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-weight: 600;
 }
 
 .bar-value {
-  color: $color-primary-gold;
+  font-size: 12px;
   font-weight: 700;
-  font-size: 0.95rem;
-  text-align: right;
-  min-width: 50px;
+  color: #4dd9ff;
 }
 
-// Activity List
+// ─── Recent activity ────────────────────────────────────────
+
 .activity-list {
   display: flex;
   flex-direction: column;
-  gap: $spacing-md;
+  gap: 10px;
 }
 
-.activity-item {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: $spacing-md;
-  padding: $spacing-md;
-  background: rgba(212, 175, 55, 0.05);
-  border-radius: $border-radius-md;
-  border: 1px solid rgba(212, 175, 55, 0.1);
+.activity-row {
+  display: flex;
   align-items: center;
-  transition: all $transition-standard;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(13, 24, 44, 0.5);
+  border: 1px solid rgba(77, 217, 255, 0.12);
+  transition: border-color $transition-standard, background $transition-standard;
 
   &:hover {
-    background: rgba(212, 175, 55, 0.1);
-    border-color: rgba(212, 175, 55, 0.3);
+    border-color: rgba(77, 217, 255, 0.3);
+    background: rgba(13, 24, 44, 0.7);
   }
 }
 
 .activity-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  background: linear-gradient(135deg, $color-primary-gold, $color-accent-light-blue);
-  border-radius: $border-radius-md;
+  background: linear-gradient(135deg, rgba(77, 217, 255, 0.15), rgba(26, 143, 181, 0.15));
+  color: #4dd9ff;
   flex-shrink: 0;
-
-  mat-icon {
-    color: $color-bg-darker;
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
-  }
+  font-size: 18px;
 }
 
-.activity-content {
-  .activity-title {
-    margin: 0 0 $spacing-xs 0;
-    color: $color-text-primary;
-    font-weight: 600;
-    font-size: 0.95rem;
-  }
-
-  .activity-description {
-    margin: 0 0 $spacing-xs 0;
-    color: $color-text-secondary;
-    font-size: 0.85rem;
-  }
-
-  .activity-time {
-    margin: 0;
-    color: $color-text-tertiary;
-    font-size: 0.75rem;
-  }
-}
-
-.activity-xp {
-  .xp-badge {
-    display: inline-block;
-    padding: $spacing-xs $spacing-sm;
-    background: rgba(212, 175, 55, 0.2);
-    color: $color-primary-gold;
-    border-radius: $border-radius-sm;
-    font-weight: 700;
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-}
-
-.no-activity {
-  padding: $spacing-xl;
-  text-align: center;
-  color: $color-text-tertiary;
-
-  p {
-    margin: 0;
-  }
-}
-
-
-.card-value {
-  font-size: 2rem;
-  font-weight: 700;
-}
-
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: 1.5fr 1fr;
-  gap: 1.5rem;
-}
-
-.chart-card,
-.milestones-card,
-.activity-card {
-  padding: 1.5rem;
-  border-radius: 28px;
-  background: linear-gradient(180deg, rgba(10, 10, 14, 0.96), rgba(21, 18, 34, 0.96));
-  border: 1px solid rgba(236, 212, 109, 0.1);
-}
-
-.card-header {
+.activity-text {
+  flex: 1;
   display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  align-items: flex-start;
-  margin-bottom: 1.25rem;
-}
-
-.card-header h2 {
-  margin: 0;
-  font-size: 1.2rem;
-}
-
-.card-header p {
-  margin: 0.4rem 0 0;
-  color: rgba(245, 235, 199, 0.72);
-}
-
-.badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.4rem 0.8rem;
-  border-radius: 999px;
-  background: rgba(236, 212, 109, 0.14);
-  color: #f7e6ad;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-}
-
-.chart-row {
-  display: flex;
-  gap: 2rem;
-  align-items: center;
-}
-
-.pie-visual {
-  position: relative;
-  width: 190px;
-  height: 190px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, rgba(236, 212, 109, 0.18), transparent 35%),
-              rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(236, 212, 109, 0.14);
-  display: grid;
-  place-items: center;
-}
-
-.pie-ring {
-  width: 138px;
-  height: 138px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(236, 212, 109, 0.18) 0%, rgba(255, 255, 255, 0.04) 72%);
-  border: 1px solid rgba(236, 212, 109, 0.16);
-}
-
-.pie-label {
-  position: absolute;
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: #fff;
-}
-
-.legend-list {
-  display: grid;
-  gap: 0.9rem;
-}
-
-.legend {
-  display: inline-block;
-  width: 12px;
-  height: 12px;
-  border-radius: 999px;
-  margin-right: 0.75rem;
-}
-
-.legend.completed {
-  background: #d4af37;
-}
-
-.legend.pending {
-  background: rgba(255, 255, 255, 0.35);
-}
-
-.bar-chart {
-  display: grid;
-  gap: 1rem;
-}
-
-.bar-row {
-  display: grid;
-  grid-template-columns: 100px 1fr 60px;
-  align-items: center;
-  gap: 1rem;
-}
-
-.bar-track {
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 999px;
-  overflow: hidden;
-  height: 14px;
-}
-
-.bar-fill {
-  height: 100%;
-  background: linear-gradient(90deg, rgba(236, 212, 109, 0.9), rgba(152, 111, 22, 0.9));
-}
-
-.milestone-list,
-.activity-list {
-  display: grid;
-  gap: 1rem;
-}
-
-.milestone-item,
-.activity-item {
-  padding: 1rem;
-  border-radius: 22px;
-  background: rgba(7, 8, 12, 0.78);
-  border: 1px solid rgba(236, 212, 109, 0.08);
-}
-
-.milestone-item strong {
-  display: block;
-  margin-bottom: 0.35rem;
-}
-
-.milestone-status {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 0.85rem;
-  padding: 0.35rem 0.75rem;
-  border-radius: 999px;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.09em;
-  color: #f7df8f;
-}
-
-.milestone-status.complete {
-  background: rgba(72, 205, 160, 0.15);
+  flex-direction: column;
+  min-width: 0;
 }
 
 .activity-title {
+  font-size: 13px;
   font-weight: 600;
+  color: #e8f4ff;
 }
 
-.activity-item {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  align-items: center;
+.activity-description {
+  font-size: 12px;
+  color: rgba(232, 244, 255, 0.5);
 }
 
-.activity-item p {
-  margin: 0.35rem 0 0;
-  color: rgba(245, 235, 199, 0.72);
-}
+.activity-xp {
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
 
-@media (max-width: 1024px) {
-  .hero-panel,
-  .dashboard-grid {
-    grid-template-columns: 1fr;
+  &.text-gold {
+    color: $color-primary-gold;
   }
 }
 
-@media (max-width: 680px) {
-  .stat-grid {
-    grid-template-columns: 1fr 1fr;
+.empty-state {
+  text-align: center;
+  color: rgba(232, 244, 255, 0.4);
+  font-size: 13px;
+  padding: 24px 0;
+}
+
+// ─── Quick actions ──────────────────────────────────────────
+
+.quick-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.action-link {
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  border: 1px solid rgba(77, 217, 255, 0.3);
+  color: #4dd9ff;
+  transition: background $transition-standard, transform 140ms ease;
+
+  &:hover {
+    background: rgba(77, 217, 255, 0.1);
+    transform: translateY(-1px);
+  }
+
+  &.primary {
+    background: linear-gradient(135deg, #1a8fb5, #4dd9ff);
+    color: #03060f;
+    border: none;
+  }
+}
+
+@media (max-width: $breakpoint-md) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .rank-header {
+    flex-wrap: wrap;
+  }
+
+  .rank-progress {
+    width: 100%;
+    flex-basis: 100%;
+  }
+}
+
+@media (max-width: $breakpoint-sm) {
+  .stats-grid {
+    grid-template-columns: 1fr;
   }
 }

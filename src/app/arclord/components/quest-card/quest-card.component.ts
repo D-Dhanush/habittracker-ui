@@ -1,28 +1,38 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { Quest } from '../../models/quest.model';
+import { QuestDto } from '../../../models/quest.model';
 
+/**
+ * Replaces the old src/app/arclord/components/quest-card component,
+ * which was confirmed dead code (imported by nothing, built against
+ * a Quest model with fields like `streak` that the backend never had).
+ * This version uses the real, persisted QuestProgress rollup fields.
+ */
 @Component({
   selector: 'app-quest-card',
   standalone: true,
-  imports: [CommonModule, MatCardModule, MatIconModule, MatButtonModule, MatProgressBarModule],
+  imports: [CommonModule],
   templateUrl: './quest-card.component.html',
   styleUrls: ['./quest-card.component.scss']
 })
 export class QuestCardComponent {
-  @Input() quest!: Quest;
-  @Output() editQuest = new EventEmitter<Quest>();
-  @Output() deleteQuest = new EventEmitter<Quest>();
+  @Input() quest!: QuestDto;
+  @Output() questClick = new EventEmitter<string>();
 
-  onEdit(): void {
-    this.editQuest.emit(this.quest);
+  get difficultyClass(): string {
+    const d = (this.quest?.difficulty ?? '').toLowerCase();
+    if (d === 'hard' || d === 'gold') return 'difficulty-hard';
+    if (d === 'medium' || d === 'silver') return 'difficulty-medium';
+    return 'difficulty-easy';
   }
 
-  onDelete(): void {
-    this.deleteQuest.emit(this.quest);
+  get taskSummary(): string {
+    const total = this.quest?.totalTasks ?? 0;
+    const done = this.quest?.completedTasks ?? 0;
+    return `${done}/${total} tasks`;
+  }
+
+  onCardClick(): void {
+    this.questClick.emit(this.quest.id);
   }
 }

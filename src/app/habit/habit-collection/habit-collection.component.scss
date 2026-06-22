@@ -1,6 +1,52 @@
+@use '../../../styles/theme' as *;
+
 .habits-list {
   margin-top: 30px;
   padding: 0;
+}
+
+.list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-lg;
+
+  h2 {
+    margin: 0;
+  }
+}
+
+.new-habit-link {
+  @include flex-center;
+  gap: $spacing-xs;
+  padding: $spacing-sm $spacing-md;
+  border-radius: $border-radius-md;
+  background: rgba($color-accent-light-blue, 0.15);
+  color: $color-accent-light-blue;
+  border: 1px solid rgba($color-accent-light-blue, 0.35);
+  font-weight: 600;
+  text-decoration: none;
+  transition: all $transition-fast;
+
+  &:hover {
+    background: rgba($color-accent-light-blue, 0.25);
+    box-shadow: $glow-blue;
+  }
+}
+
+.state-message {
+  text-align: center;
+  padding: $spacing-xl;
+  color: $color-text-secondary;
+
+  a {
+    color: $color-accent-light-blue;
+  }
+
+  &.empty {
+    @include glass-morphism;
+    border-radius: $border-radius-lg;
+  }
 }
 
 .habits-container {
@@ -21,12 +67,19 @@
 }
 
 .page-btn {
-  background: #1976d2;
+  background: $color-primary-blue;
   border: none;
-  color: white;
+  color: $color-bg-darker;
   padding: 8px 14px;
-  border-radius: 4px;
+  border-radius: $border-radius-sm;
   cursor: pointer;
+  font-weight: 600;
+  transition: all $transition-fast;
+
+  &:hover:not(:disabled) {
+    background: $color-accent-cyan;
+    box-shadow: $glow-blue;
+  }
 }
 
 .page-btn:disabled {
@@ -36,4 +89,5 @@
 
 .page-info {
   font-weight: 600;
+  color: $color-text-secondary;
 }

@@ -4,6 +4,9 @@
     <div>
       <h1>{{ isEditing ? 'Edit Habit' : 'Create New Habit' }}</h1>
       <p>{{ isEditing ? 'Update your habit details and goals' : 'Start building better habits today' }}</p>
+      <p class="form-hint" *ngIf="!isEditing">
+        Tasks and XP-earning checklists are added afterward, inside a Quest on this habit.
+      </p>
     </div>
   </section>
 
@@ -152,48 +155,6 @@
               (click)="habitForm.get('icon')?.setValue(icon)"
               [title]="icon">
               <mat-icon>{{ icon }}</mat-icon>
-            </button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Tasks Section -->
-    <section class="form-section">
-      <div class="section-header">
-        <h2>Tasks/Checklist (Optional)</h2>
-        <button type="button" mat-stroked-button (click)="addTask()">
-          <mat-icon>add</mat-icon>
-          Add Task
-        </button>
-      </div>
-
-      <div class="tasks-list" [formArrayName]="'tasks'">
-        <div 
-          *ngFor="let task of tasksArray.controls; let i = index"
-          class="task-form-item"
-          [formGroupName]="i">
-          <div class="task-inputs">
-            <mat-form-field appearance="outline" class="form-field">
-              <mat-label>Task Name *</mat-label>
-              <input matInput formControlName="name" placeholder="Task name">
-              <mat-error *ngIf="task.get('name')?.hasError('required')">
-                Task name is required
-              </mat-error>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="form-field">
-              <mat-label>Description</mat-label>
-              <input matInput formControlName="description" placeholder="Task description">
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="form-field">
-              <mat-label>XP Reward</mat-label>
-              <input matInput type="number" formControlName="xpReward" min="5" max="100">
-            </mat-form-field>
-
-            <button type="button" mat-icon-button (click)="removeTask(i)" class="remove-btn">
-              <mat-icon>delete</mat-icon>
             </button>
           </div>
         </div>

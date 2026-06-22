@@ -1,0 +1,279 @@
+@use '../../styles/theme' as *;
+
+:host {
+  display: block;
+}
+
+// ── Utility colours ──────────────────────────────────────────────────
+.text-gold   { color: $color-primary-gold; }
+.text-blue   { color: $color-accent-light-blue; }
+.text-purple { color: $color-primary-purple; }
+
+// ── Shell / header ───────────────────────────────────────────────────
+.progress-shell {
+  display: grid;
+  gap: $spacing-lg;
+  padding: $spacing-xl;
+
+  @media (max-width: $breakpoint-md) {
+    padding: $spacing-md;
+  }
+}
+
+.progress-header {
+  h1 {
+    margin: 0 0 $spacing-xs;
+    font-size: clamp(1.75rem, 2.4vw, 2.5rem);
+  }
+
+  p {
+    margin: 0;
+    color: $color-text-secondary;
+  }
+}
+
+// ── Loading / error states ────────────────────────────────────────────
+.state-message {
+  text-align: center;
+  padding: 60px 20px;
+  color: $color-text-secondary;
+  font-size: 1rem;
+
+  &.state-error {
+    color: $color-danger;
+
+    button {
+      margin-top: $spacing-md;
+      display: block;
+      margin-inline: auto;
+      background: rgba($color-accent-light-blue, 0.12);
+      border: 1px solid rgba($color-accent-light-blue, 0.3);
+      color: $color-accent-light-blue;
+      padding: 6px 18px;
+      border-radius: $border-radius-md;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background $transition-fast;
+
+      &:hover {
+        background: rgba($color-accent-light-blue, 0.22);
+      }
+    }
+  }
+}
+
+// ── Top metric tiles ──────────────────────────────────────────────────
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $spacing-md;
+
+  @media (max-width: $breakpoint-md) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.metric-card {
+  @include glass-morphism;
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  padding: $spacing-md $spacing-lg !important;
+  border-radius: $border-radius-lg !important;
+  background: $color-bg-card !important;
+  border: 1px solid rgba($color-accent-light-blue, 0.14) !important;
+  box-shadow: $shadow-elevation-1 !important;
+}
+
+.metric-icon {
+  @include flex-center;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: $border-radius-md;
+  background: rgba($color-accent-light-blue, 0.1);
+  color: $color-accent-light-blue;
+
+  mat-icon {
+    font-size: 1.5rem;
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+}
+
+.metric-label {
+  color: $color-text-secondary;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 2px;
+}
+
+.metric-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.metric-subtitle {
+  color: $color-text-tertiary;
+  font-size: 0.8rem;
+  margin-top: 2px;
+}
+
+// ── Analytics two-column grid ─────────────────────────────────────────
+.analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: $spacing-md;
+
+  @media (max-width: $breakpoint-md) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.analytics-card {
+  @include glass-morphism;
+  padding: $spacing-lg !important;
+  border-radius: $border-radius-lg !important;
+  background: $color-bg-card !important;
+  border: 1px solid rgba($color-accent-light-blue, 0.12) !important;
+  box-shadow: $shadow-elevation-1 !important;
+
+  &.wide-card {
+    // stays within the 2-col grid but gets more vertical breathing room
+    padding-bottom: $spacing-xl !important;
+  }
+}
+
+.card-title {
+  margin-bottom: $spacing-md;
+  padding-bottom: $spacing-sm;
+  border-bottom: 1px solid rgba($color-accent-light-blue, 0.10);
+
+  h2 {
+    margin: 0;
+    font-size: 1.05rem;
+    color: $color-text-primary;
+  }
+}
+
+// ── Habit completion trend list ───────────────────────────────────────
+.trend-list {
+  display: grid;
+  gap: $spacing-xs;
+}
+
+.trend-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-sm $spacing-md;
+  border-radius: $border-radius-md;
+  background: rgba($color-accent-light-blue, 0.04);
+  font-size: 0.9rem;
+}
+
+.empty-state {
+  color: $color-text-secondary;
+  font-size: 0.9rem;
+  text-align: center;
+  padding: $spacing-lg 0 $spacing-sm;
+  margin: 0;
+}
+
+// ── Consistency metrics ───────────────────────────────────────────────
+.consistency-stat {
+  display: grid;
+  gap: $spacing-sm;
+
+  > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: $spacing-sm;
+    padding: $spacing-sm $spacing-md;
+    border-radius: $border-radius-md;
+    background: rgba($color-accent-light-blue, 0.04);
+
+    strong {
+      font-size: 1.15rem;
+    }
+
+    span {
+      color: $color-text-secondary;
+      font-size: 0.88rem;
+    }
+  }
+}
+
+// ── XP progress bar ───────────────────────────────────────────────────
+.progress-stack {
+  display: grid;
+  gap: $spacing-sm;
+}
+
+.progress-entry {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: $spacing-sm;
+  font-size: 0.9rem;
+  color: $color-text-secondary;
+
+  strong {
+    font-weight: 700;
+  }
+
+  &.last {
+    margin-top: $spacing-xs;
+  }
+}
+
+// Material progress bar override
+::ng-deep .analytics-card mat-progress-bar {
+  border-radius: 999px;
+  height: 8px;
+  overflow: hidden;
+
+  .mdc-linear-progress__bar-inner {
+    border-color: $color-accent-light-blue;
+  }
+}
+
+// ── Rank grid ─────────────────────────────────────────────────────────
+.rank-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+
+  @media (max-width: $breakpoint-sm) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.rank-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-xs;
+  padding: $spacing-sm;
+  border-radius: $border-radius-md;
+  background: rgba($color-accent-light-blue, 0.05);
+  border: 1px solid rgba($color-accent-light-blue, 0.10);
+  text-align: center;
+
+  strong {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: $color-text-secondary;
+  }
+
+  span {
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+}

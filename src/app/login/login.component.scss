@@ -1,8 +1,17 @@
+@use '../../styles/theme' as *;
+
+// Fixes: the primary submit button was solid gold (#d4af37) — a primary
+// action shouldn't be gold-dominant, that's reserved for accents (XP,
+// rank, achievements). Now blue, matching every other primary action
+// across the app (habit-form, quest-form, etc). Also moved off hardcoded
+// colors onto real theme.scss tokens, and added the new login/signup
+// mode toggle this template introduces.
+
 :host {
   display: block;
   min-height: 100vh;
-  background: #0b3b6f;
-  color: #f3f4f6;
+  background: $gradient-igris;
+  color: $color-text-primary;
 }
 
 .login-container {
@@ -15,10 +24,10 @@
 
 .login-card {
   width: min(1100px, 100%);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
-  border: 2px solid #d4af37;
+  background: $color-bg-card;
+  border: 1px solid rgba(77, 217, 255, 0.25);
   border-radius: 32px;
-  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.33);
+  box-shadow: $shadow-elevation-3, $glow-blue;
   overflow: hidden;
   display: grid;
   grid-template-columns: 1.1fr 1fr;
@@ -30,11 +39,10 @@
 }
 
 .login-panel__visual {
-  background: linear-gradient(180deg, rgba(13, 46, 96, 0.95), rgba(11, 59, 111, 0.9));
+  background: linear-gradient(180deg, rgba(10, 74, 110, 0.45), rgba(3, 6, 15, 0.85));
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #f8f3e7;
 }
 
 .visual-content {
@@ -46,34 +54,68 @@
   width: 100%;
   max-width: 360px;
   border-radius: 24px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  box-shadow: $shadow-elevation-2, $glow-blue;
 }
 
 .visual-eyebrow {
   text-transform: uppercase;
   letter-spacing: 0.25em;
   font-size: 0.8rem;
-  color: #f5d384;
+  color: $color-primary-gold;
   margin-bottom: 0.5rem;
 }
 
 .login-panel__visual h1 {
+  font-family: 'Cinzel', serif;
   font-size: clamp(2.2rem, 4vw, 3rem);
   line-height: 1.05;
   margin: 0;
+  color: $color-text-primary;
 }
 
 .login-panel__visual p {
   max-width: 380px;
-  color: rgba(243, 244, 246, 0.88);
+  color: $color-text-secondary;
   line-height: 1.75;
 }
 
 .login-panel__form {
-  background: rgba(0, 0, 0, 0.06);
+  background: rgba(3, 6, 15, 0.35);
   display: flex;
   flex-direction: column;
   justify-content: center;
+}
+
+.mode-toggle {
+  display: flex;
+  gap: 6px;
+  background: rgba(77, 217, 255, 0.06);
+  border: 1px solid rgba(77, 217, 255, 0.15);
+  border-radius: 14px;
+  padding: 5px;
+  margin-bottom: 1.75rem;
+  width: fit-content;
+}
+
+.mode-btn {
+  border: none;
+  background: transparent;
+  color: $color-text-secondary;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 9px 22px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background $transition-fast, color $transition-fast;
+
+  &.active {
+    background: linear-gradient(135deg, $color-primary-blue-dim, $color-primary-blue);
+    color: $color-bg-darker;
+  }
+
+  &:not(.active):hover {
+    color: $color-text-primary;
+  }
 }
 
 .form-header {
@@ -84,18 +126,20 @@
   text-transform: uppercase;
   letter-spacing: 0.22em;
   font-size: 0.8rem;
-  color: #f5d384;
+  color: $color-primary-gold;
   margin: 0 0 0.5rem;
 }
 
 .form-header h2 {
   margin: 0;
+  font-family: 'Cinzel', serif;
   font-size: 2rem;
+  color: $color-text-primary;
 }
 
 .form-subtitle {
   margin-top: 0.8rem;
-  color: rgba(243, 244, 246, 0.78);
+  color: $color-text-secondary;
   line-height: 1.6;
 }
 
@@ -107,26 +151,26 @@ form {
 label {
   font-size: 0.95rem;
   font-weight: 600;
-  color: #f8f3e7;
+  color: $color-text-primary;
 }
 
 input {
   width: 100%;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  background: rgba(255, 255, 255, 0.08);
-  color: #f3f4f6;
+  border: 1px solid rgba(77, 217, 255, 0.2);
+  background: rgba(77, 217, 255, 0.04);
+  color: $color-text-primary;
   border-radius: 16px;
   padding: 1rem 1.1rem;
   font-size: 1rem;
-}
 
-input:focus {
-  outline: 2px solid rgba(212, 175, 55, 0.8);
-  outline-offset: 2px;
+  &:focus {
+    outline: 2px solid rgba(77, 217, 255, 0.6);
+    outline-offset: 2px;
+  }
 }
 
 .input-error {
-  color: #ffcecb;
+  color: $color-danger;
   font-size: 0.9rem;
 }
 
@@ -140,23 +184,28 @@ input:focus {
   padding: 1rem 1.25rem;
   cursor: pointer;
   font-weight: 700;
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
-}
+  transition: transform $transition-fast, box-shadow $transition-fast, opacity $transition-fast;
 
-.btn:hover {
-  transform: translateY(-1px);
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
 }
 
 .btn-primary {
-  background: #d4af37;
-  color: #102a43;
-  box-shadow: 0 16px 30px rgba(212, 175, 55, 0.25);
+  background: linear-gradient(135deg, $color-primary-blue-dim, $color-primary-blue);
+  color: $color-bg-darker;
+  box-shadow: $shadow-elevation-2, $glow-blue;
 }
 
 .btn-google {
-  background: rgba(255, 255, 255, 0.12);
-  color: #f3f4f6;
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  color: $color-text-primary;
+  border: 1px solid rgba(255, 255, 255, 0.16);
 }
 
 .google-icon {
@@ -166,7 +215,7 @@ input:focus {
   align-items: center;
   justify-content: center;
   background: #fff;
-  color: #102a43;
+  color: $color-bg-darker;
   border-radius: 0.65rem;
   font-weight: 800;
 }
@@ -184,7 +233,7 @@ input:focus {
   top: 50%;
   width: 40%;
   height: 1px;
-  background: rgba(255, 255, 255, 0.14);
+  background: rgba(77, 217, 255, 0.15);
 }
 
 .divider::before {
@@ -198,25 +247,26 @@ input:focus {
 .divider span {
   position: relative;
   background: transparent;
-  color: rgba(243, 244, 246, 0.78);
+  color: $color-text-secondary;
   padding: 0 0.85rem;
 }
 
 .login-footer {
   margin-top: 1.5rem;
-  color: rgba(243, 244, 246, 0.75);
+  color: $color-text-secondary;
 }
 
 .login-footer a {
-  color: #d4af37;
+  color: $color-primary-blue;
   text-decoration: none;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
-.login-footer a:hover {
-  text-decoration: underline;
-}
-
-@media (max-width: 900px) {
+@media (max-width: $breakpoint-md) {
   .login-card {
     grid-template-columns: 1fr;
   }

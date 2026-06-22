@@ -1,0 +1,92 @@
+<p>questform works!</p>
+<div class="quest-form-page">
+
+  <button type="button" class="back-button" (click)="cancel()">
+    <span class="material-icons">arrow_back</span>
+    Cancel
+  </button>
+
+  <h1 class="form-title">New Quest</h1>
+  <p class="form-subtitle">Quests live inside a Habit and hold the Tasks that earn you XP.</p>
+
+  <form class="quest-form" (ngSubmit)="submit()">
+
+    <label class="field">
+      <span class="field-label">Quest name</span>
+      <input
+        type="text"
+        name="name"
+        placeholder="e.g. Bulk"
+        [(ngModel)]="name"
+        [disabled]="submitting"
+        required>
+    </label>
+
+    <label class="field">
+      <span class="field-label">Category</span>
+      <input
+        type="text"
+        name="category"
+        placeholder="e.g. Strength, Nutrition, Discipline"
+        [(ngModel)]="category"
+        [disabled]="submitting"
+        required>
+    </label>
+
+    <div class="field-row">
+      <label class="field">
+        <span class="field-label">Difficulty</span>
+        <select name="difficulty" [(ngModel)]="difficulty" [disabled]="submitting">
+          <option *ngFor="let d of difficultyOptions" [value]="d">{{ d }}</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span class="field-label">Base XP</span>
+        <input
+          type="number"
+          name="xp"
+          min="0"
+          max="1000"
+          [(ngModel)]="xp"
+          [disabled]="submitting">
+      </label>
+    </div>
+
+    <label class="field">
+      <span class="field-label">Icon</span>
+      <input
+        type="text"
+        name="icon"
+        placeholder="material icon name, e.g. flag, fitness_center"
+        [(ngModel)]="icon"
+        [disabled]="submitting">
+    </label>
+
+    <label class="field">
+      <span class="field-label">Description</span>
+      <textarea
+        name="description"
+        rows="3"
+        placeholder="What is this quest about?"
+        [(ngModel)]="description"
+        [disabled]="submitting"></textarea>
+    </label>
+
+    <label class="field">
+      <span class="field-label">Notes (optional)</span>
+      <textarea
+        name="notes"
+        rows="2"
+        [(ngModel)]="notes"
+        [disabled]="submitting"></textarea>
+    </label>
+
+    <div class="form-actions">
+      <button type="button" class="btn-secondary" (click)="cancel()" [disabled]="submitting">Cancel</button>
+      <button type="submit" class="btn-primary" [disabled]="!isValid || submitting">
+        {{ submitting ? 'Creating...' : 'Create Quest' }}
+      </button>
+    </div>
+  </form>
+</div>

@@ -1,38 +1,25 @@
-<mat-card class="quest-card" [ngClass]="{ completed: quest.status === 'Completed' }">
-  <div class="card-top">
-    <div class="icon-shell" [style.boxShadow]="'0 0 24px rgba(236,212,109,0.32)'">
-      <mat-icon>{{ quest.icon }}</mat-icon>
+<div *ngIf="quest as q" class="quest-card" (click)="onCardClick()">
+  <div class="quest-header">
+    <span class="material-icons quest-icon">{{ q.icon || 'flag' }}</span>
+    <div class="quest-title-block">
+      <h4 class="quest-name">{{ q.name }}</h4>
+      <span class="quest-category">{{ q.category }}</span>
     </div>
-    <div class="primary-info">
-      <div class="quest-name">{{ quest.name }}</div>
-      <div class="metadata">
-        <span>{{ quest.category }}</span>
-        <span class="divider">•</span>
-        <span>{{ quest.difficulty }}</span>
-      </div>
-    </div>
-    <div class="status-chip" [ngClass]="quest.status.toLowerCase()">{{ quest.status }}</div>
+    <span class="badge difficulty" [ngClass]="difficultyClass">{{ q.difficulty }}</span>
   </div>
 
-  <div class="progress-row">
-    <div class="score">
-      <span class="label">XP</span>
-      <strong>{{ quest.xp }}</strong>
+  <p class="quest-description" *ngIf="q.description">{{ q.description }}</p>
+
+  <div class="quest-progress-row">
+    <div class="progress-bar">
+      <div class="progress-fill" [style.width.%]="q.completionPercent"></div>
     </div>
-    <div class="score">
-      <span class="label">Streak</span>
-      <strong>{{ quest.streak }}d</strong>
-    </div>
-    <div class="score">
-      <span class="label">Complete</span>
-      <strong>{{ quest.completionRate }}%</strong>
-    </div>
+    <span class="progress-label">{{ q.completionPercent }}%</span>
   </div>
 
-  <mat-progress-bar mode="determinate" [value]="quest.completionRate" color="accent"></mat-progress-bar>
-
-  <div class="card-actions">
-    <button mat-stroked-button color="primary" (click)="onEdit()">Edit</button>
-    <button mat-stroked-button color="warn" (click)="onDelete()">Delete</button>
+  <div class="quest-footer">
+    <span class="task-summary">{{ taskSummary }}</span>
+    <span class="xp-summary text-gold">+{{ q.currentXP }} XP</span>
+    <span class="badge status" [ngClass]="'status-' + q.status.toLowerCase()">{{ q.status }}</span>
   </div>
-</mat-card>
+</div>

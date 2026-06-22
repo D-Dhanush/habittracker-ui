@@ -1,138 +1,166 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTabsModule } from '@angular/material/tabs';
-import { MatButtonModule } from '@angular/material/button';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { HabitService } from '../../services/habit.service';
-import { Observable } from 'rxjs';
-import { HabitCompletionDto, HabitDto } from '../../models/habitdto';
+import { FormsModule } from '@angular/forms';
+import { QuestService } from '../../services/quest.service';
+import { ToastService } from '../../toast.service';
+import { QuestDto, QuestTaskDto } from '../../models/quest.model';
 
+/**
+ * Replaces the old src/app/arclord/quest-detail/quest-detail.component.ts,
+ * which despite its name and route never touched QuestService at all — it
+ * called HabitService.getHabitById() and rendered Habit data. This is the
+ * genuine Quest detail page: shows a Quest's Tasks, lets you add new tasks,
+ * and completing a task calls the cascade endpoint (Task -> Quest -> Habit
+ * -> UserProgress) rather than a plain "mark done" toggle.
+ */
 @Component({
   selector: 'app-quest-detail',
   standalone: true,
-  imports: [
-    CommonModule,
-    RouterModule,
-    MatIconModule,
-    MatTabsModule,
-    MatButtonModule,
-    MatChipsModule,
-    MatTooltipModule
-  ],
+  imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './quest-detail.component.html',
   styleUrls: ['./quest-detail.component.scss']
 })
 export class QuestDetailComponent implements OnInit {
-  habit$!: Observable<HabitDto>;
-  currentStreak = 0;
-  completionPercentage = 0;
-  completedTasks = 0;
-  totalTasks = 0;
-  
+  quest: QuestDto | null = null;
+  habitId = '';
+  questId = '';
+  loading = true;
+  error = false;
+
+  newTaskName = '';
+  newTaskXp = 10;
+  addingTask = false;
+
+  completingTaskId: string | null = null;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private habitService: HabitService
-    
+    private questService: QuestService,
+    private toast: ToastService
   ) {}
 
   ngOnInit(): void {
-    this.route.paramMap.subscribe(params => {
-      const habitId = params.get('id');
-      if (habitId) {
-        this.habit$ = this.habitService.getHabitById(habitId);
-        this.habit$.subscribe(habit => {
-          if (habit) {
-            this.calculateStats(habit);
-          }
-        });
+    this.habitId = this.route.snapshot.paramMap.get('habitId') ?? '';
+    this.questId = this.route.snapshot.paramMap.get('questId') ?? '';
+    this.loadQuest();
+  }
+
+  loadQuest(): void {
+    this.loading = true;
+    this.error = false;
+
+    this.questService.getQuestById(this.questId).subscribe({
+      next: (quest) => {
+        this.quest = quest;
+        this.loading = false;
+      },
+      error: () => {
+        this.error = true;
+        this.loading = false;
+        this.toast.show('Could not load this quest.', 'failure');
       }
     });
   }
 
-private calculateStats(habit: HabitDto): void {
-  const completions = habit.recentCompletions ?? [];
-  const tasks = habit.tasks ?? [];
+  get tasks(): QuestTaskDto[] {
+    return this.quest?.tasks ?? [];
+  }
 
-  const completed = completions.filter(c => c.completed).length;
+  get pendingTasks(): QuestTaskDto[] {
+    return this.tasks.filter(t => !t.completed);
+  }
 
-  this.completionPercentage =
-    completions.length > 0
-      ? Math.round((completed / completions.length) * 100)
-      : 0;
+  get completedTasks(): QuestTaskDto[] {
+    return this.tasks.filter(t => t.completed);
+  }
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  completeTask(task: QuestTaskDto): void {
+    if (task.completed || this.completingTaskId) return;
 
-  let streak = 0;
-  let currentDate = new Date(today);
+    this.completingTaskId = task.id;
 
-  for (let i = 0; i < 365; i++) {
-    const completion = completions.find(c => {
-      const cDate = new Date(c.date);
-      cDate.setHours(0, 0, 0, 0);
-      return cDate.getTime() === currentDate.getTime();
+    this.questService.completeTask(this.questId, task.id).subscribe({
+      next: (result) => {
+        this.completingTaskId = null;
+
+        if (!result.success) {
+          this.toast.show(result.message || 'Could not complete task.', 'failure');
+          return;
+        }
+
+        // Update the task in place rather than re-fetching the whole quest —
+        // the cascade response already carries everything that changed.
+        if (this.quest && result.task) {
+          const idx = this.quest.tasks?.findIndex(t => t.id === task.id) ?? -1;
+          if (idx >= 0 && this.quest.tasks) {
+            this.quest.tasks[idx] = result.task;
+          }
+        }
+
+        if (this.quest && result.questProgress) {
+          this.quest.currentXP = result.questProgress.currentXP;
+          this.quest.completedTasks = result.questProgress.completedTasks;
+          this.quest.completionPercent = result.questProgress.completionPercent;
+          this.quest.progress = result.questProgress.completionPercent;
+        }
+
+        const xpGained = result.task?.xpReward ?? 0;
+        this.toast.show(`+${xpGained} XP earned!`, 'success');
+
+        if (result.habitProgress) {
+          this.toast.show(`Habit streak: ${result.habitProgress.streak} days`, 'info');
+        }
+      },
+      error: () => {
+        this.completingTaskId = null;
+        this.toast.show('Could not complete task. Try again.', 'failure');
+      }
     });
-
-    if (completion?.completed) {
-      streak++;
-      currentDate.setDate(currentDate.getDate() - 1);
-    } else {
-      break;
-    }
   }
 
-  this.currentStreak = streak;
+  addTask(): void {
+    if (!this.newTaskName.trim()) return;
 
-  this.totalTasks = tasks.length;
-  this.completedTasks = tasks.filter(t => t.completed).length;
-}
+    this.addingTask = true;
 
-  onBack(): void {
-    this.router.navigate(['/quests']);
+    this.questService.addTask(this.questId, {
+      name: this.newTaskName.trim(),
+      xpReward: this.newTaskXp || 10
+    }).subscribe({
+      next: (task) => {
+        this.addingTask = false;
+        this.newTaskName = '';
+        this.newTaskXp = 10;
+
+        if (this.quest) {
+          this.quest.tasks = [...(this.quest.tasks ?? []), task];
+          this.quest.totalTasks = (this.quest.totalTasks ?? 0) + 1;
+        }
+
+        this.toast.show('Task added.', 'success');
+      },
+      error: () => {
+        this.addingTask = false;
+        this.toast.show('Could not add task.', 'failure');
+      }
+    });
   }
 
-  onEdit(habit: HabitDto): void {
-    // Navigate to edit page
-    this.router.navigate(['/add-habit', habit.id]);
+  deleteTask(task: QuestTaskDto): void {
+    this.questService.deleteTask(this.questId, task.id).subscribe({
+      next: () => {
+        if (this.quest) {
+          this.quest.tasks = this.tasks.filter(t => t.id !== task.id);
+        }
+        this.toast.show('Task removed.', 'success');
+      },
+      error: () => this.toast.show('Could not remove task.', 'failure')
+    });
   }
 
-onComplete(habit: HabitDto): void {
-  this.habitService.completeHabit(
-    habit.id,
-    {
-      xpEarned: habit.xpReward ?? 0
-    }
-  ).subscribe();
-}
-
-getCategoryLabel(habit: HabitDto): string {
-  return habit.customCategory || habit.category || 'General';
-}
-
-  getFrequencyLabel(frequency: string): string {
-    return frequency.charAt(0).toUpperCase() + frequency.slice(1);
+  goBackToHabit(): void {
+    this.router.navigate(['/habit', this.habitId]);
   }
-
-getRecentCompletions(habit: HabitDto): HabitCompletionDto[] {
-  return (habit.recentCompletions ?? [])
-    .filter(c => c.completed)
-    .sort(
-      (a, b) =>
-        new Date(b.date).getTime() -
-        new Date(a.date).getTime()
-    )
-    .slice(0, 10);
 }
-
-formatDate(date: string | Date): string {
-  return new Date(date).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  });
-}}

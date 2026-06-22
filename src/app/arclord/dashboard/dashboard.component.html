@@ -1,47 +1,59 @@
-<div class="dashboard">
-  <!-- Page Header -->
-  <section class="hero-section">
-    <div class="hero-content">
-      <h1>Welcome Back</h1>
-      <p>Master your habits and unlock your full potential</p>
+<div class="dashboard-page">
+
+  <!-- Rank / Level header -->
+  <section class="rank-header" *ngIf="!loadingProgress && rankInfo">
+    <div class="rank-icon">
+      <span class="material-icons">military_tech</span>
+    </div>
+    <div class="rank-info">
+      <span class="rank-label text-gold">{{ rankInfo.rank }}</span>
+      <span class="level-label">Level {{ rankInfo.currentLevel }}</span>
+    </div>
+    <div class="rank-progress">
+      <div class="rank-progress-bar">
+        <div class="rank-progress-fill" [style.width.%]="rankInfo.xpProgress"></div>
+      </div>
+      <span class="rank-progress-label">{{ rankInfo.xpToNextLevel }} XP to next level</span>
     </div>
   </section>
 
-  <!-- Main Stats Grid -->
+  <section class="rank-header loading" *ngIf="loadingProgress">
+    Loading rank...
+  </section>
+
+  <!-- Stat cards -->
   <section class="stats-grid" *ngIf="stats$ | async as stats">
     <app-stat-card
       label="Total Habits"
       [value]="stats.totalHabits"
-      icon="target"
-      [large]="true"
-      valueClass="text-gold">
+      icon="checklist"
+      valueClass="text-blue">
     </app-stat-card>
 
     <app-stat-card
-      label="Current XP"
-      [value]="stats.currentXp"
-      icon="lightning_bolt"
+      label="Total Quests"
+      [value]="stats.totalQuests"
+      icon="flag"
+      valueClass="text-purple">
+    </app-stat-card>
+
+    <!-- Fixed: was stats.currentXp (field never existed on the real API
+         response — backend only ever returned TotalXpEarned). Reading
+         the wrong field meant this always rendered "undefined". -->
+    <app-stat-card
+      label="Total XP"
+      [value]="stats.totalXpEarned"
+      icon="bolt"
       valueClass="text-gold">
     </app-stat-card>
 
+    <!-- Fixed: was stats.currentStreak, also never returned by the API
+         before this rebuild (backend's HabitStatsDto now actually
+         includes CurrentStreak — see ResultDtos/HabitStatsDto.cs). -->
     <app-stat-card
       label="Current Streak"
       [value]="stats.currentStreak"
       icon="local_fire_department"
-      valueClass="text-warning">
-    </app-stat-card>
-
-    <app-stat-card
-      label="Completion Rate"
-      [value]="stats.completionPercentage + '%'"
-      icon="trending_up"
-      valueClass="text-success">
-    </app-stat-card>
-
-    <app-stat-card
-      label="Active Habits"
-      [value]="stats.activeHabits"
-      icon="play_circle"
       valueClass="text-blue">
     </app-stat-card>
 
@@ -49,77 +61,63 @@
       label="Longest Streak"
       [value]="stats.longestStreak"
       icon="emoji_events"
-      valueClass="text-gold">
+      valueClass="text-purple">
+    </app-stat-card>
+
+    <!-- Fixed: was stats.completionPercentage with no backing field at
+         all. Backend's HabitStatsDto now computes and returns this. -->
+    <app-stat-card
+      label="Completion Rate"
+      [value]="stats.completionPercentage"
+      unit="%"
+      icon="task_alt"
+      valueClass="text-blue">
     </app-stat-card>
   </section>
 
-  <!-- Ranking & Progress Section -->
-  <section class="ranking-section" *ngIf="stats$ | async as stats">
-    <div class="rank-card">
-      <div class="rank-header">
-        <h3>Your Rank</h3>
-        <p class="rank-label" [ngClass]="getRankColor(stats.currentXp)">{{ getRankFromXp(stats.currentXp) }}</p>
-      </div>
-      <div class="rank-progress">
-        <div class="progress-bar">
-          <div class="progress-fill" [style.width.%]="getProgressToNextLevel(stats.currentXp)"></div>
-        </div>
-        <p class="progress-label">{{ getProgressToNextLevel(stats.currentXp) | number:'1.0-0' }}% to next level</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- Calendar Heatmap -->
-  <section class="calendar-section" *ngIf="calendarData$ | async as calendarData">
-    <app-calendar-heatmap [calendarData]="calendarData">
+  <!-- Calendar heatmap -->
+  <section class="dashboard-section">
+    <h2 class="section-title">Activity</h2>
+    <app-calendar-heatmap
+      *ngIf="calendarData$ | async as calendarData"
+      [calendarData]="calendarData">
     </app-calendar-heatmap>
   </section>
 
-  <!-- Charts and Activity -->
-  <section class="charts-section">
-    <!-- Weekly Progress -->
-    <div class="chart-card" *ngIf="weeklyData$ | async as weeklyData">
-      <div class="card-header">
-        <h3>Weekly Progress</h3>
-        <p>Completion rate trends</p>
-      </div>
-      <div class="bar-chart">
-        <div class="bar-item" *ngFor="let week of weeklyData">
-          <div class="bar-container">
-            <div class="bar">
-              <div class="bar-fill" [style.width.%]="week.completionPercentage"></div>
-            </div>
-            <span class="bar-label">{{ week.week }}</span>
-          </div>
-          <span class="bar-value">{{ week.completionPercentage }}%</span>
+  <!-- Weekly completion -->
+  <section class="dashboard-section" *ngIf="weeklyData$ | async as weeklyData">
+    <h2 class="section-title">This Month</h2>
+    <div class="weekly-bars">
+      <div class="weekly-bar-item" *ngFor="let week of weeklyData">
+        <div class="bar-track">
+          <div class="bar-fill" [style.height.%]="week.completionPercentage"></div>
         </div>
-      </div>
-    </div>
-
-    <!-- Recent Activity -->
-    <div class="activity-card" *ngIf="recentActivity$ | async as activities">
-      <div class="card-header">
-        <h3>Recent Activity</h3>
-        <p>Latest habit completions</p>
-      </div>
-      <div class="activity-list">
-        <div class="activity-item" *ngFor="let activity of activities">
-          <div class="activity-icon">
-            <mat-icon>{{ activity.icon }}</mat-icon>
-          </div>
-          <div class="activity-content">
-            <p class="activity-title">{{ activity.title }}</p>
-            <p class="activity-description">{{ activity.habitName }}</p>
-            <p class="activity-time">{{ activity.timestamp | date:'short' }}</p>
-          </div>
-          <div class="activity-xp">
-            <span class="xp-badge">+{{ activity.xpEarned }} XP</span>
-          </div>
-        </div>
-        <div class="no-activity" *ngIf="activities.length === 0">
-          <p>No recent activity yet. Start completing habits!</p>
-        </div>
+        <span class="bar-label">{{ week.week }}</span>
+        <span class="bar-value">{{ week.completionPercentage }}%</span>
       </div>
     </div>
   </section>
+
+  <!-- Recent activity -->
+  <section class="dashboard-section" *ngIf="recentActivity$ | async as activity">
+    <h2 class="section-title">Recent Activity</h2>
+    <div class="activity-list" *ngIf="activity.length > 0">
+      <div class="activity-row" *ngFor="let item of activity">
+        <span class="material-icons activity-icon">{{ item.icon }}</span>
+        <div class="activity-text">
+          <span class="activity-title">{{ item.title }}</span>
+          <span class="activity-description">{{ item.description }}</span>
+        </div>
+        <span class="activity-xp text-gold" *ngIf="item.xpEarned">+{{ item.xpEarned }} XP</span>
+      </div>
+    </div>
+    <p class="empty-state" *ngIf="activity.length === 0">
+      No activity yet. Complete a task to see it here.
+    </p>
+  </section>
+
+  <div class="quick-actions">
+    <a routerLink="/habits" class="action-link">View all habits</a>
+    <a routerLink="/add-habit" class="action-link primary">+ New Habit</a>
+  </div>
 </div>

@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
-import { Observable, map } from 'rxjs';
-import { HabitDto } from '../models/habitdto';
-import { 
-  DailyCompletionData, 
-  WeeklyCompletionData, 
+import { Observable, map, switchMap, forkJoin, of } from 'rxjs';
+import {
+  DailyCompletionData,
+  WeeklyCompletionData,
   CategoryCompletionData,
   RecentActivity,
   CalendarData,
@@ -11,6 +10,8 @@ import {
   CalendarDay
 } from '../models/analytics.model';
 import { HabitService } from './habit.service';
+import { HabitCompletionOutputDto, HabitDto } from '../models/habitdto';
+
 
 @Injectable({
   providedIn: 'root'
@@ -18,8 +19,22 @@ import { HabitService } from './habit.service';
 export class AnalyticsService {
   constructor(private habitService: HabitService) {}
 
-  getWeeklyCompletionData(): Observable<WeeklyCompletionData[]> {
+  /**
+   * Fetches full detail (including recentCompletions/milestones) for
+   * every habit. List-view calls (getHabits) don't carry that data,
+   * so every aggregation method below routes through this first.
+   */
+  private getHabitsWithDetail(): Observable<HabitDto[]> {
     return this.habitService.getHabits().pipe(
+      switchMap(habits => {
+        if (habits.length === 0) return of([]);
+        return forkJoin(habits.map(h => this.habitService.getHabitById(h.id)));
+      })
+    );
+  }
+
+  getWeeklyCompletionData(): Observable<WeeklyCompletionData[]> {
+    return this.getHabitsWithDetail().pipe(
       map(habits => {
         const weeklyData: WeeklyCompletionData[] = [];
         const today = new Date();
@@ -34,8 +49,8 @@ export class AnalyticsService {
           let total = 0;
 
           habits.forEach(habit => {
-            (habit.recentCompletions ?? []).forEach(completion => {
-              const compDate = new Date(completion.date);
+            (habit.recentCompletions ?? []).forEach((completion: HabitCompletionOutputDto) => {
+              const compDate = new Date(completion.completionDate);
               if (compDate >= weekStart && compDate <= weekEnd) {
                 total++;
                 if (completion.completed) {
@@ -59,7 +74,7 @@ export class AnalyticsService {
   }
 
   getDailyCompletionData(days: number = 30): Observable<DailyCompletionData[]> {
-    return this.habitService.getHabits().pipe(
+    return this.getHabitsWithDetail().pipe(
       map(habits => {
         const dailyData: DailyCompletionData[] = [];
         const today = new Date();
@@ -74,7 +89,7 @@ export class AnalyticsService {
 
           habits.forEach(habit => {
             const completion = (habit.recentCompletions ?? []).find(c => {
-              const cDate = new Date(c.date);
+              const cDate = new Date(c.completionDate);
               cDate.setHours(0, 0, 0, 0);
               return cDate.getTime() === date.getTime();
             });
@@ -102,7 +117,7 @@ export class AnalyticsService {
   }
 
   getCategoryCompletionData(): Observable<CategoryCompletionData[]> {
-    return this.habitService.getHabits().pipe(
+    return this.getHabitsWithDetail().pipe(
       map(habits => {
         const categoryMap = new Map<string, { completed: number; total: number }>();
 
@@ -132,7 +147,7 @@ export class AnalyticsService {
   }
 
   getHabitCompletionSummary(): Observable<{ completed: number; pending: number }> {
-    return this.habitService.getHabits().pipe(
+    return this.getHabitsWithDetail().pipe(
       map(habits => {
         let completed = 0;
         let pending = 0;
@@ -142,7 +157,7 @@ export class AnalyticsService {
 
         habits.forEach(habit => {
           const todayCompletion = (habit.recentCompletions ?? []).find(c => {
-            const cDate = new Date(c.date);
+            const cDate = new Date(c.completionDate);
             cDate.setHours(0, 0, 0, 0);
             return cDate.getTime() === today.getTime();
           });
@@ -164,15 +179,14 @@ export class AnalyticsService {
   }
 
   getRecentActivity(): Observable<RecentActivity[]> {
-    return this.habitService.getHabits().pipe(
+    return this.getHabitsWithDetail().pipe(
       map(habits => {
         const activities: RecentActivity[] = [];
 
         habits.forEach(habit => {
-          // Add completions
           const recentCompletions = (habit.recentCompletions ?? [])
             .filter(c => c.completed)
-            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+            .sort((a, b) => new Date(b.completionDate).getTime() - new Date(a.completionDate).getTime())
             .slice(0, 3);
 
           recentCompletions.forEach((completion, index) => {
@@ -184,12 +198,11 @@ export class AnalyticsService {
               title: 'Habit Completed',
               description: `${habit.name} completed`,
               xpEarned: completion.xpEarned,
-              timestamp: new Date(completion.date),
+              timestamp: new Date(completion.completionDate),
               icon: 'check_circle'
             });
           });
 
-          // Add milestones
           (habit.milestones ?? []).forEach(milestone => {
             if (milestone.achieved && milestone.achievedDate) {
               activities.push({
@@ -198,9 +211,9 @@ export class AnalyticsService {
                 habitName: habit.name,
                 type: 'milestone',
                 title: 'Milestone Achieved',
-                description: `${milestone.name} - ${milestone.description}`,
+                description: `${milestone.name}${milestone.description ? ' - ' + milestone.description : ''}`,
                 xpEarned: milestone.xpReward,
-                 timestamp: new Date(milestone.achievedDate),
+                timestamp: new Date(milestone.achievedDate),
                 icon: 'emoji_events'
               });
             }
@@ -215,7 +228,7 @@ export class AnalyticsService {
   }
 
   getCalendarData(month: number, year: number): Observable<CalendarData> {
-    return this.habitService.getHabits().pipe(
+    return this.getHabitsWithDetail().pipe(
       map(habits => {
         const firstDay = new Date(year, month, 1);
         const lastDay = new Date(year, month + 1, 0);
@@ -227,7 +240,7 @@ export class AnalyticsService {
 
         while (currentDate <= lastDay) {
           const days: CalendarDay[] = [];
-          
+
           for (let i = 0; i < 7; i++) {
             const dayDate = new Date(currentDate);
             const dayDateNormalized = new Date(dayDate);
@@ -238,13 +251,12 @@ export class AnalyticsService {
             let inStreak = false;
 
             if (isInMonth) {
-              // Check if this day has completions
               let dayCompletions = 0;
               let dayTotal = 0;
 
               habits.forEach(habit => {
                 const completion = (habit.recentCompletions ?? []).find(c => {
-                  const cDate = new Date(c.date);
+                  const cDate = new Date(c.completionDate);
                   cDate.setHours(0, 0, 0, 0);
                   return cDate.getTime() === dayDateNormalized.getTime();
                 });
@@ -290,7 +302,7 @@ export class AnalyticsService {
     return this.habitService.getHabitById(habitId).pipe(
       map(habit => {
         if (!habit) return { achieved: 0, total: 0 };
-        
+
         const achieved = (habit.milestones ?? []).filter(m => m.achieved).length;
         return {
           achieved,

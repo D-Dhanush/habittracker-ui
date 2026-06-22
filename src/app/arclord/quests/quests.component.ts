@@ -5,8 +5,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { HabitService } from '../../services/habit.service';
-import { HabitCardComponent } from '../components/habit-card/habit-card.component';
 import { HabitDto } from '../../models/habitdto';
+import { HabitCardComponent } from '../../habit/habit-card/habit-card.component';
 
 @Component({
   selector: 'app-quests',

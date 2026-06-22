@@ -3,27 +3,53 @@
     <div class="login-card">
       <div class="login-panel login-panel__visual">
         <div class="visual-content">
-          <img src="assets/images/logo.jpeg" alt="ArcLord logo" class="visual-logo">
+          <img src="assets/images/logo.jpeg" alt="ARCLORD logo" class="visual-logo">
           <div>
             <p class="visual-eyebrow">Habit tracker</p>
             <h1>Build better routines.</h1>
-            <p>Sign in to access your habits, progress, and settings in one place.</p>
+            <p>Track Habits, Quests, and Tasks. Earn XP. Rise in Rank.</p>
           </div>
         </div>
       </div>
 
       <div class="login-panel login-panel__form">
-        <div class="form-header">
-          <p class="eyebrow">Welcome back</p>
-          <h2>Sign in to continue</h2>
-          <p class="form-subtitle">Use your username/email and password, or continue with Google.</p>
+        <div class="mode-toggle">
+          <button
+            type="button"
+            class="mode-btn"
+            [class.active]="mode === 'login'"
+            (click)="switchMode('login')">
+            Log In
+          </button>
+          <button
+            type="button"
+            class="mode-btn"
+            [class.active]="mode === 'signup'"
+            (click)="switchMode('signup')">
+            Sign Up
+          </button>
         </div>
 
-        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
-          <label for="emailOrUsername">Username or email</label>
-          <input id="emailOrUsername" type="text" formControlName="emailOrUsername" placeholder="Enter username or email">
+        <div class="form-header">
+          <p class="eyebrow">{{ isSignup ? 'Get started' : 'Welcome back' }}</p>
+          <h2>{{ isSignup ? 'Create your account' : 'Sign in to continue' }}</h2>
+          <p class="form-subtitle">
+            {{ isSignup
+              ? 'Set up your account with an email and password, or continue with Google.'
+              : 'Use your email and password, or continue with Google.' }}
+          </p>
+        </div>
+
+        <form [formGroup]="authForm" (ngSubmit)="onSubmit()" novalidate>
+          <ng-container *ngIf="isSignup">
+            <label for="displayName">Name</label>
+            <input id="displayName" type="text" formControlName="displayName" placeholder="Your name">
+          </ng-container>
+
+          <label for="emailOrUsername">Email</label>
+          <input id="emailOrUsername" type="text" formControlName="emailOrUsername" placeholder="Enter your email">
           <div class="input-error" *ngIf="emailOrUsername?.invalid && emailOrUsername?.touched">
-            Please enter your username or email.
+            Please enter your email.
           </div>
 
           <label for="password">Password</label>
@@ -33,7 +59,9 @@
             <span *ngIf="password?.errors?.['minlength']">Password must be at least 6 characters.</span>
           </div>
 
-          <button type="submit" class="btn btn-primary">Sign in</button>
+          <button type="submit" class="btn btn-primary" [disabled]="submitting">
+            {{ submitting ? 'Please wait...' : (isSignup ? 'Create account' : 'Sign in') }}
+          </button>
         </form>
 
         <div class="divider"><span>or continue with</span></div>
@@ -44,7 +72,12 @@
         </button>
 
         <div class="login-footer">
-          <p>Need help? <a routerLink="/unauthorized">Unauthorized access info</a></p>
+          <p *ngIf="!isSignup">
+            Don't have an account? <a (click)="switchMode('signup')">Sign up</a>
+          </p>
+          <p *ngIf="isSignup">
+            Already have an account? <a (click)="switchMode('login')">Log in</a>
+          </p>
         </div>
       </div>
     </div>

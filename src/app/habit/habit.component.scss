@@ -32,6 +32,13 @@
     margin: 0;
     color: $color-text-secondary;
   }
+
+  .form-hint {
+    margin-top: $spacing-sm;
+    font-size: 0.85rem;
+    color: $color-text-tertiary;
+    font-style: italic;
+  }
 }
 
 // Form
@@ -168,56 +175,6 @@
     mat-icon {
       color: $color-bg-darker;
     }
-  }
-}
-
-// Tasks List
-.tasks-list {
-  display: grid;
-  gap: $spacing-lg;
-}
-
-.task-form-item {
-  @include glass-morphism;
-  border-radius: $border-radius-md;
-  padding: $spacing-md;
-  border: 1px solid rgba(212, 175, 55, 0.2);
-  transition: all $transition-standard;
-
-  &:hover {
-    border-color: rgba(212, 175, 55, 0.4);
-    background: rgba(13, 27, 42, 0.8);
-  }
-}
-
-.task-inputs {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr auto;
-  gap: $spacing-md;
-  align-items: flex-end;
-
-  @media (max-width: $breakpoint-lg) {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  @media (max-width: $breakpoint-sm) {
-    grid-template-columns: 1fr;
-  }
-
-  mat-form-field {
-    width: 100%;
-  }
-}
-
-.remove-btn {
-  color: $color-danger;
-  width: auto;
-  height: auto;
-  padding: $spacing-md;
-  transition: all $transition-standard;
-
-  &:hover {
-    background: rgba(244, 67, 54, 0.1);
   }
 }
 

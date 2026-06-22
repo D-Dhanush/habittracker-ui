@@ -16,7 +16,7 @@ html {
 .mat-mdc-button,
 .mat-mdc-raised-button {
   &.mat-primary {
-    background-color: linear-gradient(135deg, #4dd9ff, #0a4a6e) !important;
+    background: linear-gradient(135deg, #4dd9ff, #0a4a6e) !important;
     color: white !important;
     box-shadow: $glow-blue;
   }
