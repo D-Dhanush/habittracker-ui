@@ -5,39 +5,35 @@ import { Observable } from 'rxjs';
 import { HabitService, HabitStatsDto } from '../../services/habit.service';
 import { AnalyticsService } from '../../services/analytics.service';
 import { UserService } from '../../services/user.service';
-import { CalendarHeatmapComponent } from '../components/calendar-heatmap/calendar-heatmap.component';
 import { StatCardComponent } from '../components/stat-card/stat-card.component';
 import {
-  CalendarData,
   WeeklyCompletionData,
   RecentActivity,
   RankingInfo,
   calculateRankProgress
 } from '../../models/analytics.model';
 import { UserProgressDto } from '../../models/quest.model';
+import { CalendarComponent } from '../components/calendar/calendar.component';
 
 /**
- * Rewritten from scratch. Removed entirely (confirmed dead code — never
- * referenced by the template): summaryCards, completedHabits,
- * pendingHabits, progressSeries, milestones, and a hardcoded
- * recentActivity array with fake flavor text ("Defeated the Ivory
- * Wraith"). Also removed getRankFromXp/getRankColor/getProgressToNextLevel,
- * which hardcoded XP thresholds that disagreed with the mock data's
- * "Elder Warden" rank AND with the backend's own rank function — there
- * were three different rank systems across this one file. Now there is
- * exactly one: Progress.UFN_RankFromXp server-side, mirrored by
- * calculateRankProgress() in analytics.model.ts.
+ * Fixed: previously built a calendarData$ Observable and tried to pass it
+ * into <app-calendar [calendarData]="..."> — but CalendarComponent (the
+ * new full month-navigation calendar, see Priority 4) is fully
+ * self-contained: it calls AnalyticsService.getCalendarData() itself in
+ * its own ngOnInit and has no @Input() for calendarData at all. Passing
+ * a binding for an Input that doesn't exist is a strictTemplates compile
+ * error. Removed the now-redundant calendarData$/CalendarData import;
+ * the dashboard now just drops <app-calendar> in with no bindings.
  */
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, CalendarHeatmapComponent, StatCardComponent],
+  imports: [CommonModule, RouterModule, CalendarComponent, StatCardComponent],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent implements OnInit {
   stats$!: Observable<HabitStatsDto>;
-  calendarData$!: Observable<CalendarData>;
   weeklyData$!: Observable<WeeklyCompletionData[]>;
   recentActivity$!: Observable<RecentActivity[]>;
 
@@ -53,9 +49,6 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.stats$ = this.habitService.getStats();
-
-    const now = new Date();
-    this.calendarData$ = this.analyticsService.getCalendarData(now.getMonth(), now.getFullYear());
     this.weeklyData$ = this.analyticsService.getWeeklyCompletionData();
     this.recentActivity$ = this.analyticsService.getRecentActivity();
 
@@ -67,12 +60,6 @@ export class DashboardComponent implements OnInit {
     this.userService.getCurrentUserProgress().subscribe({
       next: (progress) => {
         this.userProgress = progress;
-        // The backend already computes currentLevel/rank from TotalXP via
-        // UFN_LevelFromXp/UFN_RankFromXp — but xpToNextLevel/xpProgress
-        // (needed for the progress ring) aren't part of UserProgressDto,
-        // so we derive the full display object client-side from the same
-        // total. Keeping ONE set of thresholds (see analytics.model.ts)
-        // means this can never disagree with what the backend already sent.
         this.rankInfo = calculateRankProgress(progress.totalXP);
         this.loadingProgress = false;
       },

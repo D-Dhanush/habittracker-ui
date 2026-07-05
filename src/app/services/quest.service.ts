@@ -70,8 +70,32 @@ export class QuestService {
    * so the UI never needs a follow-up GET to refresh stats.
    */
   completeTask(questId: string, taskId: string): Observable<QuestTaskCompletionResultDto> {
+    // FIXED: was posting an empty {} body. CompleteTaskRequestDto.Completed
+    // is a non-nullable bool on the backend, defaulting to false when the
+    // field is absent — so every "complete" click was silently deserialized
+    // as completed=false and ran the UNCOMPLETE branch instead. This is why
+    // the popup/UI looked right optimistically but the API state (and XP)
+    // never matched, and why a fresh never-completed task would crash with
+    // an ObjectDisposedException (hit the "Already incomplete" no-op path
+    // unexpectedly). Must explicitly send completed: true.
     return this.http.post<QuestTaskCompletionResultDto>(
-      `${this.apiUrl}/${questId}/tasks/${taskId}/complete`, {}
+      `${this.apiUrl}/${questId}/tasks/${taskId}/complete`,
+      { completed: true }
+    );
+  }
+
+
+  /**
+   * Reverses a task completion and debits the XP cascade.
+   * Uses POST /complete with { completed: false } so the server-side
+   * CompleteTaskAsync revert path runs USP_UncompleteQuestTask — a real,
+   * symmetric reversal of USP_CompleteQuestTask (reverses QuestProgress/
+   * HabitProgress/UserProgress XP, not just the task row's Completed flag).
+   */
+  uncompleteTask(questId: string, taskId: string): Observable<QuestTaskCompletionResultDto> {
+    return this.http.post<QuestTaskCompletionResultDto>(
+      `${this.apiUrl}/${questId}/tasks/${taskId}/complete`,
+      { completed: false }
     );
   }
 

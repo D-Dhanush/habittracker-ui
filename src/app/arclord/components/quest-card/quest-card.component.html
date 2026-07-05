@@ -1,14 +1,18 @@
 <div *ngIf="quest as q" class="quest-card" (click)="onCardClick()">
+
   <div class="quest-header">
     <span class="material-icons quest-icon">{{ q.icon || 'flag' }}</span>
     <div class="quest-title-block">
-      <h4 class="quest-name">{{ q.name }}</h4>
+      <h4 class="quest-name truncate-hint" [attr.data-tooltip]="q.name">{{ q.name }}</h4>
       <span class="quest-category">{{ q.category }}</span>
     </div>
     <span class="badge difficulty" [ngClass]="difficultyClass">{{ q.difficulty }}</span>
+    <button type="button" class="quest-delete-btn" (click)="promptDelete($event)" title="Delete quest">
+      <span class="material-icons">delete_outline</span>
+    </button>
   </div>
 
-  <p class="quest-description" *ngIf="q.description">{{ q.description }}</p>
+  <p class="quest-description truncate-hint" *ngIf="q.description" [attr.data-tooltip]="q.description">{{ q.description }}</p>
 
   <div class="quest-progress-row">
     <div class="progress-bar">
@@ -21,5 +25,14 @@
     <span class="task-summary">{{ taskSummary }}</span>
     <span class="xp-summary text-gold">+{{ q.currentXP }} XP</span>
     <span class="badge status" [ngClass]="'status-' + q.status.toLowerCase()">{{ q.status }}</span>
+  </div>
+
+  <!-- Full-overlay delete confirmation (same pattern as habit card) -->
+  <div class="delete-confirm" *ngIf="confirmDelete" (click)="$event.stopPropagation()">
+    <p>Delete "{{ q.name }}"? All tasks will be removed.</p>
+    <div class="confirm-actions">
+      <button type="button" class="confirm-yes" (click)="confirmDeleteQuest($event)">Delete</button>
+      <button type="button" class="confirm-no"  (click)="cancelDelete($event)">Cancel</button>
+    </div>
   </div>
 </div>

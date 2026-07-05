@@ -1,37 +1,67 @@
 <mat-sidenav-container class="sidenav-container">
-  
+
   <mat-sidenav mode="side" opened class="sidenav">
-    
-    <!-- Top nav items -->
+
+    <!-- Top nav -->
     <mat-nav-list>
-      <a mat-list-item routerLink="/" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}" matTooltip="Dashboard" matTooltipPosition="right">
+      <a mat-list-item routerLink="/" routerLinkActive="active-link"
+         [routerLinkActiveOptions]="{exact:true}" matTooltip="Dashboard" matTooltipPosition="right">
         <mat-icon>dashboard</mat-icon>
       </a>
-      <a mat-list-item routerLink="/habits" routerLinkActive="active-link" matTooltip="Habits" matTooltipPosition="right">
+      <a mat-list-item routerLink="/habits" routerLinkActive="active-link"
+         matTooltip="Habits" matTooltipPosition="right">
         <mat-icon>auto_stories</mat-icon>
       </a>
-      <a mat-list-item routerLink="/progress" routerLinkActive="active-link" matTooltip="Progress" matTooltipPosition="right">
+      <a mat-list-item routerLink="/tasks" routerLinkActive="active-link"
+         matTooltip="Tasks" matTooltipPosition="right">
+        <mat-icon>task_alt</mat-icon>
+      </a>
+      <a mat-list-item routerLink="/calendar" routerLinkActive="active-link"
+         matTooltip="Calendar" matTooltipPosition="right">
+        <mat-icon>calendar_month</mat-icon>
+      </a>
+      <a mat-list-item routerLink="/progress" routerLinkActive="active-link"
+         matTooltip="Progress" matTooltipPosition="right">
         <mat-icon>trending_up</mat-icon>
       </a>
     </mat-nav-list>
 
-    <!-- Bottom nav items -->
+    <!-- Bottom nav -->
     <mat-nav-list class="bottom-nav">
-      <a mat-list-item routerLink="/help" routerLinkActive="active-link" matTooltip="Help" matTooltipPosition="right">
-        <mat-icon>help</mat-icon>
+      <!-- Admin-only shortcut directly to the user grid -->
+      <a *ngIf="isAdmin" mat-list-item routerLink="/admin/users" routerLinkActive="active-link"
+         matTooltip="User Management" matTooltipPosition="right">
+        <mat-icon>manage_accounts</mat-icon>
       </a>
-      
-      <a mat-list-item routerLink="/settings" routerLinkActive="active-link" matTooltip="Settings" matTooltipPosition="right">
+
+      <!-- FIXED: was *ngIf="isAdmin" — Settings (and the theme picker
+           living inside it, visible to every role) was unreachable for
+           anyone but Admin/Super Admin/Platform Owner/Moderator.
+           SettingsComponent already internally gates its own admin-only
+           panels (Users/Roles/Permissions/Analytics/Security) via its
+           own isAdmin()/isOwner() computed signals — this link itself
+           should be open to everyone, same icon for every role. -->
+      <a mat-list-item routerLink="/settings" routerLinkActive="active-link"
+         matTooltip="Settings" matTooltipPosition="right">
         <mat-icon>settings</mat-icon>
       </a>
-      <a mat-list-item routerLink="/profile" routerLinkActive="active-link" matTooltip="Profile" matTooltipPosition="right">
-        <mat-icon>person</mat-icon>
+
+      <a mat-list-item routerLink="/help" routerLinkActive="active-link"
+         matTooltip="Help" matTooltipPosition="right">
+        <mat-icon>help_outline</mat-icon>
+      </a>
+      <a mat-list-item routerLink="/profile" routerLinkActive="active-link"
+         matTooltip="Profile" matTooltipPosition="right">
+        <mat-icon>person_outline</mat-icon>
+      </a>
+      <a mat-list-item (click)="logout()" matTooltip="Sign Out" matTooltipPosition="right"
+         style="cursor:pointer">
+        <mat-icon>logout</mat-icon>
       </a>
     </mat-nav-list>
 
   </mat-sidenav>
 
-  <!-- Main content -->
   <mat-sidenav-content>
     <div class="main-view">
       <div class="page-shell">

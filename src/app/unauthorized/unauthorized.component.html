@@ -1,14 +1,27 @@
-<div class="unauthorized-page">
-  <div class="unauthorized-card">
-    <div class="warning-icon">!</div>
-    <div class="unauthorized-content">
-      <h1>Unauthorized access</h1>
-      <p>We can't display this page because your account does not have permission to access it.</p>
-      <p>If you believe this is a mistake, return to the login page or navigate back to your dashboard.</p>
-      <div class="button-row">
-        <a routerLink="/login" class="btn primary">Go to login</a>
-        <a routerLink="/" class="btn secondary">Back to home</a>
+<div class="unauth-page">
+  <div class="unauth-card">
+
+    <div class="shield-icon">
+      <span class="material-icons">gpp_bad</span>
+    </div>
+
+    <div class="unauth-body">
+      <p class="unauth-eyebrow">Access Denied</p>
+      <h1 class="unauth-title">Unauthorized</h1>
+      <p class="unauth-desc">
+        Your account does not have permission to access this area.
+        <span *ngIf="userRole"> You are signed in as <strong class="role-badge">{{ userRole }}</strong>.</span>
+      </p>
+
+      <div class="action-row">
+        <a routerLink="/" class="btn btn-primary">
+          <span class="material-icons">home</span> Back to Dashboard
+        </a>
+        <button type="button" class="btn btn-ghost" (click)="logout()">
+          <span class="material-icons">logout</span> Sign Out
+        </button>
       </div>
     </div>
+
   </div>
 </div>

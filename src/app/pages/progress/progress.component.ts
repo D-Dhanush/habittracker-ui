@@ -5,10 +5,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { forkJoin } from 'rxjs';
-import { HabitService, HabitStatsDto } from '../services/habit.service';
-import { AnalyticsService } from '../services/analytics.service';
-import { UserService } from '../services/user.service';
-import { calculateRankProgress, RankingInfo, WeeklyCompletionData } from '../models/analytics.model';
+import { HabitService, HabitStatsDto } from '../../services/habit.service';
+import { calculateRankProgress, RankingInfo, WeeklyCompletionData } from '../../models/analytics.model';
+import { AnalyticsService } from '../../services/analytics.service';
+import { UserService } from '../../services/user.service';
 
 interface HabitTrend {
   habit: string;

@@ -1,98 +1,254 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, NgZone, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
-import { UserService } from '../services/user.service';
+import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router, RouterModule, ActivatedRoute } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { AuthService, AuthResponse } from '../services/auth.service';
 import { ToastService } from '../toast.service';
+import { environment } from '../../environments/environment';
+
+declare global {
+  interface Window {
+    google?: {
+      accounts: {
+        id: {
+          initialize:        (cfg: object) => void;
+          renderButton:      (el: HTMLElement, cfg: object) => void;
+          prompt:            () => void;
+          disableAutoSelect: () => void;
+        };
+      };
+    };
+  }
+}
+
+// Module-level flag — survives component destroy/recreate so GSI is only
+// initialized once per page load, preventing the "called multiple times" warning.
+let gsiInitialized = false;
 
 type AuthMode = 'login' | 'signup';
+type View     = 'login' | 'signup' | 'forgot';
 
-/**
- * Phase 1 has no real authentication (no password hashing, no JWT/session
- * handling, no Google OAuth client registered anywhere in Program.cs —
- * see the project handoff doc, this was an explicit scope decision).
- *
- * This component is intentionally honest about that: the form looks and
- * behaves like a real login/signup screen, but submitting either one
- * resolves to the single seeded default user via UserService — there is
- * no password check. The Google button does NOT fake a successful Google
- * login; it shows a toast saying Google sign-in isn't wired up yet. When
- * real auth lands in Phase 2, only the submit handlers below need to
- * change — the template/UI shape stays the same.
- */
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule],
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss']
+  styleUrls:  ['./login.component.scss']
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit, AfterViewInit {
+
+  view: View     = 'login';
   mode: AuthMode = 'login';
-  submitting = false;
+
+  submitting  = false;
+  loading     = false;
+  googleReady = false;
+  error       = '';
+  sessionMsg  = '';
 
   authForm = this.fb.group({
-    displayName: [''],
-    emailOrUsername: ['', Validators.required],
-    password: ['', [Validators.required, Validators.minLength(6)]]
+    displayName:     [''],
+    emailOrUsername: ['', [Validators.required, Validators.email]],
+    password:        ['', [Validators.required, Validators.minLength(6)]]
   });
 
+  resetEmail      = '';
+  resetSubmitting = false;
+  resetSent       = false;
+  resetError      = '';
+
   constructor(
-    private fb: FormBuilder,
+    private fb:     FormBuilder,
     private router: Router,
-    private userService: UserService,
-    private toast: ToastService
+    private route:  ActivatedRoute,
+    private auth:   AuthService,
+    private toast:  ToastService,
+    private zone:   NgZone,
+    private http:   HttpClient
   ) {}
 
-  get displayName() {
-    return this.authForm.get('displayName');
+  ngOnInit(): void {
+    if (this.auth.isLoggedIn()) { this.router.navigate(['/']); return; }
+
+    const reason = this.route.snapshot.queryParamMap.get('reason');
+    if (reason === 'session_expired') {
+      this.sessionMsg = 'Your session has expired. Please sign in again.';
+    }
+
+    this.loadGoogleScript();
   }
 
-  get emailOrUsername() {
-    return this.authForm.get('emailOrUsername');
+  // AfterViewInit ensures the #google-signin-btn div is in the DOM
+  // before renderButton() tries to find it.
+  ngAfterViewInit(): void {
+    if (gsiInitialized && window.google?.accounts?.id) {
+      // SDK already initialized — just re-render the button into the (now visible) div
+      this.renderGoogleButton();
+    }
   }
 
-  get password() {
-    return this.authForm.get('password');
+  // ── View / mode switching ─────────────────────────────────────────────────
+
+  switchView(v: View): void {
+    this.view       = v;
+    this.error      = '';
+    this.resetSent  = false;
+    this.resetError = '';
+    if (v === 'login' || v === 'signup') {
+      this.mode = v;
+      this.authForm.reset();
+    }
   }
 
-  get isSignup(): boolean {
-    return this.mode === 'signup';
-  }
-
-  switchMode(mode: AuthMode): void {
-    this.mode = mode;
+  switchMode(m: AuthMode): void {
+    this.mode  = m;
+    this.view  = m;
+    this.error = '';
     this.authForm.reset();
   }
 
+  // ── Email / Password ──────────────────────────────────────────────────────
+
   onSubmit(): void {
-    if (this.authForm.invalid) {
-      this.authForm.markAllAsTouched();
-      return;
-    }
-
+    if (this.authForm.invalid) { this.authForm.markAllAsTouched(); return; }
     this.submitting = true;
+    this.error = '';
 
-    // No real credential check yet (see class comment above) — this
-    // resolves to the seeded default user regardless of what was typed,
-    // so the rest of the app has someone to act as "the current user".
-    this.userService.getCurrentUser().subscribe({
-      next: (user) => {
+    const email    = this.authForm.value.emailOrUsername ?? '';
+    const password = this.authForm.value.password ?? '';
+    const name     = this.authForm.value.displayName ?? '';
+
+    const call = this.isSignup
+      ? this.auth.registerWithEmail(email, password, name)
+      : this.auth.loginWithEmail(email, password);
+
+    call.subscribe({
+      next: (res: AuthResponse) => {
         this.submitting = false;
         this.toast.show(
-          this.isSignup ? `Welcome, ${user.displayName || user.email}!` : `Welcome back, ${user.displayName || user.email}!`,
+          this.isSignup
+            ? `Account created! Welcome, ${res.user.name}! 🎮`
+            : `Welcome back, ${res.user.name}! 🎮`,
           'success'
         );
         this.router.navigate(['/']);
       },
-      error: () => {
+      error: (err: any) => {
         this.submitting = false;
-        this.toast.show('Could not sign in. Is the API running?', 'failure');
+        this.error = err?.error?.message
+          ?? (this.isSignup ? 'Registration failed.' : 'Invalid email or password.');
       }
     });
   }
 
-  onGoogleSignIn(): void {
-    this.toast.show('Google sign-in is coming in a future update.', 'info');
+  // ── Forgot password ───────────────────────────────────────────────────────
+
+  sendForgotPassword(): void {
+    if (!this.resetEmail.trim()) return;
+    this.resetSubmitting = true;
+    this.resetError = '';
+
+    this.http.post(`${environment.apiBaseUrl}/api/auth/forgot-password`, {
+      email: this.resetEmail.trim()
+    }).subscribe({
+      next: () => {
+        this.resetSubmitting = false;
+        this.resetSent = true;
+      },
+      error: () => {
+        // Always show success — prevents email enumeration
+        this.resetSubmitting = false;
+        this.resetSent = true;
+      }
+    });
   }
+
+  // ── Google Sign-In ────────────────────────────────────────────────────────
+
+  private loadGoogleScript(): void {
+    if (document.getElementById('gsi-script')) {
+      // Script already in DOM — wait for SDK then init (won't double-init)
+      this.waitForGSI();
+      return;
+    }
+    const s  = document.createElement('script');
+    s.id     = 'gsi-script';
+    s.src    = 'https://accounts.google.com/gsi/client';
+    s.async  = true;
+    s.defer  = true;
+    s.onload = () => this.waitForGSI();
+    document.head.appendChild(s);
+  }
+
+  private waitForGSI(attempts = 0): void {
+    if (window.google?.accounts?.id) { this.initGoogleSignIn(); return; }
+    if (attempts < 30) setTimeout(() => this.waitForGSI(attempts + 1), 200);
+  }
+
+  private initGoogleSignIn(): void {
+    const clientId = environment.googleClientId;
+    if (!clientId || clientId.includes('YOUR_GOOGLE')) {
+      this.googleReady = false;
+      return;
+    }
+
+    // Guard: only call initialize() once per page load
+    if (!gsiInitialized) {
+      window.google!.accounts.id.initialize({
+        client_id:             clientId,
+        callback:              (response: { credential: string }) => {
+          this.zone.run(() => this.handleGoogleCredential(response.credential));
+        },
+        auto_select:           false,
+        cancel_on_tap_outside: true
+      });
+      gsiInitialized = true;
+    }
+
+    this.googleReady = true;
+    this.renderGoogleButton();
+  }
+
+  private renderGoogleButton(): void {
+    // Use setTimeout to ensure Angular has rendered the div into the DOM
+    setTimeout(() => {
+      const btnEl = document.getElementById('google-signin-btn');
+      if (btnEl && window.google?.accounts?.id) {
+        window.google!.accounts.id.renderButton(btnEl, {
+          type:  'standard',
+          theme: 'filled_black',
+          size:  'large',
+          shape: 'rectangular',
+          width: btnEl.offsetWidth || 340,
+          text:  'continue_with'
+        });
+      }
+    }, 0);
+  }
+
+  private handleGoogleCredential(idToken: string): void {
+    this.loading = true;
+    this.error   = '';
+
+    this.auth.loginWithGoogle(idToken).subscribe({
+      next: (res: AuthResponse) => {
+        this.loading = false;
+        this.toast.show(`Welcome, ${res.user.name}! 🎮`, 'success');
+        this.router.navigate(['/']);
+      },
+      error: (err: any) => {
+        this.loading = false;
+        this.error = err?.error?.message ?? 'Google sign-in failed. Please try again.';
+        window.google?.accounts.id.disableAutoSelect();
+      }
+    });
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+
+  get isSignup(): boolean { return this.mode === 'signup'; }
+  get emailOrUsername()   { return this.authForm.get('emailOrUsername'); }
+  get password()          { return this.authForm.get('password'); }
+  get displayName()       { return this.authForm.get('displayName'); }
 }

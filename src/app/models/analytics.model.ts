@@ -51,9 +51,21 @@ export interface RecentActivity {
 
 export interface CalendarDay {
   date: Date;
+  /** All tracked habits for this day were completed */
   completed: boolean;
+  /** Some habits completed, some missed — yellow */
+  partial: boolean;
+  /** completed === true AND the day is part of a streak — gold */
+  perfectDay: boolean;
   inStreak: boolean;
+  /** Day is outside the displayed month */
   empty: boolean;
+  /** Total XP earned across all habits on this day */
+  xpEarned: number;
+  /** Names of habits completed this day — shown in day-detail panel */
+  completedHabits: string[];
+  /** Names of habits that had a completion record but completed===false */
+  missedHabits: string[];
 }
 
 export interface CalendarWeek {
@@ -64,15 +76,13 @@ export interface CalendarData {
   weeks: CalendarWeek[];
   month: string;
   year: number;
+  /** Total XP earned during this calendar month */
+  totalXpThisMonth: number;
+  /** Longest consecutive completed-day run in this month */
+  bestStreakThisMonth: number;
 }
 
 // ─── Rank / Level math ─────────────────────────────────────────
-// MUST stay in sync with the backend's Progress.UFN_LevelFromXp and
-// Progress.UFN_RankFromXp (see 002_stored_procedures_full.sql). The
-// original dashboard had two independent, disagreeing rank systems
-// (one hardcoded in the component, one implied by mock data) — this
-// is the single source of truth for the frontend side of that logic.
-
 const XP_PER_LEVEL = 500;
 
 const RANK_THRESHOLDS: { max: number; rank: string }[] = [
@@ -89,15 +99,16 @@ export function rankFromTotalXp(totalXp: number): string {
   return found ? found.rank : 'Legend';
 }
 
+export function nextRankFromTotalXp(totalXp: number): string | null {
+  const idx = RANK_THRESHOLDS.findIndex(t => totalXp < t.max);
+  if (idx === -1 || idx === RANK_THRESHOLDS.length - 1) return null;
+  return RANK_THRESHOLDS[idx + 1].rank;
+}
+
 export function levelFromTotalXp(totalXp: number): number {
   return Math.floor(totalXp / XP_PER_LEVEL) + 1;
 }
 
-/**
- * Builds a full RankingInfo display object from the raw totals the
- * backend's UserProgressDto provides (currentXp here = TotalXP from
- * the API — see note in user.service.ts on the CurrentXP/TotalXP split).
- */
 export function calculateRankProgress(totalXp: number): RankingInfo {
   const currentLevel = levelFromTotalXp(totalXp);
   const rank = rankFromTotalXp(totalXp);
@@ -105,11 +116,5 @@ export function calculateRankProgress(totalXp: number): RankingInfo {
   const xpToNextLevel = XP_PER_LEVEL - xpIntoLevel;
   const xpProgress = Math.round((xpIntoLevel / XP_PER_LEVEL) * 100);
 
-  return {
-    currentLevel,
-    currentXp: totalXp,
-    xpToNextLevel,
-    xpProgress,
-    rank
-  };
+  return { currentLevel, currentXp: totalXp, xpToNextLevel, xpProgress, rank };
 }

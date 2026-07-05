@@ -37,9 +37,6 @@
       valueClass="text-purple">
     </app-stat-card>
 
-    <!-- Fixed: was stats.currentXp (field never existed on the real API
-         response — backend only ever returned TotalXpEarned). Reading
-         the wrong field meant this always rendered "undefined". -->
     <app-stat-card
       label="Total XP"
       [value]="stats.totalXpEarned"
@@ -47,9 +44,6 @@
       valueClass="text-gold">
     </app-stat-card>
 
-    <!-- Fixed: was stats.currentStreak, also never returned by the API
-         before this rebuild (backend's HabitStatsDto now actually
-         includes CurrentStreak — see ResultDtos/HabitStatsDto.cs). -->
     <app-stat-card
       label="Current Streak"
       [value]="stats.currentStreak"
@@ -64,8 +58,6 @@
       valueClass="text-purple">
     </app-stat-card>
 
-    <!-- Fixed: was stats.completionPercentage with no backing field at
-         all. Backend's HabitStatsDto now computes and returns this. -->
     <app-stat-card
       label="Completion Rate"
       [value]="stats.completionPercentage"
@@ -75,13 +67,11 @@
     </app-stat-card>
   </section>
 
-  <!-- Calendar heatmap -->
+  <!-- Calendar: fully self-contained, fetches its own data and handles
+       its own month navigation — no bindings needed here. -->
   <section class="dashboard-section">
     <h2 class="section-title">Activity</h2>
-    <app-calendar-heatmap
-      *ngIf="calendarData$ | async as calendarData"
-      [calendarData]="calendarData">
-    </app-calendar-heatmap>
+    <app-calendar></app-calendar>
   </section>
 
   <!-- Weekly completion -->

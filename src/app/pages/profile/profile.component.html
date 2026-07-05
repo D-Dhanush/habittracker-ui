@@ -1,0 +1,96 @@
+<div class="profile-page">
+
+  <!-- Header -->
+  <div class="profile-header">
+    <div class="avatar-wrap">
+      <div class="avatar" *ngIf="!user?.picture">{{ initials }}</div>
+      <img class="avatar" *ngIf="user?.picture" [src]="user!.picture" [alt]="user!.name">
+      <span class="avatar-ring"></span>
+    </div>
+    <div class="header-info">
+      <h1 class="profile-name">{{ user?.name || 'Loading...' }}</h1>
+      <p class="profile-email">{{ user?.email }}</p>
+      <span class="profile-role">{{ user?.role || 'Player' }}</span>
+    </div>
+  </div>
+
+  <!-- Stats row -->
+  <div class="stats-row" *ngIf="stats">
+    <div class="stat-card">
+      <span class="stat-value text-gold">{{ stats.totalXpEarned }}</span>
+      <span class="stat-label">Total XP</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value text-orange">{{ stats.currentStreak }}🔥</span>
+      <span class="stat-label">Streak</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value text-blue">{{ stats.totalHabits }}</span>
+      <span class="stat-label">Habits</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value text-purple">{{ stats.completedToday }}</span>
+      <span class="stat-label">Done Today</span>
+    </div>
+  </div>
+
+  <div class="profile-body">
+
+    <!-- Change Password -->
+    <div class="section-card">
+      <h2 class="section-title">
+        <span class="material-icons">lock</span>
+        Change Password
+      </h2>
+      <p class="section-desc">
+        {{ isGoogleAccount
+          ? 'Your account uses Google Sign-In — no password is set.'
+          : 'Set a new password for your account.' }}
+      </p>
+
+      <form [formGroup]="pwForm" (ngSubmit)="changePassword()" *ngIf="!isGoogleAccount">
+        <div class="field-group">
+          <label>Current Password</label>
+          <input type="password" formControlName="currentPassword" placeholder="Enter current password">
+          <p class="field-error" *ngIf="pwForm.get('currentPassword')?.invalid && pwForm.get('currentPassword')?.touched">
+            Required.
+          </p>
+        </div>
+        <div class="field-group">
+          <label>New Password</label>
+          <input type="password" formControlName="newPassword" placeholder="At least 6 characters">
+          <p class="field-error" *ngIf="pwForm.get('newPassword')?.errors?.['minlength'] && pwForm.get('newPassword')?.touched">
+            Must be at least 6 characters.
+          </p>
+        </div>
+        <div class="field-group">
+          <label>Confirm New Password</label>
+          <input type="password" formControlName="confirmPassword" placeholder="Repeat new password">
+          <p class="field-error" *ngIf="pwForm.errors?.['mismatch'] && pwForm.get('confirmPassword')?.touched">
+            Passwords do not match.
+          </p>
+        </div>
+        <p class="form-error" *ngIf="pwError">{{ pwError }}</p>
+        <button type="submit" class="btn btn-primary" [disabled]="pwForm.invalid || pwSubmitting">
+          <span class="spinner-sm" *ngIf="pwSubmitting"></span>
+          {{ pwSubmitting ? 'Saving...' : 'Update Password' }}
+        </button>
+      </form>
+
+      <!-- Forgot / Reset link -->
+      <div class="forgot-wrap" *ngIf="!isGoogleAccount">
+        <button type="button" class="link-btn" (click)="sendForgotPassword()" [disabled]="resetSent">
+          {{ resetSent ? '✓ Reset email sent — check your inbox' : 'Forgot password? Send reset email' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Sign out -->
+    <div class="section-card danger-card">
+      <h2 class="section-title"><span class="material-icons">logout</span> Sign Out</h2>
+      <p class="section-desc">You will be returned to the login screen.</p>
+      <button type="button" class="btn btn-danger" (click)="logout()">Sign Out</button>
+    </div>
+
+  </div>
+</div>

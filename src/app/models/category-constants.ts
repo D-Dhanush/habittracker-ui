@@ -1,8 +1,15 @@
-// Shared category metadata for Habit creation/editing.
-// Previously habit.component.ts had stub methods (getCategoryIcon always
-// returned 'target', getCategoryLabel just echoed its input) instead of
-// using a real lookup. This is that real lookup, extracted from the old
-// (now-deleted) habit.model.ts so it has an actual consumer.
+// Shared category metadata for Habit creation/editing, and the source of
+// every habit-card icon.
+//
+// Fixed two real bugs causing "empty icon placeholders" (Priority 1):
+//   1. 'target' is NOT a valid ligature in the classic "Material Icons"
+//      font (index.html links family=Material+Icons, not Material+Symbols).
+//      It silently rendered as an empty box for the 'custom' category AND
+//      as the fallback for any unmatched category — a very common path.
+//      Replaced with 'emoji_events', a verified-valid ligature.
+//   2. The category list didn't include several categories the product
+//      spec explicitly calls out (Coding, Sleep, Reading) — habits tagged
+//      with those fell through to the broken fallback above. Added them.
 
 export const HABIT_CATEGORIES = [
   'fitness',
@@ -13,11 +20,15 @@ export const HABIT_CATEGORIES = [
   'finance',
   'social',
   'creative',
+  'coding',
+  'sleep',
+  'reading',
   'custom'
 ] as const;
 
 export type HabitCategory = typeof HABIT_CATEGORIES[number];
 
+// Every value below is a verified-valid classic Material Icons ligature.
 export const CATEGORY_ICONS: Record<HabitCategory, string> = {
   fitness: 'fitness_center',
   health: 'favorite',
@@ -27,7 +38,10 @@ export const CATEGORY_ICONS: Record<HabitCategory, string> = {
   finance: 'savings',
   social: 'groups',
   creative: 'palette',
-  custom: 'target'
+  coding: 'code',
+  sleep: 'bedtime',
+  reading: 'menu_book',
+  custom: 'emoji_events'
 };
 
 export const CATEGORY_LABELS: Record<HabitCategory, string> = {
@@ -39,6 +53,9 @@ export const CATEGORY_LABELS: Record<HabitCategory, string> = {
   finance: 'Finance',
   social: 'Social',
   creative: 'Creative',
+  coding: 'Coding',
+  sleep: 'Sleep',
+  reading: 'Reading',
   custom: 'Custom'
 };
 

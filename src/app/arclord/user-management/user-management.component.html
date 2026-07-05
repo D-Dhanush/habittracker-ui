@@ -1,0 +1,73 @@
+<div class="admin-shell">
+  <header class="admin-header">
+    <h1>User Management</h1>
+    <p>Manage roles and account status for every registered user.</p>
+  </header>
+
+  <div class="state-message" *ngIf="loading">Loading users...</div>
+
+  <div class="state-message state-error" *ngIf="error && !loading">
+    Could not load users.
+    <button type="button" (click)="loadAll()">Retry</button>
+  </div>
+
+  <div class="admin-table-wrap" *ngIf="!loading && !error">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Status</th>
+          <th>Last Login</th>
+          <th>Joined</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let user of users" [class.is-self]="isSelf(user.id)" [class.is-inactive]="!user.isActive">
+          <td class="user-cell">
+            <span class="avatar" *ngIf="!user.pictureUrl">{{ (user.displayName || user.email).charAt(0).toUpperCase() }}</span>
+            <img class="avatar" *ngIf="user.pictureUrl" [src]="user.pictureUrl" [alt]="user.displayName || user.email">
+            <div>
+              <div class="user-name">{{ user.displayName || 'Unnamed' }}</div>
+              <span class="you-badge" *ngIf="isSelf(user.id)">You</span>
+            </div>
+          </td>
+          <td>{{ user.email }}</td>
+          <td>
+            <select
+              class="role-select"
+              [ngModel]="user.roleId"
+              (ngModelChange)="onRoleChange(user, $event)"
+              [disabled]="isSelf(user.id) || isPending(user.id)">
+              <option *ngFor="let role of roles" [value]="role.roleId">{{ role.name }}</option>
+            </select>
+          </td>
+          <td>
+            <span class="status-badge" [class.active]="user.isActive" [class.inactive]="!user.isActive">
+              {{ user.isActive ? 'Active' : 'Disabled' }}
+            </span>
+          </td>
+          <td class="muted">{{ user.lastLoginDt ? (user.lastLoginDt | date:'short') : 'Never' }}</td>
+          <td class="muted">{{ user.createdDt | date:'mediumDate' }}</td>
+          <td>
+            <button
+              type="button"
+              class="toggle-active-btn"
+              [class.deactivate]="user.isActive"
+              [class.activate]="!user.isActive"
+              [disabled]="isSelf(user.id) || isPending(user.id)"
+              (click)="onToggleActive(user)">
+              {{ user.isActive ? 'Disable' : 'Enable' }}
+            </button>
+          </td>
+        </tr>
+
+        <tr *ngIf="users.length === 0">
+          <td colspan="7" class="empty-state">No users found.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

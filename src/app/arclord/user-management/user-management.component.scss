@@ -1,0 +1,216 @@
+@use '../../../styles/theme' as *;
+
+:host {
+  display: block;
+}
+
+.admin-shell {
+  padding: 24px;
+  display: grid;
+  gap: $spacing-lg;
+}
+
+.admin-header h1 {
+  margin: 0;
+  font-family: 'Cinzel', serif;
+  font-size: clamp(1.8rem, 2.4vw, 2.6rem);
+  color: $color-text-primary;
+}
+
+.admin-header p {
+  color: $color-text-secondary;
+  margin-top: 0.5rem;
+}
+
+.state-message {
+  text-align: center;
+  padding: 60px 20px;
+  color: $color-text-secondary;
+
+  &.state-error {
+    color: $color-danger;
+
+    button {
+      margin-top: 12px;
+      display: block;
+      margin-inline: auto;
+      background: rgba(77, 217, 255, 0.12);
+      border: 1px solid rgba(77, 217, 255, 0.3);
+      color: $color-primary-blue;
+      padding: 6px 16px;
+      border-radius: $border-radius-md;
+      cursor: pointer;
+    }
+  }
+}
+
+.admin-table-wrap {
+  overflow-x: auto;
+  border-radius: $border-radius-xl;
+  background: $color-bg-card;
+  border: 1px solid rgba(77, 217, 255, 0.18);
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 760px;
+
+  th, td {
+    padding: 0.95rem 1.1rem;
+    text-align: left;
+    font-size: 0.92rem;
+  }
+
+  th {
+    color: $color-text-secondary;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.75rem;
+    border-bottom: 1px solid rgba(77, 217, 255, 0.15);
+  }
+
+  tbody tr {
+    border-bottom: 1px solid rgba(77, 217, 255, 0.08);
+    transition: background $transition-fast;
+
+    &:hover {
+      background: rgba(77, 217, 255, 0.04);
+    }
+
+    &.is-self {
+      background: rgba(212, 175, 55, 0.05);
+    }
+
+    &.is-inactive {
+      opacity: 0.55;
+    }
+  }
+}
+
+.muted {
+  color: $color-text-secondary;
+}
+
+.user-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(145deg, $color-primary-blue-dim, $color-primary-blue);
+  color: $color-bg-darker;
+  font-weight: 800;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+
+.user-name {
+  color: $color-text-primary;
+  font-weight: 600;
+}
+
+.you-badge {
+  display: inline-block;
+  margin-top: 2px;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: $color-primary-gold;
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  border-radius: 999px;
+  padding: 1px 8px;
+}
+
+.role-select {
+  background: rgba(77, 217, 255, 0.06);
+  border: 1px solid rgba(77, 217, 255, 0.2);
+  border-radius: $border-radius-md;
+  color: $color-text-primary;
+  padding: 0.45rem 0.7rem;
+  font-size: 0.88rem;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &:focus {
+    outline: 2px solid rgba(77, 217, 255, 0.5);
+    outline-offset: 1px;
+  }
+
+  option {
+    background: $color-bg-darker;
+    color: $color-text-primary;
+  }
+}
+
+.status-badge {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+
+  &.active {
+    background: rgba(61, 220, 132, 0.12);
+    color: #3ddc84;
+  }
+
+  &.inactive {
+    background: rgba(255, 92, 106, 0.12);
+    color: #ff5c6a;
+  }
+}
+
+.toggle-active-btn {
+  border: none;
+  border-radius: $border-radius-md;
+  padding: 0.5rem 1rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity $transition-fast, transform $transition-fast;
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+
+  &.deactivate {
+    background: rgba(255, 92, 106, 0.14);
+    color: #ff5c6a;
+    border: 1px solid rgba(255, 92, 106, 0.3);
+  }
+
+  &.activate {
+    background: rgba(61, 220, 132, 0.14);
+    color: #3ddc84;
+    border: 1px solid rgba(61, 220, 132, 0.3);
+  }
+}
+
+.empty-state {
+  text-align: center;
+  color: $color-text-secondary;
+  padding: 2rem 0;
+}
+
+@media (max-width: $breakpoint-sm) {
+  .admin-shell {
+    padding: 14px;
+  }
+}

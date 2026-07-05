@@ -1,6 +1,7 @@
 @use '@angular/material' as mat;
 @use 'styles/theme' as *;
 @use 'styles/globals';
+@use 'styles/theme-palettes';
 
 html {
   @include mat.theme((
@@ -39,17 +40,29 @@ html {
 
 html, body { height: 100%; }
 
+// FIXED: body's background/color were hardcoded directly, completely
+// independent of theme-palettes.scss's --color-bg/--color-text-primary
+// custom properties — so toggling body.theme-* never visibly changed
+// anything, even after theme-palettes.scss is imported (see above),
+// because the page's own background always won regardless of theme
+// class. Now driven by the same tokens every theme defines, with the
+// exact original gradient preserved as the default (theme-blue-black)
+// look so nothing changes for users who haven't picked a new theme.
 body {
   margin: 0;
   font-family: 'Poppins', sans-serif;
   background:
-    radial-gradient(ellipse 80% 40% at 50% 0%, rgba(10, 40, 90, 0.65) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 30% at 80% 100%, rgba(0, 60, 100, 0.25) 0%, transparent 55%),
-    linear-gradient(180deg, #03060f 0%, #060c18 40%, #08101e 100%);
+    radial-gradient(ellipse 80% 40% at 50% 0%, color-mix(in srgb, var(--color-primary) 28%, transparent) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 30% at 80% 100%, color-mix(in srgb, var(--color-primary-dim, var(--color-primary)) 18%, transparent) 0%, transparent 55%),
+    linear-gradient(180deg, var(--color-bg-darker) 0%, var(--color-bg) 40%, var(--color-bg-darker) 100%);
   background-attachment: fixed;
-  color: var(--text-bright);
+  color: var(--color-text-primary, var(--text-bright));
+  transition: background 320ms ease, color 320ms ease;
 }
 
+// Legacy class kept for compatibility with anything still toggling it
+// directly, but theme.service.ts now uses body.theme-* exclusively —
+// new code should prefer the theme picker in Settings over this.
 body.light-theme {
   background: linear-gradient(180deg, #f4f9ff 0%, #dfeeff 45%, #c7d9f5 100%);
   color: #10203a;
@@ -59,11 +72,11 @@ app-root {
   display: block;
   min-height: 100%;
   background: transparent;
-  color: var(--text-bright);
+  color: var(--color-text-primary, var(--text-bright));
 }
 
 * { box-sizing: border-box; }
 
 button, input, select, textarea { font: inherit; }
 
-::selection { background: rgba(77, 217, 255, 0.22); }
+::selection { background: color-mix(in srgb, var(--color-primary) 22%, transparent); }

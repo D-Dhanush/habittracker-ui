@@ -1,0 +1,165 @@
+<!--
+  Arc AI — draggable floating assistant.
+  The .arc-drag-root wrapper is positioned via transform in the TS layer.
+  It starts at (0,0) top-left; the TS sets the correct position on init.
+-->
+<div
+  class="arc-drag-root"
+  [class.arc-is-dragging]="isDragging">
+
+  <!-- ── Floating Arc FAB ──────────────────────────────────────────────────── -->
+  <button
+    #fabRef
+    type="button"
+    class="arc-fab"
+    [class.is-open]="isOpen()"
+    [class.is-thinking]="ai.processing()"
+    [attr.data-state]="arcState()"
+    (pointerdown)="onPointerDown($event)"
+    (pointermove)="onPointerMove($event)"
+    (pointerup)="onPointerUp($event)"
+    (pointercancel)="onPointerCancel($event)"
+    (click)="toggle()"
+    aria-label="Open Arc AI assistant"
+    [attr.aria-expanded]="isOpen()"
+    aria-haspopup="dialog">
+
+    <!-- Spinning ring -->
+    <div class="arc-ring arc-ring--outer" aria-hidden="true"></div>
+    <div class="arc-ring arc-ring--inner" aria-hidden="true"></div>
+
+    <!-- Ember particles -->
+    <div class="arc-embers" aria-hidden="true">
+      <span class="arc-ember" *ngFor="let e of embers"></span>
+    </div>
+
+    <!-- Mascot portrait -->
+    <div class="arc-portrait">
+      <img src="assets/images/arc-mascot.png" alt="" class="arc-portrait-img" draggable="false" />
+    </div>
+
+    <!-- Thinking dots -->
+    <div class="arc-thinking" *ngIf="ai.processing()" aria-hidden="true">
+      <span></span><span></span><span></span>
+    </div>
+
+    <!-- Notification dot -->
+    <div class="arc-notif" *ngIf="!isOpen() && messages().length > 1" aria-hidden="true"></div>
+
+    <!-- Drag handle hint (tooltip on long-press / hover) -->
+    <div class="arc-drag-hint" aria-hidden="true">
+      <span class="material-icons">drag_indicator</span>
+    </div>
+  </button>
+
+  <!-- ── Shelf panel — positioned relative to FAB via inline styles ────────── -->
+  <div
+    class="ai-shelf"
+    [class.is-open]="isOpen()"
+    [class.opens-below]="!shelfOpenAbove"
+    [style.right.px]="shelfRight || null"
+    [style.left.px]="shelfLeft   || null"
+    [style.bottom.px]="shelfOpenAbove ? shelfBottom : null"
+    [style.top.px]="!shelfOpenAbove  ? shelfTop    : null"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Arc AI Assistant">
+
+    <!-- Header -->
+    <div class="shelf-header">
+      <div class="shelf-avatar" aria-hidden="true">
+        <img src="assets/images/arc-mascot.png" alt="" class="shelf-avatar-img" />
+      </div>
+      <div class="shelf-header-info">
+        <span class="shelf-name">Arc</span>
+        <span class="shelf-sub">ArcLord AI Assistant</span>
+      </div>
+      <div class="shelf-header-actions">
+        <button type="button" class="shelf-icon-btn" title="Clear chat" (click)="clearChat()">
+          <span class="material-icons">refresh</span>
+        </button>
+        <button type="button" class="shelf-icon-btn" title="Close" (click)="close()">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Messages -->
+    <div class="shelf-messages" #messagesContainer>
+
+      <!-- Suggested commands -->
+      <div class="suggestions-wrap" *ngIf="showSuggestions && messages().length <= 1">
+        <p class="suggestions-label">SUGGESTED COMMANDS</p>
+        <div class="suggestions-grid">
+          <button
+            *ngFor="let s of suggestions"
+            type="button"
+            class="suggestion-chip"
+            (click)="useSuggestion(s)">
+            {{ s }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Bubbles -->
+      <ng-container *ngFor="let msg of messages()">
+
+        <div class="msg-row msg-row--user" *ngIf="msg.role === 'user'">
+          <div class="bubble bubble--user">{{ msg.content }}</div>
+        </div>
+
+        <div class="msg-row msg-row--ai" *ngIf="msg.role === 'assistant'">
+          <div class="ai-avatar-sm" aria-hidden="true">
+            <img src="assets/images/arc-mascot.png" alt="" class="ai-avatar-sm-img" />
+          </div>
+          <div class="bubble-ai-col">
+            <div class="bubble bubble--ai">
+              <div class="typing-dots" *ngIf="msg.isTyping" aria-label="Arc is typing">
+                <span></span><span></span><span></span>
+              </div>
+              <ng-container *ngIf="!msg.isTyping">
+                <p *ngFor="let para of paragraphs(msg.content)" class="bubble-para">{{ para }}</p>
+              </ng-container>
+            </div>
+            <div class="action-pills" *ngIf="msg.actions?.length">
+              <div class="action-pill" *ngFor="let a of msg.actions">
+                <span class="material-icons">{{ actionIcon(a.type) }}</span>
+                {{ a.label }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </ng-container>
+    </div>
+
+    <!-- Input -->
+    <div class="shelf-input-area">
+      <div class="shelf-input-wrap">
+        <textarea
+          #inputEl
+          class="shelf-input"
+          rows="1"
+          placeholder="Command Arc..."
+          [(ngModel)]="inputText"
+          (keydown)="onKeydown($event)"
+          [disabled]="ai.processing()"
+          aria-label="Message Arc AI">
+        </textarea>
+        <button
+          type="button"
+          class="send-btn"
+          [disabled]="!inputText.trim() || ai.processing()"
+          (click)="send()"
+          aria-label="Send message">
+          <span class="material-icons">{{ ai.processing() ? 'hourglass_empty' : 'send' }}</span>
+        </button>
+      </div>
+      <p class="shelf-hint">💡 Type naturally — Arc understands. Press Enter to send.</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- Backdrop (touch / mobile) -->
+<div class="shelf-backdrop" *ngIf="isOpen()" (click)="close()" aria-hidden="true"></div>

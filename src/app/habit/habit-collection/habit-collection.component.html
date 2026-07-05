@@ -15,6 +15,7 @@
       *ngFor="let habit of pagedHabits"
       [habit]="habit"
       (habitClick)="onHabitClick($event)"
+      (editClicked)="onHabitEdit($event)"
       (deleteConfirmed)="onHabitDeleteConfirmed($event)">
     </app-habit-card>
   </div>

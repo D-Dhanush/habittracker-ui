@@ -79,11 +79,24 @@ export class HabitComponent implements OnInit {
     { name: 'Orange', value: '#ff9800' }
   ];
 
+  // All values are verified valid Material Icons (classic font) ligatures.
+  // Includes every category default + popular extras so the picker is useful.
   readonly materialIcons = [
-    'fitness_center', 'favorite', 'spa', 'school', 'attach_money',
-    'schedule', 'psychology', 'nights_stay', 'book', 'run_circle',
-    'health_and_safety', 'self_improvement', 'trending_up', 'star',
-    'flash_on', 'bolt'
+    // Category defaults (must match CATEGORY_ICONS in category-constants.ts)
+    'fitness_center', 'favorite', 'task_alt', 'school', 'self_improvement',
+    'savings', 'groups', 'palette', 'code', 'bedtime', 'menu_book', 'emoji_events',
+    // Fitness / health extras
+    'directions_run', 'sports_gymnastics', 'sports_martial_arts', 'local_hospital',
+    'health_and_safety', 'monitor_heart', 'water_drop',
+    // Productivity / focus
+    'bolt', 'flash_on', 'trending_up', 'bar_chart', 'checklist', 'check_circle',
+    'timer', 'alarm', 'schedule',
+    // Learning / creativity
+    'psychology', 'science', 'brush', 'music_note', 'language', 'calculate',
+    // Lifestyle
+    'spa', 'nightlight', 'wb_sunny', 'restaurant', 'local_cafe', 'people',
+    // Rewards / progress
+    'star', 'military_tech', 'workspace_premium', 'grade', 'diamond'
   ];
 
   constructor(
@@ -109,8 +122,8 @@ export class HabitComponent implements OnInit {
 
   private initializeForm(): void {
     this.habitForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(3)]],
-      subtitle: [''],
+      name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(40)]],
+      subtitle: ['', [Validators.maxLength(60)]],
       description: [''],
       category: ['fitness', Validators.required],
       customCategory: [''],
@@ -121,7 +134,7 @@ export class HabitComponent implements OnInit {
       xpReward: [50, [Validators.required, Validators.min(10), Validators.max(500)]],
       primaryColor: ['#4dd9ff', Validators.required],
       secondaryColor: ['#1a8fb5', Validators.required],
-      icon: ['target', Validators.required],
+      icon: ['emoji_events', Validators.required],
       targetOccurrencesPerPeriod: [1, [Validators.min(1)]],
       notes: ['']
     });
@@ -152,7 +165,7 @@ export class HabitComponent implements OnInit {
       xpReward: habit.xpReward,
       primaryColor: habit.primaryColor || '#4dd9ff',
       secondaryColor: habit.secondaryColor || '#1a8fb5',
-      icon: habit.icon || 'target',
+      icon: habit.icon || 'emoji_events',
       targetOccurrencesPerPeriod: habit.targetOccurrencesPerPeriod ?? 1,
       notes: habit.notes || ''
     });

@@ -1,0 +1,121 @@
+// ─────────────────────────────────────────────────────────────────────────
+// THEME PALETTES — runtime-switchable via CSS custom properties.
+//
+// IMPORTANT: this is a NEW, separate layer from theme.scss's existing
+// $color-* SCSS variables. SCSS variables are resolved at COMPILE time —
+// they cannot change after the app is built, so they can't power a
+// runtime theme switcher. These are real CSS custom properties (--token),
+// resolved at RUNTIME in the browser, switched by toggling a class on
+// <body> (.theme-blue-black, .theme-gold-black, etc).
+//
+// SCOPE NOTE (confirmed with user): only components that reference
+// var(--color-primary) etc. will reskin when the theme changes. Many
+// existing components still use the old hardcoded hex values or the old
+// $color-* SCSS variables directly — those will NOT reskin until
+// individually migrated to these custom properties. This file lays the
+// foundation; migrating existing components is follow-up work, not
+// included here.
+//
+// Palette sources: user-provided Solo Leveling reference art.
+//   Igris (cyan-blue armor glow on navy/black)      -> blue-black
+//   Red/black armor with crimson-magenta glow        -> red-black
+//   Pure gold/amber armor glow on black              -> gold-black
+//   Shadow Monarch violet flame on near-black         -> purple-black
+//   (no literal white-dominant reference image was provided — built as
+//    a light-background inversion of the blue palette instead, the
+//    closest reasonable interpretation of "white-blue")
+// ─────────────────────────────────────────────────────────────────────────
+
+:root,
+body.theme-blue-black {
+  // Default theme — matches the app's existing blue-black-gold palette.
+  --color-primary: #4dd9ff;
+  --color-primary-dim: #1a8fb5;
+  --color-primary-deep: #0a4a6e;
+  --color-secondary: #a87ce0;
+  --color-secondary-light: #c9a8f0;
+  --color-accent: #c9a227;
+  --color-accent-light: #ddb830;
+  --color-bg: #060c18;
+  --color-bg-darker: #03060f;
+  --color-bg-card: rgba(5, 12, 28, 0.78);
+  --color-text-primary: #ddf0ff;
+  --color-text-secondary: #6a9bbf;
+  --glow-primary: 0 0 12px rgba(77, 217, 255, 0.45), 0 0 24px rgba(77, 217, 255, 0.22);
+  --gradient-primary: linear-gradient(135deg, #1a8fb5, #4dd9ff);
+}
+
+body.theme-white-blue {
+  // Light-background inversion of the blue palette (no direct reference
+  // image showed a literal white theme — see scope note above).
+  --color-primary: #1a8fb5;
+  --color-primary-dim: #4dd9ff;
+  --color-primary-deep: #0a4a6e;
+  --color-secondary: #7a52b0;
+  --color-secondary-light: #a87ce0;
+  --color-accent: #b8860b;
+  --color-accent-light: #d4af37;
+  --color-bg: #f4f9fc;
+  --color-bg-darker: #e4eef5;
+  --color-bg-card: rgba(255, 255, 255, 0.85);
+  --color-text-primary: #0a2a3a;
+  --color-text-secondary: #3d6680;
+  --glow-primary: 0 0 12px rgba(26, 143, 181, 0.35), 0 0 24px rgba(26, 143, 181, 0.15);
+  --gradient-primary: linear-gradient(135deg, #1a8fb5, #4dd9ff);
+}
+
+body.theme-gold-black {
+  // Pure gold/amber armor glow — gold becomes the dominant color here
+  // (deliberately, by request) rather than staying an accent-only color
+  // like in the default theme.
+  --color-primary: #e8c349;
+  --color-primary-dim: #c9a227;
+  --color-primary-deep: #8a6a14;
+  --color-secondary: #a87ce0;
+  --color-secondary-light: #c9a8f0;
+  --color-accent: #fff3c4;
+  --color-accent-light: #ffe9a8;
+  --color-bg: #14110a;
+  --color-bg-darker: #0a0805;
+  --color-bg-card: rgba(28, 22, 8, 0.82);
+  --color-text-primary: #fff3d6;
+  --color-text-secondary: #b89a5c;
+  --glow-primary: 0 0 14px rgba(232, 195, 73, 0.55), 0 0 30px rgba(232, 195, 73, 0.28);
+  --gradient-primary: linear-gradient(135deg, #c9a227, #e8c349);
+}
+
+body.theme-red-black {
+  // Crimson/black armor with a magenta-pink accent ribbon, per reference art.
+  --color-primary: #ff3b4e;
+  --color-primary-dim: #c4202f;
+  --color-primary-deep: #7a0e18;
+  --color-secondary: #e84393;
+  --color-secondary-light: #ff79b8;
+  --color-accent: #ffd166;
+  --color-accent-light: #ffe9a8;
+  --color-bg: #140608;
+  --color-bg-darker: #0a0304;
+  --color-bg-card: rgba(28, 8, 12, 0.82);
+  --color-text-primary: #ffe8ec;
+  --color-text-secondary: #c97e88;
+  --glow-primary: 0 0 14px rgba(255, 59, 78, 0.55), 0 0 30px rgba(255, 59, 78, 0.28);
+  --gradient-primary: linear-gradient(135deg, #c4202f, #ff3b4e);
+}
+
+body.theme-purple-black {
+  // Shadow Monarch violet flame on near-black, white highlight accents.
+  --color-primary: #9d5cff;
+  --color-primary-dim: #7a3fd6;
+  --color-primary-deep: #4a1f8a;
+  --color-secondary: #4dd9ff;
+  --color-secondary-light: #8be8ff;
+  --color-accent: #f0e6ff;
+  --color-accent-light: #ffffff;
+  --color-bg: #0c0814;
+  --color-bg-darker: #06040a;
+  --color-bg-card: rgba(18, 10, 30, 0.82);
+  --color-text-primary: #ece3ff;
+  --color-text-secondary: #9a85c4;
+  --glow-primary: 0 0 16px rgba(157, 92, 255, 0.55), 0 0 32px rgba(157, 92, 255, 0.3);
+  --gradient-primary: linear-gradient(135deg, #4a1f8a, #9d5cff);
+}

@@ -42,55 +42,67 @@
       <div class="progress-fill" [style.width.%]="quest.completionPercent"></div>
     </div>
 
-    <!-- Pending tasks -->
+    <!-- Task list — pending + completed in one unified grid -->
     <section class="task-section">
       <h2 class="section-title">Tasks</h2>
 
       <div class="task-list">
-        <div *ngFor="let task of pendingTasks" class="task-row">
+        <div
+          *ngFor="let task of tasks"
+          class="task-row"
+          [class.task-done]="task.completed">
+
+          <!-- Checkbox: click to toggle complete / incomplete -->
           <button
             type="button"
             class="task-checkbox"
-            [class.loading]="completingTaskId === task.id"
-            [disabled]="completingTaskId === task.id"
-            (click)="completeTask(task)"
-            title="Complete this task">
-            <span class="material-icons" *ngIf="completingTaskId !== task.id">radio_button_unchecked</span>
-            <span class="spinner" *ngIf="completingTaskId === task.id"></span>
+            [class.is-checked]="task.completed"
+            [class.loading]="completingTaskId === task.id || uncomletingTaskId === task.id"
+            [disabled]="completingTaskId === task.id || uncomletingTaskId === task.id"
+            (click)="task.completed ? uncompleteTask(task) : completeTask(task)"
+            [title]="task.completed ? 'Mark as incomplete' : 'Mark as complete'">
+            <span class="material-icons" *ngIf="completingTaskId !== task.id && uncomletingTaskId !== task.id">
+              {{ task.completed ? 'check_circle' : 'radio_button_unchecked' }}
+            </span>
+            <span class="spinner" *ngIf="completingTaskId === task.id || uncomletingTaskId === task.id"></span>
           </button>
 
           <div class="task-info">
             <span class="task-name">{{ task.name }}</span>
-            <span class="task-description" *ngIf="task.description">{{ task.description }}</span>
+            <span class="task-status-hint" *ngIf="task.completed">✓ Completed — click to undo</span>
+            <span class="task-description" *ngIf="task.description && !task.completed">{{ task.description }}</span>
           </div>
 
           <span class="task-xp text-gold">+{{ task.xpReward }} XP</span>
 
-          <button type="button" class="task-delete" (click)="deleteTask(task)" title="Remove task">
-            <span class="material-icons">close</span>
-          </button>
+          <!-- Delete: shows confirm popover on click -->
+          <div class="task-delete-wrap">
+            <button
+              type="button"
+              class="task-delete"
+              (click)="requestDeleteTask(task)"
+              [disabled]="deletingTaskId === task.id"
+              title="Remove task">
+              <span class="material-icons" *ngIf="deletingTaskId !== task.id">delete_outline</span>
+              <span class="spinner" *ngIf="deletingTaskId === task.id"></span>
+            </button>
+
+            <!-- Inline confirmation bubble -->
+            <div class="delete-confirm-bubble" *ngIf="pendingDeleteTaskId === task.id">
+              <span class="bubble-msg">Remove task?</span>
+              <button type="button" class="bubble-btn confirm" (click)="confirmDeleteTask(task)">Yes</button>
+              <button type="button" class="bubble-btn cancel"  (click)="cancelDeleteTask()">No</button>
+            </div>
+          </div>
+
         </div>
 
-        <p class="empty-state" *ngIf="pendingTasks.length === 0 && completedTasks.length === 0">
+        <p class="empty-state" *ngIf="tasks.length === 0">
           No tasks yet. Add one below to start earning XP toward this quest.
         </p>
       </div>
 
-      <!-- Completed tasks -->
-      <div class="task-list completed-list" *ngIf="completedTasks.length > 0">
-        <h3 class="subsection-title">Completed</h3>
-        <div *ngFor="let task of completedTasks" class="task-row completed">
-          <span class="task-checkbox done">
-            <span class="material-icons">check_circle</span>
-          </span>
-          <div class="task-info">
-            <span class="task-name">{{ task.name }}</span>
-          </div>
-          <span class="task-xp text-gold">+{{ task.xpReward }} XP</span>
-        </div>
-      </div>
-
-      <!-- Add task -->
+      <!-- Add task form -->
       <form class="add-task-form" (ngSubmit)="addTask()">
         <input
           type="text"

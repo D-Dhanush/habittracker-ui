@@ -1,0 +1,612 @@
+<div class="settings-root">
+
+  <!-- ── Sidebar nav ──────────────────────────────────────────────────────── -->
+  <aside class="settings-sidebar">
+
+    <!-- User badge -->
+    <div class="sidebar-user">
+      <div class="sidebar-avatar">
+        <img *ngIf="user()?.picture" [src]="user()!.picture" [alt]="user()?.name">
+        <span *ngIf="!user()?.picture">{{ (user()?.name || 'U').charAt(0).toUpperCase() }}</span>
+      </div>
+      <div class="sidebar-info">
+        <span class="sidebar-name">{{ user()?.name || 'User' }}</span>
+        <span class="sidebar-role-badge" [attr.data-role]="role()">{{ role() }}</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+
+      <!-- ── Owner / Super Admin ──────────────────────────────────────────── -->
+      <ng-container *ngIf="isOwner()">
+        <span class="nav-group-label">Administration</span>
+        <button class="nav-item" [class.active]="activePanel() === 'users'" (click)="setPanel('users')">
+          <span class="material-icons">manage_accounts</span> User Management
+        </button>
+        <button class="nav-item" [class.active]="activePanel() === 'roles'" (click)="setPanel('roles')">
+          <span class="material-icons">security</span> Roles
+        </button>
+        <button class="nav-item" [class.active]="activePanel() === 'permissions'" (click)="setPanel('permissions')">
+          <span class="material-icons">lock_open</span> Permissions
+        </button>
+        <button class="nav-item" [class.active]="activePanel() === 'analytics'" (click)="setPanel('analytics')">
+          <span class="material-icons">bar_chart</span> Analytics
+        </button>
+        <button class="nav-item" [class.active]="activePanel() === 'security'" (click)="setPanel('security')">
+          <span class="material-icons">shield</span> Security
+        </button>
+      </ng-container>
+
+      <!-- ── Admin only (not owner) ───────────────────────────────────────── -->
+      <ng-container *ngIf="isAdmin() && !isOwner()">
+        <span class="nav-group-label">Administration</span>
+        <button class="nav-item" [class.active]="activePanel() === 'users'" (click)="setPanel('users')">
+          <span class="material-icons">manage_accounts</span> User Management
+        </button>
+        <button class="nav-item" [class.active]="activePanel() === 'analytics'" (click)="setPanel('analytics')">
+          <span class="material-icons">bar_chart</span> Analytics
+        </button>
+      </ng-container>
+
+      <!-- ── Mentor / Moderator / Coach ───────────────────────────────────── -->
+      <ng-container *ngIf="isMentor() && !isAdmin()">
+        <span class="nav-group-label">Moderation</span>
+        <button class="nav-item" [class.active]="activePanel() === 'users'" (click)="setPanel('users')">
+          <span class="material-icons">people</span> Assigned Users
+        </button>
+      </ng-container>
+
+      <!-- ── Personal (all roles) ─────────────────────────────────────────── -->
+      <span class="nav-group-label">Personal</span>
+      <button class="nav-item" [class.active]="activePanel() === 'profile'" (click)="setPanel('profile')">
+        <span class="material-icons">person_outline</span> Profile
+      </button>
+      <button class="nav-item" [class.active]="activePanel() === 'account'" (click)="setPanel('account')">
+        <span class="material-icons">vpn_key</span> Account & Security
+      </button>
+      <button class="nav-item" [class.active]="activePanel() === 'theme'" (click)="setPanel('theme')">
+        <span class="material-icons">palette</span> Theme & Display
+      </button>
+      <button class="nav-item danger" (click)="logout()">
+        <span class="material-icons">logout</span> Sign Out
+      </button>
+
+    </nav>
+  </aside>
+
+  <!-- ── Main content ─────────────────────────────────────────────────────── -->
+  <main class="settings-main">
+
+    <!-- ════════════════ USER MANAGEMENT ════════════════ -->
+    <section *ngIf="activePanel() === 'users'" class="panel">
+
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-title">User Management</h2>
+          <p class="panel-sub">Manage roles and account status for registered users.</p>
+        </div>
+        <button class="action-btn" (click)="loadUsers()">
+          <span class="material-icons">refresh</span> Refresh
+        </button>
+      </div>
+
+      <!-- Role access notice for non-owners -->
+      <div *ngIf="isAdmin() && !isOwner()" class="access-notice">
+        <span class="material-icons">info</span>
+        As <strong>Admin</strong>, you can manage <strong>Player</strong> and <strong>Reader</strong> accounts.
+        Admin-level and above accounts are protected.
+      </div>
+
+      <!-- Toolbar -->
+      <div class="table-toolbar">
+        <div class="search-box">
+          <span class="material-icons">search</span>
+          <input type="text" placeholder="Search name or email…"
+                 [(ngModel)]="searchQuery" (ngModelChange)="onFilterChange()">
+          <button *ngIf="searchQuery" class="clear-btn" (click)="searchQuery=''; onFilterChange()">
+            <span class="material-icons">close</span>
+          </button>
+        </div>
+
+        <select class="filter-sel" [(ngModel)]="filterRole" (ngModelChange)="onFilterChange()">
+          <option value="">All Roles</option>
+          <option *ngFor="let r of roles" [value]="r.name">{{ r.name }}</option>
+        </select>
+
+        <select class="filter-sel" [(ngModel)]="filterStatus" (ngModelChange)="onFilterChange()">
+          <option value="">All Status</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+
+        <span class="result-count">{{ filteredUsers.length }} users</span>
+      </div>
+
+      <!-- Loading / Error -->
+      <div *ngIf="loading" class="state-msg">
+        <span class="spin-lg"></span> Loading users…
+      </div>
+      <div *ngIf="error && !loading" class="state-msg state-err">
+        Could not load users.
+        <button (click)="loadUsers()">Retry</button>
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrap" *ngIf="!loading && !error">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th class="th-pic"></th>
+              <th class="sortable" (click)="setSort('displayName')">
+                Name <span class="material-icons sort-ic">{{ sortIcon('displayName') }}</span>
+              </th>
+              <th class="sortable" (click)="setSort('email')">
+                Email <span class="material-icons sort-ic">{{ sortIcon('email') }}</span>
+              </th>
+              <th class="sortable" (click)="setSort('role')">
+                Role <span class="material-icons sort-ic">{{ sortIcon('role') }}</span>
+              </th>
+              <th class="sortable" (click)="setSort('isActive')">
+                Status <span class="material-icons sort-ic">{{ sortIcon('isActive') }}</span>
+              </th>
+              <th class="sortable" (click)="setSort('lastLoginDt')">
+                Last Login <span class="material-icons sort-ic">{{ sortIcon('lastLoginDt') }}</span>
+              </th>
+              <th class="sortable" (click)="setSort('createdDt')">
+                Joined <span class="material-icons sort-ic">{{ sortIcon('createdDt') }}</span>
+              </th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <ng-container *ngFor="let u of pagedUsers">
+              <tr [class.row-self]="isSelf(u.id)"
+                  [class.row-inactive]="!u.isActive"
+                  [class.row-protected]="!canActOn(u) && !isSelf(u.id)">
+
+                <!-- Avatar -->
+                <td>
+                  <div class="av-wrap">
+                    <img *ngIf="u.pictureUrl" class="av" [src]="u.pictureUrl" [alt]="u.displayName ?? u.email">
+                    <div *ngIf="!u.pictureUrl" class="av av-init">
+                      {{ (u.displayName || u.email).charAt(0).toUpperCase() }}
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Name -->
+                <td>
+                  <div class="cell-name">{{ u.displayName || 'Unnamed' }}</div>
+                  <div *ngIf="isSelf(u.id)" class="you-tag">You</div>
+                  <div *ngIf="!canActOn(u) && !isSelf(u.id)" class="protected-tag">
+                    <span class="material-icons" style="font-size:11px">lock</span> Protected
+                  </div>
+                </td>
+
+                <!-- Email — always visible -->
+                <td>
+                  <div class="cell-email">{{ u.email }}</div>
+                </td>
+
+                <!-- Role display + inline change for authorised users -->
+                <td>
+                  <ng-container *ngIf="canChangeRole(u); else roleReadonly">
+                    <select class="role-sel"
+                            [ngModel]="u.roleId"
+                            (ngModelChange)="onRoleChange(u, $event)"
+                            [disabled]="isPending(u.id)">
+                      <option *ngFor="let r of assignableRoles(u)" [value]="r.roleId">{{ r.name }}</option>
+                    </select>
+                  </ng-container>
+                  <ng-template #roleReadonly>
+                    <span class="role-badge-inline" [attr.data-role]="u.role">{{ u.role }}</span>
+                  </ng-template>
+                </td>
+
+                <!-- Status badge — clear active/inactive -->
+                <td>
+                  <span class="status-badge" [class.s-active]="u.isActive" [class.s-inactive]="!u.isActive">
+                    <span class="material-icons status-dot-icon">
+                      {{ u.isActive ? 'radio_button_checked' : 'radio_button_unchecked' }}
+                    </span>
+                    {{ u.isActive ? 'Active' : 'Inactive' }}
+                  </span>
+                </td>
+
+                <!-- Dates -->
+                <td class="muted text-sm">{{ u.lastLoginDt ? (u.lastLoginDt | date:'MMM d, y') : 'Never' }}</td>
+                <td class="muted text-sm">{{ u.createdDt | date:'MMM d, y' }}</td>
+
+                <!-- Actions -->
+                <td>
+                  <div class="row-actions">
+                    <!-- View details toggle -->
+                    <button class="icon-btn act-view" (click)="toggleExpandUser(u.id)"
+                            [title]="expandedUserId === u.id ? 'Collapse' : 'View details'">
+                      <span class="material-icons">
+                        {{ expandedUserId === u.id ? 'expand_less' : 'expand_more' }}
+                      </span>
+                    </button>
+
+                    <!-- Activate / Deactivate — only if can act -->
+                    <ng-container *ngIf="canActOn(u)">
+                      <button *ngIf="!u.isActive" class="icon-btn act-enable"
+                              [disabled]="isPending(u.id)"
+                              (click)="onActivate(u)"
+                              title="Activate account">
+                        <span class="material-icons">check_circle</span>
+                      </button>
+                      <button *ngIf="u.isActive" class="icon-btn act-disable"
+                              [disabled]="isPending(u.id)"
+                              (click)="onDeactivate(u)"
+                              title="Deactivate account">
+                        <span class="material-icons">block</span>
+                      </button>
+                    </ng-container>
+
+                    <!-- Pending spinner -->
+                    <span *ngIf="isPending(u.id)" class="spin-sm"></span>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- Expanded detail row -->
+              <tr *ngIf="expandedUserId === u.id" class="detail-row">
+                <td colspan="8">
+                  <div class="detail-panel">
+                    <div class="detail-grid">
+                      <div class="detail-item">
+                        <span class="detail-label">User ID</span>
+                        <span class="detail-value mono">{{ u.id }}</span>
+                      </div>
+                      <div class="detail-item">
+                        <span class="detail-label">Email</span>
+                        <span class="detail-value">{{ u.email }}</span>
+                      </div>
+                      <div class="detail-item">
+                        <span class="detail-label">Display Name</span>
+                        <span class="detail-value">{{ u.displayName || '—' }}</span>
+                      </div>
+                      <div class="detail-item">
+                        <span class="detail-label">Role</span>
+                        <span class="detail-value">{{ u.role }}</span>
+                      </div>
+                      <div class="detail-item">
+                        <span class="detail-label">Status</span>
+                        <span class="detail-value" [style.color]="u.isActive ? '#3ddc84' : '#ff5c6a'">
+                          {{ u.isActive ? 'Active' : 'Inactive' }}
+                        </span>
+                      </div>
+                      <div class="detail-item">
+                        <span class="detail-label">Joined</span>
+                        <span class="detail-value">{{ u.createdDt | date:'MMM d, y, h:mm a' }}</span>
+                      </div>
+                      <div class="detail-item">
+                        <span class="detail-label">Last Login</span>
+                        <span class="detail-value">{{ u.lastLoginDt ? (u.lastLoginDt | date:'MMM d, y, h:mm a') : 'Never' }}</span>
+                      </div>
+                      <div class="detail-item">
+                        <span class="detail-label">Has Avatar</span>
+                        <span class="detail-value">{{ u.pictureUrl ? 'Yes' : 'No' }}</span>
+                      </div>
+                    </div>
+
+                    <!-- Quick action buttons in expanded view -->
+                    <div class="detail-actions" *ngIf="canActOn(u)">
+                      <button class="detail-btn" *ngIf="!u.isActive" (click)="onActivate(u)">
+                        <span class="material-icons">check_circle</span> Activate Account
+                      </button>
+                      <button class="detail-btn danger-outline" *ngIf="u.isActive" (click)="onDeactivate(u)">
+                        <span class="material-icons">block</span> Deactivate Account
+                      </button>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </ng-container>
+
+            <tr *ngIf="pagedUsers.length === 0">
+              <td colspan="8" class="empty-row">No users match the current filters.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination" *ngIf="!loading && !error && totalPages > 1">
+        <button class="pg-btn" [disabled]="page <= 1" (click)="page = page - 1">
+          <span class="material-icons">chevron_left</span>
+        </button>
+        <button *ngFor="let p of pageNumbers" class="pg-btn pg-num"
+                [class.active]="p === page" (click)="page = p">{{ p }}</button>
+        <button class="pg-btn" [disabled]="page >= totalPages" (click)="page = page + 1">
+          <span class="material-icons">chevron_right</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ════════════════ ROLES ════════════════ -->
+    <section *ngIf="activePanel() === 'roles'" class="panel">
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-title">Role Management</h2>
+          <p class="panel-sub">Overview of role hierarchy and their access levels.</p>
+        </div>
+      </div>
+
+      <div class="role-cards">
+        <div *ngFor="let r of roleHierarchy" class="role-card" [class.active-role]="r.name === role()">
+          <div class="role-dot" [style.background]="r.color"></div>
+          <div class="role-card-info">
+            <span class="role-card-name">{{ r.name }}</span>
+            <span class="role-card-perms">{{ r.perms }}</span>
+          </div>
+          <div class="role-card-meta">
+            <span *ngIf="r.name === role()" class="you-tag">Your role</span>
+            <span class="role-user-count">{{ users | roleCount:r.name }} users</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-note">
+        <span class="material-icons">info</span>
+        Role assignment is managed per-user in <strong>User Management</strong>.
+        The active roles in the database are: <strong>Admin, Player, Reader</strong>.
+      </div>
+    </section>
+
+    <!-- ════════════════ PERMISSIONS ════════════════ -->
+    <section *ngIf="activePanel() === 'permissions'" class="panel">
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-title">Permission Matrix</h2>
+          <p class="panel-sub">View permissions assigned to each role.</p>
+        </div>
+        <select class="filter-sel" [(ngModel)]="selectedPermRole">
+          <option *ngFor="let r of permRoleOptions" [value]="r">{{ r }}</option>
+        </select>
+      </div>
+
+      <div class="perm-grid">
+        <div *ngFor="let g of permGroups" class="perm-group">
+          <h3 class="perm-group-name">{{ g.group }}</h3>
+          <div class="perm-rows">
+            <div *ngFor="let p of g.perms" class="perm-row">
+              <span class="perm-check" [class.granted]="hasPermission(g.group, p)">
+                <span class="material-icons">{{ hasPermission(g.group, p) ? 'check_circle' : 'cancel' }}</span>
+              </span>
+              <span class="perm-name">{{ p }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════ ANALYTICS ════════════════ -->
+    <section *ngIf="activePanel() === 'analytics'" class="panel">
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-title">Platform Analytics</h2>
+          <p class="panel-sub">High-level overview of platform usage.</p>
+        </div>
+        <button class="action-btn" (click)="loadUsers()">
+          <span class="material-icons">refresh</span> Refresh
+        </button>
+      </div>
+
+      <div class="analytics-grid">
+        <div *ngFor="let c of analyticsCards" class="analytics-card">
+          <div class="ac-icon" [style.color]="c.color" [style.box-shadow]="'0 0 20px ' + c.color + '33'">
+            <span class="material-icons">{{ c.icon }}</span>
+          </div>
+          <div class="ac-body">
+            <span class="ac-value">{{ c.value }}</span>
+            <span class="ac-label">{{ c.label }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="loading" class="state-msg">
+        <span class="spin-lg"></span> Loading data…
+      </div>
+
+      <!-- Role distribution table -->
+      <div *ngIf="!loading && users.length > 0" class="role-dist">
+        <h3 class="section-sub-title">Role Distribution</h3>
+        <div class="role-dist-rows">
+          <div *ngFor="let r of roleHierarchy" class="rd-row">
+            <span class="rd-dot" [style.background]="r.color"></span>
+            <span class="rd-name">{{ r.name }}</span>
+            <div class="rd-bar-wrap">
+              <div class="rd-bar"
+                   [style.width.%]="users.length ? (users | roleCount:r.name) / users.length * 100 : 0"
+                   [style.background]="r.color"></div>
+            </div>
+            <span class="rd-count">{{ users | roleCount:r.name }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════ SECURITY ════════════════ -->
+    <section *ngIf="activePanel() === 'security'" class="panel">
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-title">Security</h2>
+          <p class="panel-sub">Your account security and authentication status.</p>
+        </div>
+      </div>
+
+      <div class="security-cards">
+        <div class="sec-card">
+          <span class="material-icons sec-icon">account_circle</span>
+          <div>
+            <div class="sec-label">Account Status</div>
+            <div class="sec-value s-active">Active</div>
+          </div>
+        </div>
+        <div class="sec-card">
+          <span class="material-icons sec-icon">verified_user</span>
+          <div>
+            <div class="sec-label">Role</div>
+            <div class="sec-value">{{ role() }}</div>
+          </div>
+        </div>
+        <div class="sec-card">
+          <span class="material-icons sec-icon">
+            {{ user()?.picture?.includes('googleusercontent') ? 'g_mobiledata' : 'email' }}
+          </span>
+          <div>
+            <div class="sec-label">Authentication</div>
+            <div class="sec-value">
+              {{ user()?.picture?.includes('googleusercontent') ? 'Google OAuth' : 'Email & Password' }}
+            </div>
+          </div>
+        </div>
+        <div class="sec-card">
+          <span class="material-icons sec-icon">email</span>
+          <div>
+            <div class="sec-label">Email</div>
+            <div class="sec-value">{{ user()?.email }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-note" *ngIf="isOwner()">
+        <span class="material-icons">shield</span>
+        Active session management and login history are available in future platform updates.
+      </div>
+    </section>
+
+    <!-- ════════════════ PROFILE ════════════════ -->
+    <section *ngIf="activePanel() === 'profile'" class="panel">
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-title">Your Profile</h2>
+          <p class="panel-sub">Personal information and public display settings.</p>
+        </div>
+      </div>
+      <div class="profile-card">
+        <div class="profile-avatar">
+          <img *ngIf="user()?.picture" [src]="user()!.picture" [alt]="user()?.name">
+          <div *ngIf="!user()?.picture" class="av-init-lg">
+            {{ (user()?.name || 'U').charAt(0).toUpperCase() }}
+          </div>
+        </div>
+        <div class="profile-fields">
+          <div class="pf-row">
+            <span class="pf-label">Name</span>
+            <span class="pf-value">{{ user()?.name || '—' }}</span>
+          </div>
+          <div class="pf-row">
+            <span class="pf-label">Email</span>
+            <span class="pf-value">{{ user()?.email }}</span>
+          </div>
+          <div class="pf-row">
+            <span class="pf-label">Role</span>
+            <span class="pf-value role-val">{{ role() }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="info-note">
+        <span class="material-icons">info</span>
+        To update your name or avatar, sign in with a Google account that has the desired profile details.
+        Email/password account editing is coming in a future update.
+      </div>
+    </section>
+
+    <!-- ════════════════ ACCOUNT & SECURITY ════════════════ -->
+    <section *ngIf="activePanel() === 'account'" class="panel">
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-title">Account & Security</h2>
+          <p class="panel-sub">Manage your sign-in methods and account access.</p>
+        </div>
+      </div>
+      <div class="security-cards">
+        <div class="sec-card">
+          <span class="material-icons sec-icon">
+            {{ user()?.picture?.includes('googleusercontent') ? 'g_mobiledata' : 'lock' }}
+          </span>
+          <div>
+            <div class="sec-label">Sign-in Method</div>
+            <div class="sec-value">
+              {{ user()?.picture?.includes('googleusercontent') ? 'Google Account' : 'Email & Password' }}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="info-note">
+        <span class="material-icons">info</span>
+        Password reset and linked account management are coming in a future update.
+        For now, sign in with Google for the best experience.
+      </div>
+      <button class="danger-btn" (click)="logout()">
+        <span class="material-icons">logout</span> Sign Out
+      </button>
+    </section>
+
+    <!-- ════════════════ THEME ════════════════ -->
+    <section *ngIf="activePanel() === 'theme'" class="panel">
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-title">Theme & Display</h2>
+          <p class="panel-sub">Personalise your ArcLord experience. Choose a Solo Leveling inspired palette.</p>
+        </div>
+      </div>
+
+      <!--
+        Wired to the real ThemeService (toggles a body.theme-* class,
+        persisted to localStorage). NOTE: only components referencing the
+        new --color-* CSS custom properties (theme-palettes.scss) will
+        visually reskin — most existing components still use the old
+        hardcoded hex values or theme.scss's compile-time SCSS variables,
+        so the overall app will only partially reskin until those are
+        individually migrated. This panel itself, and any newly-built
+        component, should prefer the var(--color-*) tokens going forward.
+      -->
+      <div class="theme-picker-grid">
+        <button
+          type="button"
+          class="theme-swatch"
+          *ngFor="let option of themeOptions"
+          [class.active]="activeTheme() === option.id"
+          [attr.data-theme]="option.id"
+          (click)="setTheme(option.id)">
+          <span class="swatch-preview"></span>
+          <span class="swatch-label">{{ option.label }}</span>
+          <span class="swatch-desc">{{ option.description }}</span>
+          <span class="material-icons swatch-check" *ngIf="activeTheme() === option.id">check_circle</span>
+        </button>
+      </div>
+
+      <div class="info-note">
+        <span class="material-icons">info</span>
+        Theme choice is saved to this browser and applies automatically next time you sign in here.
+        Some older parts of the app may not fully reflect the new palette yet — that migration is ongoing.
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ════════════════ CONFIRM DIALOG ════════════════ -->
+<div class="dialog-backdrop" *ngIf="confirm.visible" (click)="dismissConfirm()">
+  <div class="dialog-box" (click)="$event.stopPropagation()">
+    <div class="dialog-header">
+      <span class="material-icons dialog-icon" [class.icon-danger]="confirm.danger">
+        {{ confirm.danger ? 'warning' : 'help_outline' }}
+      </span>
+      <h3 class="dialog-title">{{ confirm.title }}</h3>
+    </div>
+    <p class="dialog-msg" [innerHTML]="confirm.message"></p>
+    <div class="dialog-actions">
+      <button class="dialog-btn dialog-cancel" (click)="dismissConfirm()">Cancel</button>
+      <button class="dialog-btn" [class.dialog-confirm-danger]="confirm.danger"
+              [class.dialog-confirm]="!confirm.danger"
+              (click)="runConfirm()">
+        {{ confirm.confirmLabel }}
+      </button>
+    </div>
+  </div>
+</div>

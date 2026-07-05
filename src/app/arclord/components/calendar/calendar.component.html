@@ -1,0 +1,142 @@
+<div class="calendar-page">
+
+  <header class="cal-header">
+    <div class="cal-title-block">
+      <h1>Calendar</h1>
+      <p>Your full habit history — click any day for details.</p>
+    </div>
+
+    <div class="cal-month-stats" *ngIf="calendarData && !loading">
+      <div class="month-stat">
+        <span class="month-stat-label">XP This Month</span>
+        <strong class="text-gold">{{ calendarData.totalXpThisMonth }}</strong>
+      </div>
+      <div class="month-stat">
+        <span class="month-stat-label">Best Streak</span>
+        <strong class="text-blue">{{ calendarData.bestStreakThisMonth }}d</strong>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation -->
+  <div class="cal-nav">
+    <button type="button" class="nav-btn" (click)="prevMonth()">
+      <span class="material-icons">chevron_left</span>
+    </button>
+
+    <div class="cal-nav-center">
+      <h2 class="cal-month-label">
+        {{ calendarData?.month || '' }} {{ currentYear }}
+      </h2>
+      <button type="button" class="today-btn" (click)="goToToday()" [disabled]="isTodayMonth">
+        Today
+      </button>
+    </div>
+
+    <button type="button" class="nav-btn" (click)="nextMonth()">
+      <span class="material-icons">chevron_right</span>
+    </button>
+  </div>
+
+  <!-- Legend -->
+  <div class="cal-legend">
+    <span class="legend-item"><span class="legend-dot dot-perfect"></span>Perfect</span>
+    <span class="legend-item"><span class="legend-dot dot-completed"></span>Completed</span>
+    <span class="legend-item"><span class="legend-dot dot-partial"></span>Partial</span>
+    <span class="legend-item"><span class="legend-dot dot-missed"></span>Missed</span>
+    <span class="legend-item"><span class="legend-dot dot-future"></span>Upcoming</span>
+  </div>
+
+  <div class="cal-body">
+
+    <!-- Grid -->
+    <div class="cal-grid-wrap">
+      <p class="state-msg" *ngIf="loading">Loading calendar...</p>
+      <p class="state-msg error" *ngIf="error">Could not load calendar. Check your connection and retry.</p>
+
+      <div class="cal-grid" *ngIf="calendarData && !loading">
+        <!-- Day headers -->
+        <div class="day-header" *ngFor="let d of DAY_LABELS">{{ d }}</div>
+
+        <!-- Weeks -->
+        <ng-container *ngFor="let week of calendarData.weeks">
+          <div
+            *ngFor="let day of week.days"
+            class="cal-day"
+            [ngClass]="dayClass(day)"
+            [class.today]="isToday(day.date)"
+            [class.selected]="selectedDay?.date?.getTime() === day.date.getTime()"
+            (click)="selectDay(day)"
+            [title]="day.empty ? '' : (day.date | date:'mediumDate')">
+
+            <span class="day-num" *ngIf="!day.empty">{{ day.date.getDate() }}</span>
+
+            <!-- XP badge on completed/partial days -->
+            <span class="day-xp" *ngIf="!day.empty && day.xpEarned > 0">
+              +{{ day.xpEarned }}
+            </span>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+
+    <!-- Day detail panel -->
+    <div class="day-detail" *ngIf="selectedDay && !selectedDay.empty">
+      <div class="detail-date">
+        <span class="material-icons detail-icon">calendar_today</span>
+        <strong>{{ selectedDay.date | date:'EEEE, MMMM d' }}</strong>
+      </div>
+
+      <ng-container *ngIf="selectedDayIsFuture">
+        <p class="detail-empty">This day hasn't happened yet.</p>
+      </ng-container>
+
+      <ng-container *ngIf="!selectedDayIsFuture">
+        <!-- XP earned -->
+        <div class="detail-stat" *ngIf="selectedDay.xpEarned > 0">
+          <span class="material-icons">bolt</span>
+          <span>{{ selectedDay.xpEarned }} XP earned</span>
+        </div>
+
+        <!-- Completed habits -->
+        <div class="detail-section" *ngIf="selectedDay.completedHabits.length > 0">
+          <p class="detail-section-title text-blue">
+            <span class="material-icons">check_circle</span>
+            Completed ({{ selectedDay.completedHabits.length }})
+          </p>
+          <ul>
+            <li *ngFor="let name of selectedDay.completedHabits">{{ name }}</li>
+          </ul>
+        </div>
+
+        <!-- Missed habits -->
+        <div class="detail-section" *ngIf="selectedDay.missedHabits.length > 0">
+          <p class="detail-section-title text-danger">
+            <span class="material-icons">cancel</span>
+            Missed ({{ selectedDay.missedHabits.length }})
+          </p>
+          <ul>
+            <li *ngFor="let name of selectedDay.missedHabits">{{ name }}</li>
+          </ul>
+        </div>
+
+        <!-- Rest day -->
+        <p class="detail-empty"
+          *ngIf="selectedDay.completedHabits.length === 0 && selectedDay.missedHabits.length === 0">
+          No habit activity recorded for this day.
+        </p>
+
+        <!-- Status badge -->
+        <div class="detail-badge" [ngClass]="dayClass(selectedDay)">
+          <span *ngIf="selectedDay.perfectDay">⭐ Perfect Day</span>
+          <span *ngIf="selectedDay.completed && !selectedDay.perfectDay">✓ Completed</span>
+          <span *ngIf="selectedDay.partial">◑ Partial</span>
+          <span *ngIf="!selectedDay.completed && !selectedDay.partial && selectedDay.xpEarned === 0">
+            ✕ Missed
+          </span>
+        </div>
+      </ng-container>
+    </div>
+
+  </div>
+</div>

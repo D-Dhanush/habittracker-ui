@@ -2,12 +2,6 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { QuestDto } from '../../../models/quest.model';
 
-/**
- * Replaces the old src/app/arclord/components/quest-card component,
- * which was confirmed dead code (imported by nothing, built against
- * a Quest model with fields like `streak` that the backend never had).
- * This version uses the real, persisted QuestProgress rollup fields.
- */
 @Component({
   selector: 'app-quest-card',
   standalone: true,
@@ -17,7 +11,10 @@ import { QuestDto } from '../../../models/quest.model';
 })
 export class QuestCardComponent {
   @Input() quest!: QuestDto;
-  @Output() questClick = new EventEmitter<string>();
+  @Output() questClick   = new EventEmitter<string>();
+  @Output() deleteQuest  = new EventEmitter<string>();
+
+  confirmDelete = false;
 
   get difficultyClass(): string {
     const d = (this.quest?.difficulty ?? '').toLowerCase();
@@ -27,12 +24,27 @@ export class QuestCardComponent {
   }
 
   get taskSummary(): string {
-    const total = this.quest?.totalTasks ?? 0;
-    const done = this.quest?.completedTasks ?? 0;
-    return `${done}/${total} tasks`;
+    return `${this.quest?.completedTasks ?? 0}/${this.quest?.totalTasks ?? 0} tasks`;
   }
 
   onCardClick(): void {
+    if (this.confirmDelete) return;
     this.questClick.emit(this.quest.id);
+  }
+
+  promptDelete(e: Event): void {
+    e.stopPropagation();
+    this.confirmDelete = true;
+  }
+
+  confirmDeleteQuest(e: Event): void {
+    e.stopPropagation();
+    this.confirmDelete = false;
+    this.deleteQuest.emit(this.quest.id);
+  }
+
+  cancelDelete(e: Event): void {
+    e.stopPropagation();
+    this.confirmDelete = false;
   }
 }

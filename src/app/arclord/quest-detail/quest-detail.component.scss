@@ -169,106 +169,59 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  background: rgba(13, 24, 44, 0.55);
-  border: 1px solid rgba(77, 217, 255, 0.12);
-  border-radius: 12px;
   padding: 12px 14px;
-  transition: border-color 160ms ease, background 160ms ease;
-
-  &:hover {
-    border-color: rgba(77, 217, 255, 0.3);
-  }
-
-  &.completed {
-    opacity: 0.55;
-  }
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  margin-bottom: 8px;
+  transition: opacity 300ms ease, background 300ms ease;
 }
 
+/* Completed state: faded/shadowed, looks "done" */
+.task-row.task-done {
+  opacity: 0.45;
+  background: rgba(0, 0, 0, 0.15);
+  border-color: rgba(255, 255, 255, 0.03);
+
+  .task-name { text-decoration: line-through; color: rgba(232, 244, 255, 0.4); }
+  .task-xp   { opacity: 0.5; }
+}
+
+/* Checkbox states */
 .task-checkbox {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 1px solid rgba(77, 217, 255, 0.4);
-  background: transparent;
-  color: #4dd9ff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: background 160ms ease, transform 120ms ease;
-
-  .material-icons { font-size: 18px; }
-
-  &:hover:not(:disabled) {
-    background: rgba(77, 217, 255, 0.15);
-    transform: scale(1.05);
-  }
-
-  &:disabled {
-    cursor: not-allowed;
-  }
-
-  &.done {
-    border-color: rgba(120, 220, 150, 0.5);
-    color: #78dc96;
-    cursor: default;
-  }
-}
-
-.spinner {
-  width: 14px;
-  height: 14px;
-  border: 2px solid rgba(77, 217, 255, 0.25);
-  border-top-color: #4dd9ff;
-  border-radius: 50%;
-  animation: spin 700ms linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-.task-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.task-name {
-  font-size: 14px;
-  font-weight: 600;
-  color: #e8f4ff;
-}
-
-.task-description {
-  font-size: 12px;
-  color: rgba(232, 244, 255, 0.5);
-}
-
-.task-xp {
-  font-size: 13px;
-  font-weight: 700;
-  flex-shrink: 0;
-
-  &.text-gold { color: #d4af37; }
-}
-
-.task-delete {
   background: transparent;
   border: none;
+  cursor: pointer;
+  padding: 0;
   color: rgba(232, 244, 255, 0.3);
+  transition: color 160ms ease, transform 120ms ease;
+  flex-shrink: 0;
+
+  .material-icons { font-size: 22px; display: block; }
+
+  &.is-checked { color: #4caf50; }
+  &:not(.is-checked):hover { color: #4dd9ff; transform: scale(1.1); }
+  &[disabled] { opacity: 0.5; cursor: not-allowed; }
+}
+
+/* Delete button on tasks — always red */
+.task-delete {
+  background: transparent;
+  border: 1px solid rgba(255, 107, 107, 0.35);
+  color: #ff6b6b;
   cursor: pointer;
   padding: 4px;
-  border-radius: 6px;
+  border-radius: 5px;
+  display: flex;
+  transition: color 160ms ease, background 160ms ease;
   flex-shrink: 0;
-  transition: color 160ms ease;
 
-  .material-icons { font-size: 16px; }
+  .material-icons { font-size: 17px; }
 
   &:hover {
-    color: #ff6b6b;
+    color: #ff4444;
+    background: rgba(255, 107, 107, 0.18);
+    box-shadow: 0 0 8px rgba(255,107,107,0.35);
   }
 }
 
@@ -323,4 +276,113 @@
       cursor: not-allowed;
     }
   }
+}
+
+// Undo hint on completed tasks
+.undo-hint {
+  font-size: 0.68rem;
+  color: transparent;
+  transition: color $transition-fast;
+}
+.task-row.completed:hover .undo-hint {
+  color: $color-text-tertiary;
+}
+
+// Make completed checkbox a button
+.task-checkbox.done {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: $color-success;
+  transition: opacity $transition-fast, color $transition-fast;
+
+  &:hover { opacity: 0.65; color: $color-danger; }
+}
+
+// ── Task delete — inline bubble confirm ────────────────────────────────────────
+
+.task-delete-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.task-status-hint {
+  display: block;
+  font-size: 11px;
+  color: rgba(77, 200, 130, 0.6);
+  margin-top: 2px;
+  font-style: italic;
+}
+
+.delete-confirm-bubble {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  background: #060c18;
+  border: 1px solid rgba(255, 107, 107, 0.4);
+  border-radius: 10px;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 10;
+  white-space: nowrap;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 12px rgba(255, 107, 107, 0.15);
+
+  // Arrow tip pointing up-right
+  &::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    right: 12px;
+    width: 8px;
+    height: 8px;
+    background: #060c18;
+    border-left: 1px solid rgba(255, 107, 107, 0.4);
+    border-top: 1px solid rgba(255, 107, 107, 0.4);
+    transform: rotate(45deg);
+  }
+}
+
+.bubble-msg {
+  font-size: 12px;
+  color: rgba(232, 244, 255, 0.7);
+}
+
+.bubble-btn {
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: transform 120ms ease;
+  &:active { transform: scale(0.95); }
+
+  &.confirm {
+    background: #c0392b;
+    color: #fff;
+  }
+
+  &.cancel {
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: rgba(232, 244, 255, 0.6);
+  }
+}
+
+// Spinner (reused from task-checkbox.loading)
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid rgba(77, 217, 255, 0.25);
+  border-top-color: #4dd9ff;
+  animation: spin-task 0.7s linear infinite;
+}
+
+@keyframes spin-task {
+  to { transform: rotate(360deg); }
 }

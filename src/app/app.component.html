@@ -18,14 +18,17 @@
   </div>
 </div>
 
-<!-- When logged in: leftnav owns the router-outlet (inside mat-sidenav-content) -->
+<!-- When logged in: leftnav owns the router-outlet -->
 <div *ngIf="showMainShell" class="app-shell">
   <app-leftnav></app-leftnav>
 </div>
 
-<!-- Login / Unauthorized only: standalone outlet, no nav shell -->
+<!-- Login / Unauthorized only -->
 <main *ngIf="!showMainShell" class="app-main">
   <router-outlet></router-outlet>
 </main>
 
 <app-toast></app-toast>
+
+<!-- Arc AI shelf — fixed position, always on top, shown when logged in -->
+<app-ai-shelf *ngIf="showMainShell"></app-ai-shelf>

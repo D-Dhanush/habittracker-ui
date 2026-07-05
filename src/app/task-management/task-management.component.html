@@ -1,0 +1,253 @@
+<div class="tm-page">
+
+  <!-- ── Page Header ─────────────────────────────────────────────────── -->
+  <header class="tm-header">
+    <div class="tm-header-left">
+      <span class="material-icons tm-header-icon">task_alt</span>
+      <div>
+        <h1 class="tm-title">Task Management</h1>
+        <p class="tm-subtitle">All quests · All tasks · One view</p>
+      </div>
+    </div>
+    <div class="tm-summary-pills">
+      <div class="summary-pill pill-gold">
+        <span class="material-icons">bolt</span>
+        <span>{{ totalXP }} XP Earned</span>
+      </div>
+      <div class="summary-pill pill-green">
+        <span class="material-icons">check_circle</span>
+        <span>{{ completedCount }} Done</span>
+      </div>
+      <div class="summary-pill pill-blue">
+        <span class="material-icons">hourglass_empty</span>
+        <span>{{ pendingCount }} Pending</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Filters ─────────────────────────────────────────────────────── -->
+  <div class="tm-filters">
+    <div class="filter-search">
+      <span class="material-icons search-icon">search</span>
+      <input
+        type="text"
+        placeholder="Search tasks..."
+        [(ngModel)]="search"
+        (ngModelChange)="applyFilters()">
+    </div>
+
+    <select [(ngModel)]="filterHabitId" (ngModelChange)="onHabitFilterChange()">
+      <option value="">All Habits</option>
+      <option *ngFor="let h of habits" [value]="h.id">{{ h.name }}</option>
+    </select>
+
+    <select [(ngModel)]="filterQuestId" (ngModelChange)="applyFilters()">
+      <option value="">All Quests</option>
+      <option *ngFor="let q of availableQuests" [value]="q.id">{{ q.name }}</option>
+    </select>
+
+    <select [(ngModel)]="filterStatus" (ngModelChange)="applyFilters()">
+      <option value="all">All Status</option>
+      <option value="pending">Pending</option>
+      <option value="completed">Completed</option>
+    </select>
+
+    <select [(ngModel)]="filterPriority" (ngModelChange)="applyFilters()">
+      <option value="all">All Priority</option>
+      <option value="high">High</option>
+      <option value="medium">Medium</option>
+      <option value="low">Low</option>
+    </select>
+
+    <button type="button" class="clear-btn" (click)="clearFilters()">
+      <span class="material-icons">filter_alt_off</span>
+      Clear
+    </button>
+  </div>
+
+  <!-- ── Loading / Error / Empty ─────────────────────────────────────── -->
+  <div *ngIf="loading" class="tm-state">
+    <span class="material-icons spinning">autorenew</span>
+    <p>Loading tasks…</p>
+  </div>
+
+  <div *ngIf="error && !loading" class="tm-state tm-error">
+    <span class="material-icons">error_outline</span>
+    <p>Could not load tasks.</p>
+    <button type="button" (click)="loadAll()">Retry</button>
+  </div>
+
+  <div *ngIf="!loading && !error && allTasks.length === 0" class="tm-state">
+    <span class="material-icons">inbox</span>
+    <p>No tasks yet. Create habits and quests first.</p>
+  </div>
+
+  <!-- ── Table ───────────────────────────────────────────────────────── -->
+  <div *ngIf="!loading && !error && allTasks.length > 0" class="tm-table-wrap">
+
+    <div class="tm-results-bar">
+      <span>{{ total }} task{{ total !== 1 ? 's' : '' }} found</span>
+      <select [(ngModel)]="pageSize" (ngModelChange)="applyFilters()" class="page-size-select">
+        <option [value]="10">10 / page</option>
+        <option [value]="15">15 / page</option>
+        <option [value]="25">25 / page</option>
+        <option [value]="50">50 / page</option>
+      </select>
+    </div>
+
+    <table class="tm-table">
+      <thead>
+        <tr>
+          <th class="col-check"></th>
+          <th class="col-name sortable" (click)="setSort('name')">
+            Task <span class="material-icons sort-icon">{{ sortIcon('name') }}</span>
+          </th>
+          <th class="col-habit sortable" (click)="setSort('habitName')">
+            Habit <span class="material-icons sort-icon">{{ sortIcon('habitName') }}</span>
+          </th>
+          <th class="col-quest sortable" (click)="setSort('questName')">
+            Quest <span class="material-icons sort-icon">{{ sortIcon('questName') }}</span>
+          </th>
+          <th class="col-status sortable" (click)="setSort('completed')">
+            Status <span class="material-icons sort-icon">{{ sortIcon('completed') }}</span>
+          </th>
+          <th class="col-priority sortable" (click)="setSort('priority')">
+            Priority <span class="material-icons sort-icon">{{ sortIcon('priority') }}</span>
+          </th>
+          <th class="col-xp sortable" (click)="setSort('xpReward')">
+            XP <span class="material-icons sort-icon">{{ sortIcon('xpReward') }}</span>
+          </th>
+          <th class="col-date sortable" (click)="setSort('createdDt')">
+            Created <span class="material-icons sort-icon">{{ sortIcon('createdDt') }}</span>
+          </th>
+          <th class="col-actions">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let task of pagedTasks; trackBy: trackById"
+          class="tm-row"
+          [class.row-done]="task.completed"
+          [class.row-confirm]="task.confirmDelete">
+
+          <!-- Confirm-delete overlay row -->
+          <td *ngIf="task.confirmDelete" colspan="9" class="confirm-cell">
+            <div class="confirm-overlay">
+              <span class="material-icons confirm-icon">warning</span>
+              <p>Delete "<strong>{{ task.name }}</strong>"? This cannot be undone.</p>
+              <div class="confirm-btns">
+                <button type="button" class="btn-confirm-yes" (click)="confirmDeleteTask(task)">Delete</button>
+                <button type="button" class="btn-confirm-no"  (click)="cancelDelete(task)">Cancel</button>
+              </div>
+            </div>
+          </td>
+
+          <!-- Normal row -->
+          <ng-container *ngIf="!task.confirmDelete">
+            <!-- Checkbox -->
+            <td class="col-check">
+              <button
+                type="button"
+                class="check-btn"
+                [class.is-done]="task.completed"
+                [class.is-loading]="task.loadingComplete"
+                [disabled]="task.loadingComplete"
+                (click)="toggleComplete(task)"
+                [title]="task.completed ? 'Mark incomplete' : 'Mark complete'">
+                <span class="material-icons" *ngIf="!task.loadingComplete">
+                  {{ task.completed ? 'check_circle' : 'radio_button_unchecked' }}
+                </span>
+                <span class="spinner-sm" *ngIf="task.loadingComplete"></span>
+              </button>
+            </td>
+
+            <!-- Task name + description -->
+            <td class="col-name">
+              <span class="task-name" [class.done-text]="task.completed">{{ task.name }}</span>
+              <span class="task-desc" *ngIf="task.description">{{ task.description }}</span>
+            </td>
+
+            <!-- Breadcrumb: Habit -->
+            <td class="col-habit">
+              <span class="crumb crumb-habit">
+                <span class="material-icons crumb-icon">auto_stories</span>
+                {{ task.habitName }}
+              </span>
+            </td>
+
+            <!-- Breadcrumb: Quest -->
+            <td class="col-quest">
+              <span class="crumb crumb-quest" (click)="navigateToQuest(task)" title="Open quest">
+                <span class="material-icons crumb-icon">flag</span>
+                {{ task.questName }}
+              </span>
+            </td>
+
+            <!-- Status badge -->
+            <td class="col-status">
+              <span class="status-badge" [class.badge-done]="task.completed" [class.badge-pending]="!task.completed">
+                {{ task.completed ? 'Completed' : 'Pending' }}
+              </span>
+            </td>
+
+            <!-- Priority -->
+            <td class="col-priority">
+              <span class="priority-chip" [class]="'priority-' + task.priority">
+                {{ priorityLabel(task.priority) }}
+              </span>
+            </td>
+
+            <!-- XP -->
+            <td class="col-xp">
+              <span class="xp-value">+{{ task.xpReward }}</span>
+            </td>
+
+            <!-- Created date -->
+            <td class="col-date">
+              <span class="date-value">{{ task.createdDt | date:'MMM d, y' }}</span>
+            </td>
+
+            <!-- Actions -->
+            <td class="col-actions">
+              <div class="action-row">
+                <button type="button" class="act-btn act-view"
+                  (click)="navigateToQuest(task)" title="View in quest">
+                  <span class="material-icons">open_in_new</span>
+                </button>
+                <button type="button" class="act-btn act-complete"
+                  (click)="toggleComplete(task)"
+                  [title]="task.completed ? 'Undo completion' : 'Complete task'">
+                  <span class="material-icons">{{ task.completed ? 'undo' : 'check' }}</span>
+                </button>
+                <button type="button" class="act-btn act-delete"
+                  (click)="promptDelete(task)" title="Delete task">
+                  <span class="material-icons">delete_outline</span>
+                </button>
+              </div>
+            </td>
+          </ng-container>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ── Pagination ───────────────────────────────────────────────── -->
+    <div class="tm-pagination" *ngIf="totalPages > 1">
+      <button type="button" class="page-btn" [disabled]="page === 1" (click)="goToPage(page - 1)">
+        <span class="material-icons">chevron_left</span>
+      </button>
+      <button
+        type="button"
+        *ngFor="let p of pages"
+        class="page-btn"
+        [class.active]="p === page"
+        (click)="goToPage(p)">
+        {{ p }}
+      </button>
+      <button type="button" class="page-btn" [disabled]="page === totalPages" (click)="goToPage(page + 1)">
+        <span class="material-icons">chevron_right</span>
+      </button>
+      <span class="page-info">{{ page }} / {{ totalPages }}</span>
+    </div>
+
+  </div>
+</div>

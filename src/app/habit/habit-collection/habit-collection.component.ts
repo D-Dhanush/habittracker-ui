@@ -61,6 +61,10 @@ export class HabitCollectionComponent implements OnInit {
     this.router.navigate(['/habit', habitId]);
   }
 
+  onHabitEdit(habitId: string): void {
+    this.router.navigate(['/habit', habitId, 'edit']);
+  }
+
   // Fixed: previously only updated local state. Now actually deletes
   // server-side first, and only updates local state on success.
   onHabitDeleteConfirmed(id: string): void {

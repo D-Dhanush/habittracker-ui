@@ -1,0 +1,573 @@
+@use '../../styles/theme' as *;
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  DRAG ROOT
+//  - Sits at position: fixed, top: 0, left: 0
+//  - transform: translate(x, y) is applied via TS directly to this element's
+//    parent (.arc-drag-root) — bypasses Angular CD entirely during drag.
+//  - GPU-accelerated: transform + will-change
+// ═══════════════════════════════════════════════════════════════════════════════
+
+.arc-drag-root {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9990;
+  // transform set dynamically by component
+  will-change: transform;
+  touch-action: none; // disable browser pan/zoom so pointer events fire
+  user-select: none;
+  -webkit-user-select: none;
+
+  // Default transition (snap animation). Removed during drag by TS.
+  transition: transform 380ms cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  // Cursor changes
+  cursor: grab;
+
+  &.arc-is-dragging {
+    cursor: grabbing;
+
+    .arc-fab {
+      transform: scale(1.08);
+      box-shadow:
+        0 0 0 3px rgba(192, 57, 43, 0.8),
+        0 0 40px rgba(192, 57, 43, 0.5),
+        0 16px 48px rgba(0, 0, 0, 0.7);
+    }
+
+    // Suppress shelf opening during drag
+    .ai-shelf { pointer-events: none !important; opacity: 0 !important; }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  FLOATING BUTTON
+// ═══════════════════════════════════════════════════════════════════════════════
+
+.arc-fab {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: none;
+  background: radial-gradient(circle at 40% 35%, #2a0808 0%, #0c0203 60%, #000 100%);
+  cursor: inherit; // inherit grab/grabbing from root
+  padding: 0;
+  outline: none;
+  overflow: visible;
+  flex-shrink: 0;
+  transition:
+    transform 250ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 250ms ease;
+  box-shadow:
+    0 0 0 2px rgba(192, 57, 43, 0.45),
+    0 0 20px rgba(192, 57, 43, 0.3),
+    0 8px 32px rgba(0, 0, 0, 0.65);
+
+  // Hover — only when not dragging
+  .arc-drag-root:not(.arc-is-dragging) &:hover {
+    transform: scale(1.08);
+    box-shadow:
+      0 0 0 2px rgba(192, 57, 43, 0.75),
+      0 0 32px rgba(192, 57, 43, 0.5),
+      0 8px 32px rgba(0, 0, 0, 0.65);
+  }
+
+  &.is-open {
+    box-shadow:
+      0 0 0 2px rgba(192, 57, 43, 0.9),
+      0 0 40px rgba(192, 57, 43, 0.6),
+      0 8px 32px rgba(0, 0, 0, 0.65);
+    .arc-portrait { transform: scale(0.88); }
+  }
+
+  &[data-state="bounce"]   { animation: arc-bounce 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  &[data-state="thinking"] { animation: arc-pulse 1.4s ease-in-out infinite; }
+  &[data-state="success"]  {
+    box-shadow:
+      0 0 0 3px rgba(61, 186, 110, 0.8),
+      0 0 40px rgba(61, 186, 110, 0.4),
+      0 8px 32px rgba(0, 0, 0, 0.65);
+  }
+
+  &.is-thinking .arc-ring--outer {
+    animation-duration: 0.9s;
+  }
+}
+
+// ── Drag hint icon ────────────────────────────────────────────────────────────
+
+.arc-drag-hint {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 4px;
+  opacity: 0;
+  transition: opacity 200ms ease;
+  pointer-events: none;
+  z-index: 3;
+
+  .material-icons {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.4);
+    filter: drop-shadow(0 0 3px rgba(0,0,0,0.8));
+  }
+}
+
+// Show drag hint on long hover (desktop only)
+@media (hover: hover) {
+  .arc-drag-root:hover .arc-drag-hint { opacity: 1; }
+}
+
+// ── Rings ─────────────────────────────────────────────────────────────────────
+
+.arc-ring {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.arc-ring--outer {
+  inset: -6px;
+  border: 2px solid transparent;
+  border-top-color: rgba(192, 57, 43, 0.7);
+  border-right-color: rgba(192, 57, 43, 0.4);
+  animation: ring-spin 4s linear infinite;
+}
+
+.arc-ring--inner {
+  inset: -2px;
+  border: 1px solid rgba(192, 57, 43, 0.2);
+}
+
+// ── Portrait ──────────────────────────────────────────────────────────────────
+
+.arc-portrait {
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  overflow: hidden;
+  z-index: 1;
+  transition: transform 250ms ease;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.6), 0 0 10px rgba(255,60,40,0.35);
+}
+
+.arc-portrait-img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+  display: block;
+  filter: drop-shadow(0 0 6px rgba(255,32,32,0.35));
+  pointer-events: none;
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+// ── Embers ────────────────────────────────────────────────────────────────────
+
+.arc-embers {
+  position: absolute;
+  inset: -18px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.arc-ember {
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  width: 3px; height: 3px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffb060 0%, #ff5028 55%, transparent 100%);
+  box-shadow: 0 0 5px rgba(255, 120, 60, 0.8);
+  opacity: 0;
+  animation: ember-rise 3.2s ease-in infinite;
+
+  @for $i from 1 through 6 {
+    &:nth-child(#{$i}) {
+      left: #{12 + ($i * 12)}px;
+      animation-delay: #{$i * 0.45}s;
+      animation-duration: #{2.6 + ($i * 0.2)}s;
+    }
+  }
+}
+
+// ── Thinking burst ────────────────────────────────────────────────────────────
+
+.arc-thinking {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 3px;
+  z-index: 2;
+
+  span {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: #ff6b3d;
+    box-shadow: 0 0 4px rgba(255,107,61,0.8);
+    animation: thinking-dot 1.2s ease-in-out infinite;
+
+    &:nth-child(2) { animation-delay: 0.2s; }
+    &:nth-child(3) { animation-delay: 0.4s; }
+  }
+}
+
+// ── Notification dot ──────────────────────────────────────────────────────────
+
+.arc-notif {
+  position: absolute;
+  top: 5px; right: 5px;
+  width: 11px; height: 11px;
+  border-radius: 50%;
+  background: #c0392b;
+  border: 2px solid #030408;
+  animation: notif-pulse 2s ease-in-out infinite;
+  z-index: 2;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  SHELF PANEL
+//  - position: fixed, placed by inline [style] bindings from TS
+//  - Opens above or below the FAB depending on available space
+// ═══════════════════════════════════════════════════════════════════════════════
+
+.ai-shelf {
+  position: fixed;
+  width: 380px;
+  max-height: 600px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 20px;
+  overflow: hidden;
+  background: linear-gradient(160deg, #0e0606 0%, #08020a 100%);
+  border: 1px solid rgba(192, 57, 43, 0.25);
+  box-shadow:
+    0 0 0 1px rgba(192, 57, 43, 0.1),
+    0 24px 80px rgba(0, 0, 0, 0.85),
+    0 0 60px rgba(192, 57, 43, 0.08);
+  z-index: 9991; // above the drag root
+
+  // Hidden state
+  opacity: 0;
+  transform: scale(0.94) translateY(8px);
+  pointer-events: none;
+  transform-origin: bottom right;
+  transition:
+    opacity 220ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 280ms cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  // Shelf opens below FAB
+  &.opens-below {
+    transform-origin: top right;
+    transform: scale(0.94) translateY(-8px);
+  }
+
+  // Visible state
+  &.is-open {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    pointer-events: all;
+  }
+}
+
+// ── Header ────────────────────────────────────────────────────────────────────
+
+.shelf-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  background: rgba(192, 57, 43, 0.06);
+  border-bottom: 1px solid rgba(192, 57, 43, 0.12);
+  flex-shrink: 0;
+}
+
+.shelf-avatar {
+  width: 40px; height: 40px;
+  border-radius: 50%; overflow: hidden;
+  background: radial-gradient(circle, #2d0808, #0a0202);
+  border: 1.5px solid rgba(192, 57, 43, 0.4);
+  flex-shrink: 0;
+  box-shadow: 0 0 12px rgba(192, 57, 43, 0.3);
+}
+
+.shelf-avatar-img {
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: center 30%;
+}
+
+.shelf-header-info { flex: 1; display: flex; flex-direction: column; gap: 1px; }
+
+.shelf-name {
+  font-size: 15px; font-weight: 700; color: $color-text-primary;
+  font-family: 'Cinzel', serif; letter-spacing: 0.03em;
+}
+
+.shelf-sub { font-size: 11px; color: rgba(192, 57, 43, 0.75); font-weight: 500; }
+
+.shelf-header-actions { display: flex; gap: 2px; }
+
+.shelf-icon-btn {
+  background: transparent; border: none; cursor: pointer;
+  width: 30px; height: 30px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  color: rgba(232, 244, 255, 0.35);
+  transition: background 150ms, color 150ms;
+
+  .material-icons { font-size: 16px; }
+  &:hover { background: rgba(192,57,43,0.1); color: rgba(232,244,255,0.8); }
+}
+
+// ── Messages ──────────────────────────────────────────────────────────────────
+
+.shelf-messages {
+  flex: 1; overflow-y: auto;
+  padding: 16px 12px;
+  display: flex; flex-direction: column; gap: 12px;
+  scroll-behavior: smooth;
+
+  &::-webkit-scrollbar { width: 4px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb { background: rgba(192,57,43,0.2); border-radius: 2px; }
+}
+
+// ── Suggestions ───────────────────────────────────────────────────────────────
+
+.suggestions-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.1em; color: rgba(192,57,43,0.6); margin: 0 0 8px;
+}
+
+.suggestions-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.suggestion-chip {
+  background: rgba(192,57,43,0.07);
+  border: 1px solid rgba(192,57,43,0.2);
+  border-radius: 999px;
+  color: rgba(232,244,255,0.7);
+  font-size: 11px; font-weight: 500;
+  padding: 5px 11px; cursor: pointer;
+  transition: background 150ms, border-color 150ms, color 150ms;
+  font-family: 'Poppins', sans-serif;
+
+  &:hover {
+    background: rgba(192,57,43,0.18);
+    border-color: rgba(192,57,43,0.45);
+    color: $color-text-primary;
+  }
+}
+
+// ── Bubbles ───────────────────────────────────────────────────────────────────
+
+.msg-row {
+  display: flex; gap: 8px;
+  &--user { justify-content: flex-end; }
+  &--ai   { justify-content: flex-start; align-items: flex-start; }
+}
+
+.ai-avatar-sm {
+  width: 28px; height: 28px; border-radius: 50%; overflow: hidden;
+  background: radial-gradient(circle, #2d0808, #0a0202);
+  border: 1px solid rgba(192,57,43,0.3);
+  flex-shrink: 0; margin-top: 2px;
+}
+
+.ai-avatar-sm-img { width: 100%; height: 100%; object-fit: cover; object-position: center 30%; }
+
+.bubble-ai-col { display: flex; flex-direction: column; gap: 4px; max-width: calc(100% - 40px); }
+
+.bubble {
+  padding: 10px 14px; border-radius: 14px;
+  font-size: 13px; line-height: 1.55;
+  font-family: 'Poppins', sans-serif; word-break: break-word;
+
+  &--user {
+    background: linear-gradient(135deg, #8b1a1a, #c0392b);
+    color: #fff; border-bottom-right-radius: 4px;
+    box-shadow: 0 2px 12px rgba(192,57,43,0.3); max-width: 80%;
+  }
+
+  &--ai {
+    background: rgba(20,8,8,0.85);
+    border: 1px solid rgba(192,57,43,0.12);
+    color: $color-text-primary; border-bottom-left-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+}
+
+.bubble-para { margin: 0; & + .bubble-para { margin-top: 8px; } }
+
+// ── Typing ────────────────────────────────────────────────────────────────────
+
+.typing-dots {
+  display: flex; gap: 4px; padding: 2px 0;
+
+  span {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: rgba(192,57,43,0.6);
+    animation: typing-dot 1.3s ease-in-out infinite;
+    &:nth-child(2) { animation-delay: 0.22s; }
+    &:nth-child(3) { animation-delay: 0.44s; }
+  }
+}
+
+// ── Action pills ──────────────────────────────────────────────────────────────
+
+.action-pills { display: flex; flex-direction: column; gap: 4px; }
+
+.action-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 600;
+  padding: 5px 10px; border-radius: 999px;
+  background: rgba(61,186,110,0.08);
+  border: 1px solid rgba(61,186,110,0.22);
+  color: $color-success; align-self: flex-start;
+  .material-icons { font-size: 13px; }
+}
+
+// ── Input ─────────────────────────────────────────────────────────────────────
+
+.shelf-input-area {
+  padding: 10px 12px 14px;
+  border-top: 1px solid rgba(192,57,43,0.1);
+  flex-shrink: 0;
+  background: rgba(8,2,2,0.5);
+}
+
+.shelf-input-wrap {
+  display: flex; align-items: flex-end; gap: 8px;
+  background: rgba(16,5,5,0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(192,57,43,0.22);
+  border-radius: 14px;
+  padding: 8px 8px 8px 14px;
+  transition: border-color 160ms, box-shadow 160ms;
+
+  &:focus-within {
+    border-color: rgba(192,57,43,0.55);
+    box-shadow: 0 0 0 3px rgba(192,57,43,0.1);
+  }
+}
+
+.shelf-input {
+  flex: 1; background: transparent; border: none; outline: none;
+  color: $color-text-primary; font-size: 13px;
+  font-family: 'Poppins', sans-serif; resize: none;
+  max-height: 100px; line-height: 1.5;
+
+  &::placeholder { color: rgba(192,57,43,0.35); font-style: italic; }
+  &:disabled { opacity: 0.45; }
+}
+
+.send-btn {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: linear-gradient(135deg, #8b1a1a, #c0392b);
+  border: none; color: #fff; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: opacity 160ms, transform 120ms, box-shadow 160ms;
+  box-shadow: 0 0 12px rgba(192,57,43,0.35);
+
+  .material-icons { font-size: 17px; }
+
+  &:hover:not(:disabled) { transform: scale(1.06); box-shadow: 0 0 20px rgba(192,57,43,0.55); }
+  &:disabled { opacity: 0.3; cursor: not-allowed; }
+}
+
+.shelf-hint {
+  font-size: 10px; color: rgba(232,244,255,0.25);
+  margin: 6px 0 0; text-align: center;
+}
+
+// ── Backdrop ──────────────────────────────────────────────────────────────────
+
+.shelf-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 9989;
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  ANIMATIONS — all GPU-accelerated (transform + opacity only)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+@keyframes arc-bounce {
+  0%   { transform: translateY(0) scale(1); }
+  30%  { transform: translateY(-14px) scale(1.07); }
+  60%  { transform: translateY(-4px) scale(1.02); }
+  80%  { transform: translateY(-8px) scale(1.05); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+@keyframes arc-pulse {
+  0%, 100% { box-shadow: 0 0 0 2px rgba(192,57,43,0.4), 0 0 20px rgba(192,57,43,0.3), 0 8px 32px rgba(0,0,0,0.6); }
+  50%       { box-shadow: 0 0 0 4px rgba(192,57,43,0.7), 0 0 36px rgba(192,57,43,0.55), 0 8px 32px rgba(0,0,0,0.6); }
+}
+
+@keyframes ring-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes ember-rise {
+  0%   { transform: translate(-50%, 0) scale(0.6); opacity: 0; }
+  15%  { opacity: 0.9; }
+  70%  { opacity: 0.6; }
+  100% { transform: translate(-50%, -46px) scale(0.2); opacity: 0; }
+}
+
+@keyframes thinking-dot {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30%            { transform: translateY(-5px); opacity: 1; }
+}
+
+@keyframes typing-dot {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.3; }
+  30%            { transform: translateY(-4px); opacity: 0.9; }
+}
+
+@keyframes notif-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%       { transform: scale(1.3); opacity: 0.7; }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  MOBILE
+// ═══════════════════════════════════════════════════════════════════════════════
+
+@media (max-width: 500px) {
+  .ai-shelf {
+    // On mobile, shelf always covers the bottom of the screen
+    position: fixed !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    top: auto !important;
+    width: 100% !important;
+    max-height: 78vh;
+    border-radius: 20px 20px 0 0;
+    transform-origin: bottom center !important;
+  }
+}
+
+// Keyboard accessible focus ring
+.arc-fab:focus-visible {
+  outline: 3px solid rgba(192, 57, 43, 0.7);
+  outline-offset: 4px;
+}
+
+.shelf-icon-btn:focus-visible,
+.send-btn:focus-visible,
+.suggestion-chip:focus-visible {
+  outline: 2px solid rgba(192, 57, 43, 0.6);
+  outline-offset: 2px;
+}

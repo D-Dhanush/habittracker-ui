@@ -19,7 +19,8 @@
       <div class="form-row">
         <mat-form-field appearance="outline" class="form-field">
           <mat-label>Habit Name *</mat-label>
-          <input matInput formControlName="name" placeholder="Enter habit name">
+          <input matInput formControlName="name" placeholder="Enter habit name" maxlength="40">
+          <mat-hint align="end">{{ habitForm.get('name')?.value?.length || 0 }}/40</mat-hint>
           <mat-error *ngIf="habitForm.get('name')?.hasError('required')">
             Habit name is required
           </mat-error>
@@ -30,7 +31,8 @@
 
         <mat-form-field appearance="outline" class="form-field">
           <mat-label>Subtitle (Optional)</mat-label>
-          <input matInput formControlName="subtitle" placeholder="Secondary description">
+          <input matInput formControlName="subtitle" placeholder="Secondary description" maxlength="60">
+          <mat-hint align="end">{{ habitForm.get('subtitle')?.value?.length || 0 }}/60</mat-hint>
         </mat-form-field>
       </div>
 
@@ -174,4 +176,3 @@
     </section>
   </form>
 </div>
-

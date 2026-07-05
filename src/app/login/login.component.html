@@ -1,6 +1,8 @@
 <div class="login-page">
   <div class="login-container">
     <div class="login-card">
+
+      <!-- Left panel: branding -->
       <div class="login-panel login-panel__visual">
         <div class="visual-content">
           <img src="assets/images/logo.jpeg" alt="ARCLORD logo" class="visual-logo">
@@ -12,73 +14,152 @@
         </div>
       </div>
 
+      <!-- Right panel: form -->
       <div class="login-panel login-panel__form">
-        <div class="mode-toggle">
-          <button
-            type="button"
-            class="mode-btn"
-            [class.active]="mode === 'login'"
-            (click)="switchMode('login')">
-            Log In
-          </button>
-          <button
-            type="button"
-            class="mode-btn"
-            [class.active]="mode === 'signup'"
-            (click)="switchMode('signup')">
-            Sign Up
-          </button>
-        </div>
 
-        <div class="form-header">
-          <p class="eyebrow">{{ isSignup ? 'Get started' : 'Welcome back' }}</p>
-          <h2>{{ isSignup ? 'Create your account' : 'Sign in to continue' }}</h2>
-          <p class="form-subtitle">
-            {{ isSignup
-              ? 'Set up your account with an email and password, or continue with Google.'
-              : 'Use your email and password, or continue with Google.' }}
-          </p>
-        </div>
-
-        <form [formGroup]="authForm" (ngSubmit)="onSubmit()" novalidate>
-          <ng-container *ngIf="isSignup">
-            <label for="displayName">Name</label>
-            <input id="displayName" type="text" formControlName="displayName" placeholder="Your name">
-          </ng-container>
-
-          <label for="emailOrUsername">Email</label>
-          <input id="emailOrUsername" type="text" formControlName="emailOrUsername" placeholder="Enter your email">
-          <div class="input-error" *ngIf="emailOrUsername?.invalid && emailOrUsername?.touched">
-            Please enter your email.
+        <!-- ── Forgot Password view ────────────────────────────────────── -->
+        <ng-container *ngIf="view === 'forgot'">
+          <div class="form-header">
+            <p class="eyebrow">Account Recovery</p>
+            <h2>Reset your password</h2>
+            <p class="form-subtitle">
+              Enter your email and we'll send you a reset link.
+            </p>
           </div>
 
-          <label for="password">Password</label>
-          <input id="password" type="password" formControlName="password" placeholder="Enter password">
-          <div class="input-error" *ngIf="password?.invalid && password?.touched">
-            <span *ngIf="password?.errors?.['required']">Password is required.</span>
-            <span *ngIf="password?.errors?.['minlength']">Password must be at least 6 characters.</span>
+          <p class="auth-success" *ngIf="resetSent">
+            ✓ If that email exists, a reset link has been sent. Check your inbox.
+          </p>
+
+          <form *ngIf="!resetSent" (ngSubmit)="sendForgotPassword()" novalidate>
+            <label for="resetEmail">Email</label>
+            <input
+              id="resetEmail"
+              type="email"
+              [(ngModel)]="resetEmail"
+              name="resetEmail"
+              placeholder="you@example.com"
+              autocomplete="email"
+              required>
+            <p class="input-error" *ngIf="resetError">{{ resetError }}</p>
+            <button type="submit" class="btn btn-primary" [disabled]="resetSubmitting || !resetEmail">
+              <span class="spinner-sm" *ngIf="resetSubmitting"></span>
+              {{ resetSubmitting ? 'Sending...' : 'Send Reset Link' }}
+            </button>
+          </form>
+
+          <div class="login-footer">
+            <p><a (click)="switchView('login')">← Back to Sign In</a></p>
+          </div>
+        </ng-container>
+
+        <!-- ── Login / Sign-up view ───────────────────────────────────── -->
+        <ng-container *ngIf="view === 'login' || view === 'signup'">
+
+          <!-- Mode toggle -->
+          <div class="mode-toggle">
+            <button type="button" class="mode-btn"
+                    [class.active]="mode === 'login'"
+                    (click)="switchMode('login')">Log In</button>
+            <button type="button" class="mode-btn"
+                    [class.active]="mode === 'signup'"
+                    (click)="switchMode('signup')">Sign Up</button>
           </div>
 
-          <button type="submit" class="btn btn-primary" [disabled]="submitting">
-            {{ submitting ? 'Please wait...' : (isSignup ? 'Create account' : 'Sign in') }}
-          </button>
-        </form>
+          <!-- Header -->
+          <div class="form-header">
+            <p class="eyebrow">{{ isSignup ? 'Get started' : 'Welcome back' }}</p>
+            <h2>{{ isSignup ? 'Create your account' : 'Sign in to continue' }}</h2>
+            <p class="form-subtitle">
+              {{ isSignup
+                ? 'Set up your account with an email and password, or continue with Google.'
+                : 'Use your email and password, or continue with Google.' }}
+            </p>
+          </div>
 
-        <div class="divider"><span>or continue with</span></div>
+          <!-- Session-expired notice -->
+          <p class="session-msg" *ngIf="sessionMsg">{{ sessionMsg }}</p>
 
-        <button type="button" class="btn btn-google" (click)="onGoogleSignIn()">
-          <span class="google-icon">G</span>
-          Continue with Google
-        </button>
+          <!-- Error banner -->
+          <p class="auth-error" *ngIf="error">{{ error }}</p>
 
-        <div class="login-footer">
-          <p *ngIf="!isSignup">
-            Don't have an account? <a (click)="switchMode('signup')">Sign up</a>
-          </p>
-          <p *ngIf="isSignup">
-            Already have an account? <a (click)="switchMode('login')">Log in</a>
-          </p>
-        </div>
+          <!-- Email / password form -->
+          <form [formGroup]="authForm" (ngSubmit)="onSubmit()" novalidate>
+
+            <ng-container *ngIf="isSignup">
+              <label for="displayName">Name</label>
+              <input
+                id="displayName"
+                type="text"
+                formControlName="displayName"
+                placeholder="Your name"
+                autocomplete="name">
+            </ng-container>
+
+            <label for="emailOrUsername">Email</label>
+            <input
+              id="emailOrUsername"
+              type="email"
+              formControlName="emailOrUsername"
+              placeholder="you@example.com"
+              autocomplete="email">
+            <div class="input-error" *ngIf="emailOrUsername?.invalid && emailOrUsername?.touched">
+              Please enter a valid email address.
+            </div>
+
+            <label for="password">Password</label>
+            <input
+              id="password"
+              type="password"
+              formControlName="password"
+              placeholder="{{ isSignup ? 'Choose a password (min 6 chars)' : 'Enter your password' }}"
+              [attr.autocomplete]="isSignup ? 'new-password' : 'current-password'">
+            <div class="input-error" *ngIf="password?.invalid && password?.touched">
+              <span *ngIf="password?.errors?.['required']">Password is required.</span>
+              <span *ngIf="password?.errors?.['minlength']">At least 6 characters required.</span>
+            </div>
+
+            <!-- Forgot password link — only on login mode -->
+            <div class="forgot-row" *ngIf="!isSignup">
+              <a class="forgot-link" (click)="switchView('forgot')">Forgot password?</a>
+            </div>
+
+            <button type="submit" class="btn btn-primary" [disabled]="submitting">
+              <span class="spinner-sm" *ngIf="submitting"></span>
+              {{ submitting ? 'Please wait...' : (isSignup ? 'Create account' : 'Sign in') }}
+            </button>
+
+          </form>
+
+          <!-- Divider -->
+          <div class="divider"><span>or continue with</span></div>
+
+          <!-- Google Sign-In -->
+          <div class="google-area">
+            <div class="auth-loading" *ngIf="loading">
+              <span class="spinner-sm spinner-blue"></span>
+              <span>Signing you in with Google…</span>
+            </div>
+            <!-- Official GSI-rendered button -->
+            <div id="google-signin-btn" class="google-btn-wrap" [hidden]="loading"></div>
+            <!-- Shown only when Client ID is not configured -->
+            <p class="google-unconfigured" *ngIf="!googleReady && !loading">
+              Google sign-in is not configured.
+              <span class="hint">Set <code>environment.googleClientId</code></span>
+            </p>
+          </div>
+
+          <!-- Footer -->
+          <div class="login-footer">
+            <p *ngIf="!isSignup">
+              Don't have an account? <a (click)="switchMode('signup')">Sign up free</a>
+            </p>
+            <p *ngIf="isSignup">
+              Already have an account? <a (click)="switchMode('login')">Log in</a>
+            </p>
+          </div>
+
+        </ng-container>
       </div>
     </div>
   </div>

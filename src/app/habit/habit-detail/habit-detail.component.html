@@ -3,11 +3,12 @@
   <div *ngIf="errorMessage && !loading" class="error-message">{{ errorMessage }}</div>
 
   <div *ngIf="habit && !loading" class="detail-layout">
+
     <header class="detail-header">
       <div class="header-icon">
         <span class="material-icons">{{ categoryIcon }}</span>
       </div>
-      <div>
+      <div class="header-text">
         <h1>{{ habit.name }}</h1>
         <p class="subtitle" *ngIf="habit.subtitle">{{ habit.subtitle }}</p>
       </div>
@@ -17,9 +18,7 @@
       </div>
     </header>
 
-    <!-- Fixed: previously showed fabricated streak/level numbers derived
-         from targetOccurrencesPerPeriod via arbitrary math. These are now
-         the real, persisted values from Habit.HabitProgress. -->
+    <!-- Summary stats -->
     <div class="detail-summary-grid">
       <div class="summary-card">
         <span class="summary-label">Current Streak</span>
@@ -39,26 +38,63 @@
       </div>
     </div>
 
+    <!-- ── Complete Habit CTA ────────────────────────────────── -->
+    <div class="completion-banner" [class.already-done]="isCompletedToday">
+
+      <!-- Floating XP popup -->
+      <div class="xp-popup" *ngIf="xpPopup !== null">
+        +{{ xpPopup }} XP ⚡
+      </div>
+
+      <ng-container *ngIf="!isCompletedToday">
+        <div class="completion-copy">
+          <span class="material-icons">emoji_events</span>
+          <div>
+            <p class="completion-title">Ready to complete today's habit?</p>
+            <p class="completion-sub">Earn <strong class="text-gold">+{{ habit.xpReward }} XP</strong> and grow your streak.</p>
+          </div>
+        </div>
+        <button
+          type="button"
+          class="complete-btn"
+          [class.loading]="completing"
+          [disabled]="completing"
+          (click)="completeHabit()">
+          <span class="material-icons" *ngIf="!completing">check_circle</span>
+          <span class="spinner-inline" *ngIf="completing"></span>
+          {{ completing ? 'Saving...' : 'Complete Habit' }}
+        </button>
+      </ng-container>
+
+      <ng-container *ngIf="isCompletedToday">
+        <span class="material-icons done-icon">verified</span>
+        <div>
+          <p class="completion-title">Completed today! ✨</p>
+          <p class="completion-sub text-blue">Come back tomorrow to keep the streak alive.</p>
+        </div>
+      </ng-container>
+    </div>
+
     <!-- Quests -->
     <div class="detail-section">
       <div class="section-header-row">
         <h2>Quests</h2>
         <button type="button" class="new-quest-btn" (click)="onNewQuest()">+ New Quest</button>
       </div>
-
       <div class="quests-grid" *ngIf="quests.length > 0">
         <app-quest-card
-          *ngFor="let quest of quests"
-          [quest]="quest"
-          (questClick)="onQuestClick($event)">
-        </app-quest-card>
+        *ngFor="let quest of quests"
+        [quest]="quest"
+        (questClick)="onQuestClick($event)"
+        (deleteQuest)="onDeleteQuest($event)">
+      </app-quest-card>
       </div>
-
       <p class="empty-state" *ngIf="quests.length === 0">
         No quests yet. Quests hold the tasks that earn XP toward this habit.
       </p>
     </div>
 
+    <!-- 30-day activity -->
     <div class="detail-section calendar-section">
       <h2>{{ calendarWindowDays }}-Day Activity</h2>
       <div class="calendar-grid">
@@ -69,39 +105,22 @@
           [title]="day.date | date:'mediumDate'">
         </div>
       </div>
-      <p class="calendar-note">Completed days are highlighted, based on real recorded completions.</p>
+      <p class="calendar-note">Completed days highlighted — based on recorded completions.</p>
     </div>
 
+    <!-- Basic info -->
     <div class="detail-section">
       <h2>Basic Info</h2>
-      <div class="detail-row">
-        <span class="label">Description</span>
-        <span class="value">{{ habit.description || 'No description provided' }}</span>
-      </div>
-      <div class="detail-row">
-        <span class="label">Created On</span>
-        <span class="value">{{ habit.startDt | date:'medium' }}</span>
-      </div>
-      <div class="detail-row">
-        <span class="label">Status</span>
-        <span class="value">{{ habit.status || (habit.isActive ? 'Active' : 'Inactive') }}</span>
-      </div>
+      <div class="detail-row"><span class="label">Description</span><span class="value">{{ habit.description || 'No description' }}</span></div>
+      <div class="detail-row"><span class="label">Created On</span><span class="value">{{ habit.startDt | date:'medium' }}</span></div>
+      <div class="detail-row"><span class="label">Status</span><span class="value">{{ habit.status || (habit.isActive ? 'Active' : 'Inactive') }}</span></div>
     </div>
 
     <div class="detail-section">
       <h2>Schedule</h2>
-      <div class="detail-row">
-        <span class="label">Frequency</span>
-        <span class="value">{{ habit.frequency }}</span>
-      </div>
-      <div class="detail-row">
-        <span class="label">Target</span>
-        <span class="value">{{ habit.targetOccurrencesPerPeriod || 'Not set' }}</span>
-      </div>
-      <div class="detail-row">
-        <span class="label">Reminder Time</span>
-        <span class="value">{{ habit.reminderTimeUtc || 'No reminder' }}</span>
-      </div>
+      <div class="detail-row"><span class="label">Frequency</span><span class="value">{{ habit.frequency }}</span></div>
+      <div class="detail-row"><span class="label">Target</span><span class="value">{{ habit.targetOccurrencesPerPeriod || 'Not set' }}</span></div>
+      <div class="detail-row"><span class="label">Reminder Time</span><span class="value">{{ habit.reminderTimeUtc || 'No reminder' }}</span></div>
     </div>
 
     <div class="detail-section">
@@ -109,12 +128,11 @@
       <div class="detail-row">
         <span class="label">Categories</span>
         <span class="value">
-          <ng-container *ngIf="habit.tagsList?.length; else noTags">
-          {{ habit.tagsList?.join(', ') }}
-          </ng-container>
+          <ng-container *ngIf="habit.tagsList?.length; else noTags">{{ habit.tagsList?.join(', ') }}</ng-container>
           <ng-template #noTags>None</ng-template>
         </span>
       </div>
     </div>
+
   </div>
 </section>
