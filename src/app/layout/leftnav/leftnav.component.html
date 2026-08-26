@@ -16,13 +16,13 @@
          matTooltip="Tasks" matTooltipPosition="right">
         <mat-icon>task_alt</mat-icon>
       </a>
-      <a mat-list-item routerLink="/calendar" routerLinkActive="active-link"
-         matTooltip="Calendar" matTooltipPosition="right">
-        <mat-icon>calendar_month</mat-icon>
-      </a>
       <a mat-list-item routerLink="/progress" routerLinkActive="active-link"
          matTooltip="Progress" matTooltipPosition="right">
         <mat-icon>trending_up</mat-icon>
+      </a>
+      <a mat-list-item routerLink="/subscription/status" routerLinkActive="active-link"
+         matTooltip="Premium" matTooltipPosition="right" class="premium-link">
+        <mat-icon>workspace_premium</mat-icon>
       </a>
     </mat-nav-list>
 
@@ -34,13 +34,25 @@
         <mat-icon>manage_accounts</mat-icon>
       </a>
 
-      <!-- FIXED: was *ngIf="isAdmin" — Settings (and the theme picker
-           living inside it, visible to every role) was unreachable for
-           anyone but Admin/Super Admin/Platform Owner/Moderator.
-           SettingsComponent already internally gates its own admin-only
-           panels (Users/Roles/Permissions/Analytics/Security) via its
-           own isAdmin()/isOwner() computed signals — this link itself
-           should be open to everyone, same icon for every role. -->
+      <button mat-list-item
+              matTooltip="Theme" matTooltipPosition="right"
+              class="theme-trigger"
+              type="button"
+              [matMenuTriggerFor]="themeMenu">
+        <mat-icon>palette</mat-icon>
+      </button>
+
+      <mat-menu #themeMenu="matMenu" class="theme-menu-panel" xPosition="before" yPosition="above">
+        <button mat-menu-item
+                *ngFor="let option of themeOptions"
+                (click)="setTheme(option.id)"
+                [class.theme-menu-active]="activeTheme() === option.id">
+          <span class="theme-menu-swatch" [attr.data-theme]="option.id"></span>
+          <span class="theme-menu-label">{{ option.label }}</span>
+          <span class="material-icons theme-menu-check" *ngIf="activeTheme() === option.id">check</span>
+        </button>
+      </mat-menu>
+
       <a mat-list-item routerLink="/settings" routerLinkActive="active-link"
          matTooltip="Settings" matTooltipPosition="right">
         <mat-icon>settings</mat-icon>

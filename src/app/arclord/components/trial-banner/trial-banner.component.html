@@ -1,0 +1,11 @@
+<div class="trial-banner" *ngIf="visible()" [class.trial-banner--urgent]="isUrgent()">
+  <span class="sparkle">✨</span>
+  <div class="trial-text">
+    <strong>Premium Trial Active</strong>
+    <span class="days">
+      {{ trial()!.daysRemaining }} {{ trial()!.daysRemaining === 1 ? 'Day' : 'Days' }} Remaining
+    </span>
+  </div>
+  <p class="trial-sub">Enjoy all premium features before your trial ends.</p>
+  <button class="upgrade-link" (click)="upgrade()">Upgrade Now</button>
+</div>

@@ -1,16 +1,16 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { ToastService } from '../../toast.service';
-import { ThemeService, THEME_OPTIONS, ThemeId } from '../../services/theme.service';
 import {
   UserManagementService,
   AdminUserRow,
   AdminRoleOption
 } from '../../services/user-management.service';
 import { RoleCountPipe } from '../../pipes/role-count.pipe';
+import { ThemeService, ThemeId, THEME_OPTIONS } from '../../services/theme.service';
 
 // ─── Role helpers ─────────────────────────────────────────────────────────────
 // These match exactly what the DB has (Admin, Player, Reader) plus future roles
@@ -26,8 +26,8 @@ type SettingsPanel =
   | 'analytics'
   | 'security'
   | 'profile'
-  | 'theme'
-  | 'account';
+  | 'account'
+  | 'theme';
 
 // ─── Permission catalogue (static, display only) ──────────────────────────────
 const PERMISSION_GROUPS = [
@@ -93,6 +93,10 @@ export class SettingsComponent implements OnInit {
   // ── Active panel ───────────────────────────────────────────────────────────
   activePanel = signal<SettingsPanel>('overview');
 
+  // ── Theme state ───────────────────────────────────────────────────────────
+  readonly themeOptions = THEME_OPTIONS;
+  readonly activeTheme = computed(() => this.themeSvc.activeTheme());
+
   // ── User Management state ─────────────────────────────────────────────────
   users:   AdminUserRow[]    = [];
   roles:   AdminRoleOption[] = [];
@@ -149,20 +153,11 @@ export class SettingsComponent implements OnInit {
     { label: 'New (30d)',       value: 0, icon: 'new_releases',        color: '#ff9800' },
   ];
 
-  // ── Theme ──────────────────────────────────────────────────────────────────
-  readonly themeOptions = THEME_OPTIONS;
-  readonly activeTheme = this.themeSvc.activeTheme;
-
-  setTheme(id: ThemeId): void {
-    this.themeSvc.setTheme(id);
-    const option = this.themeOptions.find(o => o.id === id);
-    this.toast.show(`Theme set to ${option?.label ?? id}.`, 'success');
-  }
-
   constructor(
     private auth: AuthService,
     private toast: ToastService,
     private umSvc: UserManagementService,
+    private route: ActivatedRoute,
     private themeSvc: ThemeService
   ) {}
 
@@ -172,6 +167,10 @@ export class SettingsComponent implements OnInit {
 
   // ── Panel navigation ───────────────────────────────────────────────────────
   setPanel(p: SettingsPanel): void { this.activePanel.set(p); }
+
+  setTheme(theme: ThemeId): void {
+    this.themeSvc.setTheme(theme);
+  }
 
   // ── User loading ───────────────────────────────────────────────────────────
   loadUsers(): void {

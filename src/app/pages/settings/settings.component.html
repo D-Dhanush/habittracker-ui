@@ -64,9 +64,6 @@
       <button class="nav-item" [class.active]="activePanel() === 'account'" (click)="setPanel('account')">
         <span class="material-icons">vpn_key</span> Account & Security
       </button>
-      <button class="nav-item" [class.active]="activePanel() === 'theme'" (click)="setPanel('theme')">
-        <span class="material-icons">palette</span> Theme & Display
-      </button>
       <button class="nav-item danger" (click)="logout()">
         <span class="material-icons">logout</span> Sign Out
       </button>
@@ -551,20 +548,10 @@
       <div class="panel-header">
         <div>
           <h2 class="panel-title">Theme & Display</h2>
-          <p class="panel-sub">Personalise your ArcLord experience. Choose a Solo Leveling inspired palette.</p>
+          <p class="panel-sub">Personalise your ArcLord experience. Choose a navy-first palette that feels consistent across the app.</p>
         </div>
       </div>
 
-      <!--
-        Wired to the real ThemeService (toggles a body.theme-* class,
-        persisted to localStorage). NOTE: only components referencing the
-        new --color-* CSS custom properties (theme-palettes.scss) will
-        visually reskin — most existing components still use the old
-        hardcoded hex values or theme.scss's compile-time SCSS variables,
-        so the overall app will only partially reskin until those are
-        individually migrated. This panel itself, and any newly-built
-        component, should prefer the var(--color-*) tokens going forward.
-      -->
       <div class="theme-picker-grid">
         <button
           type="button"
@@ -583,7 +570,6 @@
       <div class="info-note">
         <span class="material-icons">info</span>
         Theme choice is saved to this browser and applies automatically next time you sign in here.
-        Some older parts of the app may not fully reflect the new palette yet — that migration is ongoing.
       </div>
     </section>
 

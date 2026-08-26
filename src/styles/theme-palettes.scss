@@ -1,121 +1,174 @@
 // ─────────────────────────────────────────────────────────────────────────
 // THEME PALETTES — runtime-switchable via CSS custom properties.
 //
-// IMPORTANT: this is a NEW, separate layer from theme.scss's existing
-// $color-* SCSS variables. SCSS variables are resolved at COMPILE time —
-// they cannot change after the app is built, so they can't power a
-// runtime theme switcher. These are real CSS custom properties (--token),
-// resolved at RUNTIME in the browser, switched by toggling a class on
-// <body> (.theme-blue-black, .theme-gold-black, etc).
+// --color-primary-rgb is the R,G,B triplet of --color-primary so you can
+// write rgba(var(--color-primary-rgb), 0.12) for opacity variants anywhere
+// without needing separate opacity tokens.
 //
-// SCOPE NOTE (confirmed with user): only components that reference
-// var(--color-primary) etc. will reskin when the theme changes. Many
-// existing components still use the old hardcoded hex values or the old
-// $color-* SCSS variables directly — those will NOT reskin until
-// individually migrated to these custom properties. This file lays the
-// foundation; migrating existing components is follow-up work, not
-// included here.
-//
-// Palette sources: user-provided Solo Leveling reference art.
-//   Igris (cyan-blue armor glow on navy/black)      -> blue-black
-//   Red/black armor with crimson-magenta glow        -> red-black
-//   Pure gold/amber armor glow on black              -> gold-black
-//   Shadow Monarch violet flame on near-black         -> purple-black
-//   (no literal white-dominant reference image was provided — built as
-//    a light-background inversion of the blue palette instead, the
-//    closest reasonable interpretation of "white-blue")
+// New tokens added this round:
+//   --color-primary-rgb   R,G,B triplet for rgba() usage
+//   --color-success / --color-success-rgb
+//   --color-danger  / --color-danger-rgb
+//   --color-warning / --color-warning-rgb
+//   --color-xp      gold accent for XP / rank / milestone labels (semantic,
+//                   NOT the theme primary — gold stays gold in every theme)
 // ─────────────────────────────────────────────────────────────────────────
 
 :root,
 body.theme-blue-black {
-  // Default theme — matches the app's existing blue-black-gold palette.
-  --color-primary: #4dd9ff;
-  --color-primary-dim: #1a8fb5;
-  --color-primary-deep: #0a4a6e;
-  --color-secondary: #a87ce0;
-  --color-secondary-light: #c9a8f0;
-  --color-accent: #c9a227;
-  --color-accent-light: #ddb830;
-  --color-bg: #060c18;
-  --color-bg-darker: #03060f;
-  --color-bg-card: rgba(5, 12, 28, 0.78);
-  --color-text-primary: #ddf0ff;
-  --color-text-secondary: #6a9bbf;
-  --glow-primary: 0 0 12px rgba(77, 217, 255, 0.45), 0 0 24px rgba(77, 217, 255, 0.22);
-  --gradient-primary: linear-gradient(135deg, #1a8fb5, #4dd9ff);
+  --color-primary:         #3054b3;
+  --color-primary-rgb:     48, 84, 179;
+  --color-primary-dim:     #1f3560;
+  --color-primary-deep:    #0b1428;
+  --color-secondary:       #7c3a8c;
+  --color-secondary-rgb:   124, 58, 140;
+  --color-secondary-light: #b88bd3;
+  --color-accent:          #b53346;
+  --color-accent-light:    #e05b72;
+  --color-bg:              #03060b;
+  --color-bg-darker:       #010308;
+  --color-bg-card:         rgba(8, 10, 20, 0.92);
+  --color-text-primary:    #f4f2ff;
+  --color-text-secondary:  #7f8aa8;
+  --color-text-tertiary:   #4f5872;
+  --glow-primary:          0 0 12px rgba(48, 84, 179, 0.22), 0 0 24px rgba(181, 51, 70, 0.12);
+  --gradient-primary:      linear-gradient(135deg, #0e1728, #3054b3);
+
+  /* Status — shared across themes (must still read as success/danger/warning) */
+  --color-success:         #3dba6e;
+  --color-success-rgb:     61, 186, 110;
+  --color-danger:          #e03535;
+  --color-danger-rgb:      224, 53, 53;
+  --color-warning:         #e8920a;
+  --color-warning-rgb:     232, 146, 10;
+
+  /* Semantic XP/rank gold — intentionally NOT the theme primary */
+  --color-xp:              #c9a227;
+  --color-xp-light:        #ddb830;
+  --color-xp-rgb:          201, 162, 39;
 }
 
 body.theme-white-blue {
-  // Light-background inversion of the blue palette (no direct reference
-  // image showed a literal white theme — see scope note above).
-  --color-primary: #1a8fb5;
-  --color-primary-dim: #4dd9ff;
-  --color-primary-deep: #0a4a6e;
-  --color-secondary: #7a52b0;
-  --color-secondary-light: #a87ce0;
-  --color-accent: #b8860b;
-  --color-accent-light: #d4af37;
-  --color-bg: #f4f9fc;
-  --color-bg-darker: #e4eef5;
-  --color-bg-card: rgba(255, 255, 255, 0.85);
-  --color-text-primary: #0a2a3a;
-  --color-text-secondary: #3d6680;
-  --glow-primary: 0 0 12px rgba(26, 143, 181, 0.35), 0 0 24px rgba(26, 143, 181, 0.15);
-  --gradient-primary: linear-gradient(135deg, #1a8fb5, #4dd9ff);
+  --color-primary:         #4f7fb8;
+  --color-primary-rgb:     79, 127, 184;
+  --color-primary-dim:     #2f567f;
+  --color-primary-deep:    #08121f;
+  --color-secondary:       #87a9cb;
+  --color-secondary-rgb:   135, 169, 203;
+  --color-secondary-light: #cddff7;
+  --color-accent:          #a83f3f;
+  --color-accent-light:    #d06a5e;
+  --color-bg:              #08121f;
+  --color-bg-darker:       #040b14;
+  --color-bg-card:         rgba(10, 21, 38, 0.92);
+  --color-text-primary:    #f5f8ff;
+  --color-text-secondary:  #95a7bd;
+  --color-text-tertiary:   #5c6d83;
+  --glow-primary:          0 0 14px rgba(79, 127, 184, 0.24), 0 0 26px rgba(10, 21, 38, 0.18);
+  --gradient-primary:      linear-gradient(135deg, #0d1b2a, #4f7fb8);
+
+  --color-success:         #3bbf7f;
+  --color-success-rgb:     59, 191, 127;
+  --color-danger:          #ff5a70;
+  --color-danger-rgb:      255, 90, 112;
+  --color-warning:         #ffb84d;
+  --color-warning-rgb:     255, 184, 77;
+
+  --color-xp:              #8bc4ff;
+  --color-xp-light:        #cce6ff;
+  --color-xp-rgb:          139, 196, 255;
 }
 
 body.theme-gold-black {
-  // Pure gold/amber armor glow — gold becomes the dominant color here
-  // (deliberately, by request) rather than staying an accent-only color
-  // like in the default theme.
-  --color-primary: #e8c349;
-  --color-primary-dim: #c9a227;
-  --color-primary-deep: #8a6a14;
-  --color-secondary: #a87ce0;
+  --color-primary:         #e8c349;
+  --color-primary-rgb:     232, 195, 73;
+  --color-primary-dim:     #c9a227;
+  --color-primary-deep:    #8a6a14;
+  --color-secondary:       #a87ce0;
+  --color-secondary-rgb:   168,124,224;
   --color-secondary-light: #c9a8f0;
-  --color-accent: #fff3c4;
-  --color-accent-light: #ffe9a8;
-  --color-bg: #14110a;
-  --color-bg-darker: #0a0805;
-  --color-bg-card: rgba(28, 22, 8, 0.82);
-  --color-text-primary: #fff3d6;
-  --color-text-secondary: #b89a5c;
-  --glow-primary: 0 0 14px rgba(232, 195, 73, 0.55), 0 0 30px rgba(232, 195, 73, 0.28);
-  --gradient-primary: linear-gradient(135deg, #c9a227, #e8c349);
+  --color-accent:          #fff3c4;
+  --color-accent-light:    #ffe9a8;
+  --color-bg:              #14110a;
+  --color-bg-darker:       #0a0805;
+  --color-bg-card:         rgba(28, 22, 8, 0.82);
+  --color-text-primary:    #fff3d6;
+  --color-text-secondary:  #b89a5c;
+  --color-text-tertiary:   #7a6030;
+  --glow-primary:          0 0 14px rgba(232, 195, 73, 0.55), 0 0 30px rgba(232, 195, 73, 0.28);
+  --gradient-primary:      linear-gradient(135deg, #c9a227, #e8c349);
+
+  --color-success:         #4dc882;
+  --color-success-rgb:     77, 200, 130;
+  --color-danger:          #ff5c6a;
+  --color-danger-rgb:      255, 92, 106;
+  --color-warning:         #ffc85a;
+  --color-warning-rgb:     255, 200, 90;
+
+  /* In gold-black, XP/rank gold is the same as primary — intentional */
+  --color-xp:              #e8c349;
+  --color-xp-light:        #fff3c4;
+  --color-xp-rgb:          232, 195, 73;
 }
 
 body.theme-red-black {
-  // Crimson/black armor with a magenta-pink accent ribbon, per reference art.
-  --color-primary: #ff3b4e;
-  --color-primary-dim: #c4202f;
-  --color-primary-deep: #7a0e18;
-  --color-secondary: #e84393;
+  --color-primary:         #ff3b4e;
+  --color-primary-rgb:     255, 59, 78;
+  --color-primary-dim:     #c4202f;
+  --color-primary-deep:    #7a0e18;
+  --color-secondary:       #e84393;
+  --color-secondary-rgb:   232,67,147;
   --color-secondary-light: #ff79b8;
-  --color-accent: #ffd166;
-  --color-accent-light: #ffe9a8;
-  --color-bg: #140608;
-  --color-bg-darker: #0a0304;
-  --color-bg-card: rgba(28, 8, 12, 0.82);
-  --color-text-primary: #ffe8ec;
-  --color-text-secondary: #c97e88;
-  --glow-primary: 0 0 14px rgba(255, 59, 78, 0.55), 0 0 30px rgba(255, 59, 78, 0.28);
-  --gradient-primary: linear-gradient(135deg, #c4202f, #ff3b4e);
+  --color-accent:          #ffd166;
+  --color-accent-light:    #ffe9a8;
+  --color-bg:              #140608;
+  --color-bg-darker:       #0a0304;
+  --color-bg-card:         rgba(28, 8, 12, 0.82);
+  --color-text-primary:    #ffe8ec;
+  --color-text-secondary:  #c97e88;
+  --color-text-tertiary:   #7a3a42;
+  --glow-primary:          0 0 14px rgba(255, 59, 78, 0.55), 0 0 30px rgba(255, 59, 78, 0.28);
+  --gradient-primary:      linear-gradient(135deg, #c4202f, #ff3b4e);
+
+  --color-success:         #4dc882;
+  --color-success-rgb:     77, 200, 130;
+  --color-danger:          #ff5c6a;
+  --color-danger-rgb:      255, 92, 106;
+  --color-warning:         #ffd166;
+  --color-warning-rgb:     255, 209, 102;
+
+  --color-xp:              #ffd166;
+  --color-xp-light:        #ffe9a8;
+  --color-xp-rgb:          255, 209, 102;
 }
 
 body.theme-purple-black {
-  // Shadow Monarch violet flame on near-black, white highlight accents.
-  --color-primary: #9d5cff;
-  --color-primary-dim: #7a3fd6;
-  --color-primary-deep: #4a1f8a;
-  --color-secondary: #4dd9ff;
+  --color-primary:         #9d5cff;
+  --color-primary-rgb:     157, 92, 255;
+  --color-primary-dim:     #7a3fd6;
+  --color-primary-deep:    #4a1f8a;
+  --color-secondary:       #4dd9ff;
+  --color-secondary-rgb:   77,217,255;
   --color-secondary-light: #8be8ff;
-  --color-accent: #f0e6ff;
-  --color-accent-light: #ffffff;
-  --color-bg: #0c0814;
-  --color-bg-darker: #06040a;
-  --color-bg-card: rgba(18, 10, 30, 0.82);
-  --color-text-primary: #ece3ff;
-  --color-text-secondary: #9a85c4;
-  --glow-primary: 0 0 16px rgba(157, 92, 255, 0.55), 0 0 32px rgba(157, 92, 255, 0.3);
-  --gradient-primary: linear-gradient(135deg, #4a1f8a, #9d5cff);
+  --color-accent:          #f0e6ff;
+  --color-accent-light:    #ffffff;
+  --color-bg:              #0c0814;
+  --color-bg-darker:       #06040a;
+  --color-bg-card:         rgba(18, 10, 30, 0.82);
+  --color-text-primary:    #ece3ff;
+  --color-text-secondary:  #9a85c4;
+  --color-text-tertiary:   #5a4a80;
+  --glow-primary:          0 0 16px rgba(157, 92, 255, 0.55), 0 0 32px rgba(157, 92, 255, 0.3);
+  --gradient-primary:      linear-gradient(135deg, #4a1f8a, #9d5cff);
+
+  --color-success:         #4dc882;
+  --color-success-rgb:     77, 200, 130;
+  --color-danger:          #ff5c6a;
+  --color-danger-rgb:      255, 92, 106;
+  --color-warning:         #ffc85a;
+  --color-warning-rgb:     255, 200, 90;
+
+  --color-xp:              #f0c040;
+  --color-xp-light:        #ffe9a8;
+  --color-xp-rgb:          240, 192, 64;
 }

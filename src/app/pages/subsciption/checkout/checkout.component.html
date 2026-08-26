@@ -1,0 +1,118 @@
+<div class="checkout-page">
+
+  <div class="checkout-loading" *ngIf="loadingPlan()">
+    <div class="spinner"></div>
+  </div>
+
+  <ng-container *ngIf="!loadingPlan() && plan() as p">
+
+    <!-- ── Order summary ─────────────────────────────────────────────── -->
+    <aside class="order-summary">
+      <span class="eyebrow">Order Summary</span>
+      <h2>{{ p.name }} Plan</h2>
+      <p class="duration">{{ p.durationLabel }} access</p>
+
+      <div class="summary-row total">
+        <span>Total</span>
+        <span class="price">₹{{ p.priceInr }}</span>
+      </div>
+
+      <p class="secure-note">🔒 Payments verified server-side. Card and UPI details are handled entirely by the payment gateway — ArcLord never sees or stores them.</p>
+    </aside>
+
+    <!-- ── Checkout panel ────────────────────────────────────────────── -->
+    <main class="checkout-panel">
+
+      <ng-container [ngSwitch]="step()">
+
+        <!-- Method selection -->
+        <div *ngSwitchCase="'select-method'" class="method-select">
+          <h1>Choose payment method</h1>
+
+          <div class="method-group" *ngIf="groupedMethods()['upi'].length">
+            <span class="group-label">UPI</span>
+            <div class="method-options">
+              <button *ngFor="let m of groupedMethods()['upi']"
+                      class="method-chip"
+                      [class.method-chip--active]="selectedMethod() === m.type"
+                      (click)="selectMethod(m.type)">
+                {{ m.label }}
+              </button>
+            </div>
+          </div>
+
+          <div class="method-group" *ngIf="groupedMethods()['card'].length">
+            <span class="group-label">Cards</span>
+            <div class="method-options">
+              <button *ngFor="let m of groupedMethods()['card']"
+                      class="method-chip"
+                      [class.method-chip--active]="selectedMethod() === m.type"
+                      (click)="selectMethod(m.type)">
+                {{ m.label }}
+              </button>
+            </div>
+          </div>
+
+          <div class="method-group" *ngIf="groupedMethods()['netbanking'].length">
+            <span class="group-label">Net Banking</span>
+            <div class="method-options">
+              <button *ngFor="let m of groupedMethods()['netbanking']"
+                      class="method-chip"
+                      [class.method-chip--active]="selectedMethod() === m.type"
+                      (click)="selectMethod(m.type)">
+                {{ m.label }}
+              </button>
+            </div>
+          </div>
+
+          <div class="method-group" *ngIf="groupedMethods()['wallet'].length">
+            <span class="group-label">Wallets</span>
+            <div class="method-options">
+              <button *ngFor="let m of groupedMethods()['wallet']"
+                      class="method-chip"
+                      [class.method-chip--active]="selectedMethod() === m.type"
+                      (click)="selectMethod(m.type)">
+                {{ m.label }}
+              </button>
+            </div>
+          </div>
+
+          <p class="error-text" *ngIf="errorMessage()">{{ errorMessage() }}</p>
+
+          <button class="pay-btn" [disabled]="!selectedMethod()" (click)="pay()">
+            Pay ₹{{ p.priceInr }}
+          </button>
+        </div>
+
+        <!-- Processing / verifying -->
+        <div *ngSwitchCase="'processing'" class="status-panel">
+          <div class="spinner spinner--lg"></div>
+          <h2>Opening secure payment window…</h2>
+        </div>
+        <div *ngSwitchCase="'verifying'" class="status-panel">
+          <div class="spinner spinner--lg"></div>
+          <h2>Verifying your payment…</h2>
+          <p>Please don't close this window.</p>
+        </div>
+
+        <!-- Success -->
+        <div *ngSwitchCase="'success'" class="status-panel status-panel--success">
+          <div class="status-icon">✓</div>
+          <h2>Payment successful!</h2>
+          <p>{{ p.name }} plan is now active on your account.</p>
+          <button class="pay-btn" (click)="goToStatus()">View my subscription</button>
+        </div>
+
+        <!-- Failed -->
+        <div *ngSwitchCase="'failed'" class="status-panel status-panel--failed">
+          <div class="status-icon">✕</div>
+          <h2>Payment failed</h2>
+          <p>{{ errorMessage() }}</p>
+          <button class="pay-btn" (click)="retry()">Try again</button>
+        </div>
+
+      </ng-container>
+
+    </main>
+  </ng-container>
+</div>

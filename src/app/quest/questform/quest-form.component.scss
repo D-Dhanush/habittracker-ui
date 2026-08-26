@@ -13,7 +13,7 @@
   gap: 6px;
   background: transparent;
   border: 1px solid rgba(77, 217, 255, 0.25);
-  color: #4dd9ff;
+  color: var(--color-primary);
   padding: 8px 14px;
   border-radius: 999px;
   font-size: 13px;
@@ -138,12 +138,12 @@ select {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #1a8fb5, #4dd9ff);
-  color: #03060f;
+  background: linear-gradient(135deg, var(--color-primary-dim), var(--color-primary));
+  color: var(--color-bg-darker);
 }
 
 .btn-secondary {
   background: transparent;
   border: 1px solid rgba(77, 217, 255, 0.3);
-  color: #4dd9ff;
+  color: var(--color-primary);
 }

@@ -1,155 +1,88 @@
 @use './theme' as *;
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
 html, body {
   width: 100%;
   height: 100%;
-  // Font-family is set once, in styles.scss (Poppins) — was previously
-  // duplicated here as 'Segoe UI', which collided at equal CSS specificity
-  // with styles.scss's later declaration. Removed to avoid ambiguity.
-  background: $color-bg-darker;
-  color: $color-text-primary;
   overflow-x: hidden;
 }
 
-body {
-  margin: 0;
-  padding: 0;
-}
+body { margin: 0; padding: 0; }
 
-/* Scrollbar Styling */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
+// All headings use the serif brand font consistently
+h1, h2, h3, h4, h5, h6 { font-family: 'Cinzel', serif; }
 
-::-webkit-scrollbar-track {
-  background: rgba(77, 217, 255, 0.05);
-}
-
+// ── Scrollbar ─────────────────────────────────────────────────────────────────
+::-webkit-scrollbar       { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: rgba(var(--color-primary-rgb, 77,217,255), 0.04); }
 ::-webkit-scrollbar-thumb {
-  background: rgba(77, 217, 255, 0.25);
+  background: rgba(var(--color-primary-rgb, 77,217,255), 0.22);
   border-radius: 4px;
-
-  &:hover {
-    background: rgba(77, 217, 255, 0.5);
-  }
+  &:hover { background: rgba(var(--color-primary-rgb, 77,217,255), 0.45); }
 }
 
-/* Text Selection */
 ::selection {
-  background: rgba(77, 217, 255, 0.3);
-  color: $color-text-primary;
+  background: rgba(var(--color-primary-rgb, 77,217,255), 0.28);
+  color: var(--color-text-primary);
 }
 
-/* Animations */
-@keyframes shimmer {
-  0% {
-    background-position: -1000px 0;
-  }
-  100% {
-    background-position: 1000px 0;
-  }
+// ── Typography ────────────────────────────────────────────────────────────────
+// h1 gradient uses the theme primary token so it shifts with each theme
+h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: $spacing-md;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  @media (max-width: $breakpoint-md) { font-size: 2rem; }
 }
 
-@keyframes glow-pulse {
-  0%, 100% {
-    text-shadow: 0 0 5px $color-accent-light-blue;
-  }
-  50% {
-    text-shadow: 0 0 20px $color-accent-light-blue, 0 0 30px $color-accent-cyan;
-  }
+h2 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin-bottom: $spacing-md;
+  color: var(--color-text-primary);
+  @media (max-width: $breakpoint-md) { font-size: 1.5rem; }
 }
 
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
+h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: $spacing-sm;
+  color: var(--color-text-primary);
 }
 
-@keyframes slide-in-top {
-  from {
-    opacity: 0;
-    transform: translateY(-30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+h4, h5, h6 {
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: $spacing-sm;
 }
 
-@keyframes slide-in-bottom {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+p {
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin-bottom: $spacing-md;
 }
 
-@keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: all $transition-fast;
+  &:hover { opacity: 0.8; }
 }
 
-/* Global Classes */
+// ── Layout helpers ────────────────────────────────────────────────────────────
 .container {
   max-width: 1400px;
   margin: 0 auto;
   padding: $spacing-lg;
-
-  @media (max-width: $breakpoint-md) {
-    padding: $spacing-md;
-  }
+  @media (max-width: $breakpoint-md) { padding: $spacing-md; }
 }
 
-.grid {
-  display: grid;
-  gap: $spacing-lg;
-
-  @media (max-width: $breakpoint-md) {
-    gap: $spacing-md;
-  }
-}
-
-.grid-auto {
-  grid-auto-flow: dense;
-  grid-auto-rows: minmax(min-content, max-content);
-}
-
-.text-gold {
-  color: $color-primary-gold;
-}
-
-.text-blue {
-  color: $color-accent-light-blue;
-}
-
-.text-purple {
-  color: $color-primary-purple;
-}
-
-.text-secondary {
-  color: $color-text-secondary;
-}
-
-.text-tertiary {
-  color: $color-text-tertiary;
-}
-
+// ── Global badge utility ──────────────────────────────────────────────────────
 .badge {
   display: inline-block;
   padding: $spacing-xs $spacing-sm;
@@ -159,182 +92,57 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.5px;
 
+  &.badge-primary {
+    background: rgba(var(--color-primary-rgb), 0.2);
+    color: var(--color-primary);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.3);
+  }
   &.badge-gold {
-    background: rgba(212, 175, 55, 0.2);
-    color: $color-primary-gold;
-    border: 1px solid rgba(212, 175, 55, 0.3);
+    background: rgba(var(--color-xp-rgb), 0.2);
+    color: var(--color-xp);
+    border: 1px solid rgba(var(--color-xp-rgb), 0.3);
   }
-
-  &.badge-blue {
-    background: rgba(77, 217, 255, 0.2);
-    color: $color-accent-light-blue;
-    border: 1px solid rgba(77, 217, 255, 0.3);
-  }
-
   &.badge-success {
-    background: rgba(76, 175, 80, 0.2);
-    color: $color-success;
-    border: 1px solid rgba(76, 175, 80, 0.3);
+    background: rgba(var(--color-success-rgb), 0.2);
+    color: var(--color-success);
+    border: 1px solid rgba(var(--color-success-rgb), 0.3);
   }
-
+  &.badge-danger {
+    background: rgba(var(--color-danger-rgb), 0.2);
+    color: var(--color-danger);
+    border: 1px solid rgba(var(--color-danger-rgb), 0.3);
+  }
   &.badge-warning {
-    background: rgba(255, 152, 0, 0.2);
-    color: $color-warning;
-    border: 1px solid rgba(255, 152, 0, 0.3);
+    background: rgba(var(--color-warning-rgb), 0.2);
+    color: var(--color-warning);
+    border: 1px solid rgba(var(--color-warning-rgb), 0.3);
   }
 }
 
-/* Button Styles */
-button {
-  font-family: inherit;
-  cursor: pointer;
-  border: none;
-  transition: all $transition-standard;
+// ── Global skeleton / loader ──────────────────────────────────────────────────
+@keyframes shimmer {
+  0%   { background-position: -1000px 0; }
+  100% { background-position:  1000px 0; }
 }
 
-.btn-primary {
-  background: $color-primary-blue;
-  color: $color-bg-darker;
-  padding: $spacing-md $spacing-lg;
-  border-radius: $border-radius-md;
-  font-weight: 600;
-  box-shadow: $glow-blue;
-
-  &:hover {
-    background: $color-accent-cyan;
-    box-shadow: $glow-blue-strong;
-    transform: translateY(-2px);
-  }
-
-  &:active {
-    transform: translateY(0);
-  }
-}
-
-.btn-secondary {
-  background: rgba($color-accent-light-blue, 0.2);
-  color: $color-accent-light-blue;
-  padding: $spacing-md $spacing-lg;
-  border-radius: $border-radius-md;
-  border: 1px solid $color-accent-light-blue;
-  font-weight: 600;
-  box-shadow: $glow-blue;
-
-  &:hover {
-    background: rgba($color-accent-light-blue, 0.3);
-    box-shadow: $glow-blue-strong;
-    transform: translateY(-2px);
-  }
-
-  &:active {
-    transform: translateY(0);
-  }
-}
-
-.btn-ghost {
-  background: transparent;
-  color: $color-text-secondary;
-  padding: $spacing-md $spacing-lg;
-  border-radius: $border-radius-md;
-  border: 1px solid $color-text-tertiary;
-  font-weight: 600;
-
-  &:hover {
-    background: rgba(77, 217, 255, 0.1);
-    color: $color-accent-light-blue;
-    border-color: $color-accent-light-blue;
-  }
-
-  &:active {
-    transform: translateY(0);
-  }
-}
-
-/* Loading & Animations */
 .skeleton {
   background: linear-gradient(
     90deg,
-    rgba(77, 217, 255, 0.08) 0%,
-    rgba(77, 217, 255, 0.18) 50%,
-    rgba(77, 217, 255, 0.08) 100%
+    rgba(var(--color-primary-rgb), 0.06) 0%,
+    rgba(var(--color-primary-rgb), 0.14) 50%,
+    rgba(var(--color-primary-rgb), 0.06) 100%
   );
   background-size: 1000px 100%;
   animation: shimmer 2s infinite;
   border-radius: $border-radius-md;
 }
 
-.loader {
-  @include flex-center;
-  width: 40px;
-  height: 40px;
-  border: 3px solid rgba(77, 217, 255, 0.2);
-  border-top: 3px solid $color-accent-light-blue;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-10px); }
 }
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Responsive Typography */
-h1 {
-  font-size: 2.5rem;
-  font-weight: 700;
-  margin-bottom: $spacing-md;
-  background: linear-gradient(
-    135deg,
-    #4dd9ff,
-    #00c8ff,
-    #a5e9ff
-  );
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-
-  @media (max-width: $breakpoint-md) {
-    font-size: 2rem;
-  }
-}
-
-h2 {
-  font-size: 1.75rem;
-  font-weight: 600;
-  margin-bottom: $spacing-md;
-  color: $color-text-primary;
-
-  @media (max-width: $breakpoint-md) {
-    font-size: 1.5rem;
-  }
-}
-
-h3 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-bottom: $spacing-sm;
-  color: $color-text-primary;
-}
-
-h4, h5, h6 {
-  font-weight: 600;
-  color: $color-text-primary;
-  margin-bottom: $spacing-sm;
-}
-
-p {
-  color: $color-text-secondary;
-  line-height: 1.6;
-  margin-bottom: $spacing-md;
-}
-
-a {
-  color: $color-accent-light-blue;
-  text-decoration: none;
-  transition: all $transition-fast;
-
-  &:hover {
-    color: $color-accent-cyan;
-  }
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }

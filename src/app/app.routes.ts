@@ -35,6 +35,19 @@ export const routes: Routes = [
   { path: 'profile',       component: ProfileComponent,         canActivate: [authGuard] },
   { path: 'help',          component: HelpComponent,            canActivate: [authGuard] },
 
+  // Subscription / Premium — lazy-loaded so the checkout/payment code
+  // (and the gateway SDK loads it triggers) never ships in the main
+  // bundle for users who never open these pages.
+  { path: 'subscription/plans',
+    loadComponent: () => import('./pages/subsciption/plans/plans.component').then(m => m.PlansComponent),
+    canActivate: [authGuard] },
+  { path: 'subscription/checkout',
+    loadComponent: () => import('./pages/subsciption/checkout/checkout.component').then(m => m.CheckoutComponent),
+    canActivate: [authGuard] },
+  { path: 'subscription/status',
+    loadComponent: () => import('./pages/subsciption/status/status.component').then(m => m.SubscriptionStatusComponent),
+    canActivate: [authGuard] },
+
   // Admin-only — require Admin/Super Admin/Platform Owner role
   { path: 'settings',     component: SettingsComponent,         canActivate: [authGuard] },   // role-filtering inside component
   { path: 'admin/users',  component: UserManagementComponent,   canActivate: [adminGuard] },

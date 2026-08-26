@@ -45,10 +45,8 @@ $gold-glow:      rgba(212, 175, 55, 0.18);
   font-size: 26px;
   font-weight: 700;
   margin: 0;
-  background: linear-gradient(135deg, $gold-bright 0%, $gold-mid 60%, $gold-deep 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--color-text-primary);
+  text-shadow: 0 0 16px rgba(var(--color-primary-rgb), 0.18);
 }
 
 .tm-subtitle {
@@ -76,7 +74,7 @@ $gold-glow:      rgba(212, 175, 55, 0.18);
 
   &.pill-gold  { background: $gold-bg; border-color: $gold-border; color: $gold-mid; }
   &.pill-green { background: rgba(77, 200, 130, 0.08); border-color: rgba(77, 200, 130, 0.25); color: #4dc882; }
-  &.pill-blue  { background: rgba(77, 217, 255, 0.08); border-color: rgba(77, 217, 255, 0.25); color: #4dd9ff; }
+  &.pill-blue  { background: rgba(var(--color-primary-rgb), 0.08); border-color: rgba(var(--color-primary-rgb), 0.25); color: var(--color-primary); }
 }
 
 // ── Filters ───────────────────────────────────────────────────────────────────
@@ -89,7 +87,7 @@ $gold-glow:      rgba(212, 175, 55, 0.18);
   margin-bottom: 20px;
   padding: 16px;
   border-radius: 14px;
-  background: rgba(5, 12, 28, 0.7);
+  background: rgba(var(--color-bg-rgb, 5,12,28), 0.7);
   border: 1px solid $gold-border;
   box-shadow: 0 0 20px $gold-glow;
 }
@@ -137,7 +135,7 @@ select {
   outline: none;
   transition: border-color 160ms ease;
 
-  option { background: #060c18; }
+  option { background: var(--color-bg); }
   &:focus { border-color: $gold-mid; }
 }
 
@@ -303,8 +301,8 @@ select {
 
   .material-icons { font-size: 22px; color: rgba(232, 244, 255, 0.25); display: block; }
 
-  &.is-done .material-icons { color: #4caf50; }
-  &:not(.is-done):hover .material-icons { color: $gold-mid; transform: scale(1.1); }
+  &.is-done .material-icons { color: var(--color-success); }
+  &:not(.is-done):hover .material-icons { color: var(--color-primary); transform: scale(1.1); }
   &[disabled] { opacity: 0.5; cursor: not-allowed; }
 }
 
@@ -355,9 +353,9 @@ select {
   .crumb-icon { font-size: 13px; }
 
   &.crumb-habit {
-    background: rgba(77, 217, 255, 0.08);
-    border: 1px solid rgba(77, 217, 255, 0.2);
-    color: #4dd9ff;
+    background: rgba(var(--color-primary-rgb), 0.08);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+    color: var(--color-primary);
   }
 
   &.crumb-quest {
@@ -399,8 +397,13 @@ select {
 
 .xp-value {
   font-weight: 700;
-  color: $gold-mid;
+  color: var(--color-xp);
   font-size: 13px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(var(--color-xp-rgb), 0.12);
+  display: inline-flex;
+  align-items: center;
 }
 
 .date-value {
@@ -430,7 +433,7 @@ select {
 
   .material-icons { font-size: 16px; display: block; }
 
-  &.act-view    { color: rgba(77, 217, 255, 0.5);  &:hover { background: rgba(77,217,255,0.1);  color: #4dd9ff; border-color: rgba(77,217,255,0.3);  } }
+  &.act-view    { color: rgba(var(--color-primary-rgb), 0.5);  &:hover { background: rgba(var(--color-primary-rgb),0.1);  color: var(--color-primary); border-color: rgba(var(--color-primary-rgb),0.3);  } }
   &.act-complete{ color: rgba(77, 200, 130, 0.5); &:hover { background: rgba(77,200,130,0.1);  color: #4dc882; border-color: rgba(77,200,130,0.3);  } }
   &.act-delete  { color: rgba(255, 107, 107, 0.4); &:hover { background: rgba(255,107,107,0.1); color: #ff6b6b; border-color: rgba(255,107,107,0.3); } }
 }

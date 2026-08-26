@@ -654,10 +654,14 @@
 // (see styles/theme-palettes.scss) using attr-selector-scoped CSS variables,
 // so the swatch itself shows the real palette without needing JS per-swatch.
 
+// ── Theme picker — ALL colours hardcoded so the cards never change
+// with the active theme (they are a preview, not affected by what's selected).
+// ─────────────────────────────────────────────────────────────────────────────
+
 .theme-picker-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
   margin-bottom: 20px;
 }
 
@@ -667,64 +671,108 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 8px;
-  padding: 16px;
-  border-radius: 16px;
-  border: 1px solid rgba(77, 217, 255, 0.15);
-  background: rgba(13, 24, 44, 0.55);
+  padding: 14px;
+  border-radius: 14px;
+  // Static border — never uses CSS vars so it never changes with theme
+  border: 1px solid rgba(77, 217, 255, 0.14);
+  background: rgba(5, 12, 28, 0.75);
   cursor: pointer;
   text-align: left;
-  transition: border-color 180ms ease, transform 180ms ease, background 180ms ease;
+  transition: border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
 
   &:hover {
-    border-color: rgba(77, 217, 255, 0.4);
+    border-color: rgba(77, 217, 255, 0.38);
     transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
   }
 
+  // Active state — hardcoded blue outline, independent of theme
   &.active {
-    border-color: $color-primary-blue;
-    background: rgba(77, 217, 255, 0.08);
+    border-color: #4dd9ff;
+    background: rgba(77, 217, 255, 0.07);
+    box-shadow: 0 0 0 1px rgba(77, 217, 255, 0.2), 0 4px 16px rgba(0, 0, 0, 0.3);
   }
 }
+
+// ── Preview strip — static gradient showing theme colours ────────────────────
 
 .swatch-preview {
   width: 100%;
-  height: 48px;
-  border-radius: 10px;
+  height: 52px;
+  border-radius: 8px;
   display: block;
+  overflow: hidden;
+  position: relative;
+
+  // Simulate miniature app: left strip = nav bg, right = content bg + primary accent
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 8px;
+  }
 }
 
-// Per-theme swatch preview gradients, matching theme-palettes.scss exactly.
+// Each theme preview is fully hardcoded — no CSS vars
 .theme-swatch[data-theme="theme-blue-black"] .swatch-preview {
-  background: linear-gradient(135deg, #060c18 0%, #1a8fb5 55%, #4dd9ff 100%);
+  background: linear-gradient(90deg,
+    #03060f 0%, #03060f 22%,          // nav dark
+    #060c18 22%, #060c18 60%,          // content bg
+    #1a8fb5 60%, #4dd9ff 100%          // primary blue accent
+  );
 }
+
 .theme-swatch[data-theme="theme-white-blue"] .swatch-preview {
-  background: linear-gradient(135deg, #f4f9fc 0%, #4dd9ff 55%, #1a8fb5 100%);
+  background: linear-gradient(90deg,
+    #060e1a 0%, #060e1a 22%,           // nav navy
+    #0a1628 22%, #0a1628 60%,          // content navy
+    #4dd9ff 60%, #e8f4ff 100%          // cool white + cyan accent
+  );
 }
+
 .theme-swatch[data-theme="theme-gold-black"] .swatch-preview {
-  background: linear-gradient(135deg, #14110a 0%, #c9a227 55%, #e8c349 100%);
+  background: linear-gradient(90deg,
+    #0a0805 0%, #0a0805 22%,           // near black nav
+    #14110a 22%, #14110a 60%,          // dark amber bg
+    #c9a227 60%, #e8c349 100%          // gold accent
+  );
 }
+
 .theme-swatch[data-theme="theme-red-black"] .swatch-preview {
-  background: linear-gradient(135deg, #140608 0%, #c4202f 55%, #ff3b4e 100%);
+  background: linear-gradient(90deg,
+    #0a0304 0%, #0a0304 22%,           // deep black nav
+    #140608 22%, #140608 60%,          // dark crimson bg
+    #c4202f 60%, #ff3b4e 100%          // red accent
+  );
 }
+
 .theme-swatch[data-theme="theme-purple-black"] .swatch-preview {
-  background: linear-gradient(135deg, #0c0814 0%, #7a3fd6 55%, #9d5cff 100%);
+  background: linear-gradient(90deg,
+    #06040a 0%, #06040a 22%,           // near-black nav
+    #0c0814 22%, #0c0814 60%,          // deep purple bg
+    #7a3fd6 60%, #9d5cff 100%          // violet accent
+  );
 }
+
+// ── Labels — hardcoded colours so they never shift with theme ────────────────
 
 .swatch-label {
   font-weight: 700;
-  font-size: 0.95rem;
-  color: $color-text-primary;
+  font-size: 0.9rem;
+  color: #ddf0ff;  // hardcoded, not var(--color-text-primary)
+  margin-top: 4px;
 }
 
 .swatch-desc {
-  font-size: 0.8rem;
-  color: $color-text-secondary;
+  font-size: 0.75rem;
+  color: #6a9bbf;  // hardcoded
+  line-height: 1.4;
 }
 
 .swatch-check {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  color: $color-primary-blue;
-  font-size: 20px;
+  top: 10px;
+  right: 10px;
+  color: #4dd9ff;   // hardcoded
+  font-size: 18px;
 }

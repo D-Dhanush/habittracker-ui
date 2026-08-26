@@ -12,7 +12,7 @@ import { ToastService } from '../toast.service';
 // ── Constants ──────────────────────────────────────────────────────────────────
 const STORAGE_KEY    = 'arclord_arc_pos';
 const FAB_SIZE       = 72;
-const EDGE_MARGIN    = 16;
+const EDGE_MARGIN    = 10;
 const SNAP_THRESHOLD = 60; // px from edge to trigger snapping
 const MIN_DRAG_PX    = 5;  // below this movement = click, not drag
 
@@ -113,10 +113,11 @@ export class AiShelfComponent implements OnInit, OnDestroy {
         const vw = window.innerWidth;
         const vh = window.innerHeight;
         const y  = Math.round(saved.yPct * vh);
-        const x  = saved.edge === 'right'
-          ? vw - FAB_SIZE - EDGE_MARGIN
-          : EDGE_MARGIN;
-        this.pos         = { x, y };
+
+        // Preserve the last saved position as-is when it exists, but keep it
+        // inside the viewport with a small edge gap.
+        const x = this.clampX(saved.edge === 'right' ? vw - FAB_SIZE - EDGE_MARGIN : EDGE_MARGIN, vw);
+        this.pos         = { x, y: this.clampY(y, vh) };
         this.snappedEdge = saved.edge;
         this.applyPos(false);
         return;
@@ -153,14 +154,13 @@ export class AiShelfComponent implements OnInit, OnDestroy {
     this.updateShelfPosition();
   }
 
-  /** Clamp pos inside viewport + optional snap to nearest edge. */
+  /** Clamp pos inside viewport without moving it to a fixed edge. */
   private clampAndSnap(snap: boolean, animate = true): void {
     const vw = window.innerWidth;
     const vh = window.innerHeight;
 
-    // Clamp
-    this.pos.x = Math.max(EDGE_MARGIN, Math.min(vw  - FAB_SIZE - EDGE_MARGIN, this.pos.x));
-    this.pos.y = Math.max(EDGE_MARGIN, Math.min(vh  - FAB_SIZE - EDGE_MARGIN, this.pos.y));
+    this.pos.x = this.clampX(this.pos.x, vw);
+    this.pos.y = this.clampY(this.pos.y, vh);
 
     if (snap) {
       const midX = vw / 2;
@@ -174,13 +174,21 @@ export class AiShelfComponent implements OnInit, OnDestroy {
     this.savePosition();
   }
 
+  private clampX(x: number, vw: number): number {
+    return Math.max(EDGE_MARGIN, Math.min(vw - FAB_SIZE - EDGE_MARGIN, x));
+  }
+
+  private clampY(y: number, vh: number): number {
+    return Math.max(EDGE_MARGIN, Math.min(vh - FAB_SIZE - EDGE_MARGIN, y));
+  }
+
   /** Calculate where the shelf panel should appear relative to the FAB. */
   private updateShelfPosition(): void {
     const vw = window.innerWidth;
     const vh = window.innerHeight;
     const SHELF_H = 620; // approximate max shelf height
     const SHELF_W = 380;
-    const gap = 12;
+    const gap = 10;
 
     // Open above or below?
     const spaceAbove = this.pos.y;
@@ -188,25 +196,25 @@ export class AiShelfComponent implements OnInit, OnDestroy {
     this.shelfOpenAbove = spaceAbove > spaceBelow || spaceAbove > SHELF_H * 0.5;
 
     if (this.shelfOpenAbove) {
-      this.shelfBottom = vh - this.pos.y + gap;
+      this.shelfBottom = Math.max(12, vh - this.pos.y + gap);
       this.shelfTop = null;
     } else {
-      this.shelfTop    = this.pos.y + FAB_SIZE + gap;
+      this.shelfTop    = Math.max(12, this.pos.y + FAB_SIZE + gap);
       this.shelfBottom = 0;
     }
 
-    // Left or right anchor for horizontal
-    if (this.snappedEdge === 'right') {
-      this.shelfRight = vw - this.pos.x - FAB_SIZE;
-      this.shelfLeft  = 0;
+    const preferredLeft = this.pos.x + FAB_SIZE + gap;
+    const preferredRight = this.pos.x - SHELF_W - gap;
+
+    // Keep the shelf beside the button with a fixed 10px gap.
+    // If there is not enough room on the right, place it to the left.
+    if (preferredLeft + SHELF_W <= vw - EDGE_MARGIN) {
+      this.shelfLeft = preferredLeft;
+      this.shelfRight = 0;
     } else {
-      this.shelfLeft  = this.pos.x;
+      this.shelfLeft = Math.max(EDGE_MARGIN, preferredRight);
       this.shelfRight = 0;
     }
-
-    // Keep shelf inside viewport horizontally
-    const maxLeft = vw - SHELF_W - EDGE_MARGIN;
-    if (this.shelfLeft > maxLeft) this.shelfLeft = maxLeft;
 
     this.cdr.markForCheck();
   }
@@ -266,8 +274,7 @@ export class AiShelfComponent implements OnInit, OnDestroy {
     this.activePointerId = null;
 
     if (this.didDrag) {
-      // Snap to nearest edge with spring animation
-      this.clampAndSnap(true, true);
+      this.finalizeDrag(true);
       // Play landing bounce
       this.arcState.set('bounce');
       setTimeout(() => { this.arcState.set('idle'); this.cdr.markForCheck(); }, 800);
@@ -284,8 +291,20 @@ export class AiShelfComponent implements OnInit, OnDestroy {
     if (e.pointerId !== this.activePointerId) return;
     this.isDragging      = false;
     this.activePointerId = null;
-    // Snap back to edge
-    this.clampAndSnap(true, true);
+    this.finalizeDrag(true);
+  }
+
+  private finalizeDrag(animate = true): void {
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    this.pos.x = Math.max(EDGE_MARGIN, Math.min(vw - FAB_SIZE - EDGE_MARGIN, this.pos.x));
+    this.pos.y = Math.max(EDGE_MARGIN, Math.min(vh - FAB_SIZE - EDGE_MARGIN, this.pos.y));
+
+    // Keep the icon where it was dropped, while still enforcing a small gap
+    // from the viewport edge. Avoid snapping it to a side edge automatically.
+    this.applyPos(animate);
+    this.savePosition();
   }
 
   private removeGlobalListeners(): void { /* pointer capture handles cleanup */ }

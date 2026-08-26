@@ -8,7 +8,9 @@
   position: relative;
   border-radius: 20px;
   cursor: pointer;
-  min-height: 300px;
+  width: min(100%, 320px);
+  min-height: 320px;
+  max-height: 340px;
   display: flex;
   flex-direction: column;
   transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
@@ -17,24 +19,24 @@
 
   // FIXED: border/glow fallback was gold (#d4af37) when a habit had no
   // custom color set — meaning most cards rendered gold-bordered by
-  // default. Reverted to blue (#4dd9ff), matching the rest of the app's
+  // default. Reverted to blue (var(--color-primary)), matching the rest of the app's
   // theme (gold is reserved for the interior/XP accent, not the frame).
   background: linear-gradient(160deg, rgba(10, 20, 38, 0.92) 0%, rgba(6, 12, 24, 0.96) 100%);
   border: 1px solid rgba(var(--primary-color-rgb, 77, 217, 255), 0.25);
-  border-color: color-mix(in srgb, var(--primary-color, #4dd9ff) 25%, transparent);
+  border-color: color-mix(in srgb, var(--primary-color, var(--color-primary)) 25%, transparent);
   box-shadow:
     0 18px 48px rgba(0, 0, 0, 0.5),
-    0 0 24px color-mix(in srgb, var(--primary-color, #4dd9ff) 8%, transparent),
+    0 0 24px color-mix(in srgb, var(--primary-color, var(--color-primary)) 8%, transparent),
     inset 0 1px 0 rgba(255, 255, 255, 0.04);
 
   color: #e8f4ff;
 
   &:hover {
     transform: translateY(-4px) scale(1.01);
-    border-color: color-mix(in srgb, var(--primary-color, #4dd9ff) 55%, transparent);
+    border-color: color-mix(in srgb, var(--primary-color, var(--color-primary)) 55%, transparent);
     box-shadow:
       0 24px 56px rgba(0, 0, 0, 0.55),
-      0 0 36px color-mix(in srgb, var(--primary-color, #4dd9ff) 22%, transparent),
+      0 0 36px color-mix(in srgb, var(--primary-color, var(--color-primary)) 22%, transparent),
       inset 0 1px 0 rgba(255, 255, 255, 0.06);
   }
 }
@@ -94,10 +96,6 @@
 }
 
 .card-content {
-  // NEW: interior content area is now gold-tinted (per request — card
-  // frame/border stays blue, the dark interior where stats/text live
-  // becomes a warm gold-on-dark surface). Sits above .sparkle-layer via
-  // z-index so text always stays readable through the falling sparkles.
   position: relative;
   z-index: 2;
   overflow: hidden;
@@ -107,6 +105,7 @@
   flex-direction: column;
   gap: 12px;
   flex: 1;
+  height: 100%;
   background: linear-gradient(165deg, rgba(58, 44, 8, 0.55) 0%, rgba(20, 15, 4, 0.85) 100%);
   box-shadow: inset 0 0 40px rgba(212, 175, 55, 0.08);
 }
@@ -161,18 +160,26 @@
   font-weight: 700;
   margin: 0;
   color: #f0f8ff;
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 1.3;
+  min-height: 2.6em;
 }
 
 .habit-subtitle {
   font-size: 12px;
   color: rgba(232, 244, 255, 0.55);
   margin: 3px 0 0;
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 1.35;
+  min-height: 2.7em;
 }
 
 // Shared hover tooltip: shows the full, untruncated text in a small white box
@@ -305,7 +312,7 @@
   &.badge-purple {
     background: rgba(168, 124, 224, 0.12);
     border-color: rgba(168, 124, 224, 0.3);
-    color: #c9a8f0;
+    color: var(--color-secondary-light);
   }
 }
 
@@ -363,7 +370,7 @@
 .week-day.is-completed .day-circle {
   background: color-mix(in srgb, var(--primary-color, #d4af37) 80%, transparent);
   border-color: var(--primary-color, #d4af37);
-  color: #060c18;
+  color: var(--color-bg);
   box-shadow: 0 0 8px color-mix(in srgb, var(--primary-color, #d4af37) 50%, transparent);
 }
 
@@ -436,8 +443,8 @@
   font-size: 15px;
   font-weight: 700;
   &.text-orange { color: #ff9a3c; }
-  &.text-purple { color: #c9a8f0; }
-  &.text-gold   { color: #d4af37; }
+  &.text-purple { color: var(--color-secondary-light); }
+  &.text-xp     { color: var(--color-xp); text-shadow: 0 0 10px rgba(var(--color-xp-rgb), 0.2); }
 }
 
 // ── Progress ─────────────────────────────────────────────────────────────
@@ -559,5 +566,5 @@
 .confirm-no {
   background: rgba(77, 217, 255, 0.12);
   border: 1px solid rgba(77, 217, 255, 0.3);
-  color: #4dd9ff;
+  color: var(--color-primary);
 }

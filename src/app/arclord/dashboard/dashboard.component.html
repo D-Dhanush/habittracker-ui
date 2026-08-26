@@ -67,23 +67,38 @@
     </app-stat-card>
   </section>
 
-  <!-- Calendar: fully self-contained, fetches its own data and handles
-       its own month navigation — no bindings needed here. -->
-  <section class="dashboard-section">
-    <h2 class="section-title">Activity</h2>
-    <app-calendar></app-calendar>
-  </section>
-
-  <!-- Weekly completion -->
+  <!-- Progress overview -->
   <section class="dashboard-section" *ngIf="weeklyData$ | async as weeklyData">
-    <h2 class="section-title">This Month</h2>
-    <div class="weekly-bars">
-      <div class="weekly-bar-item" *ngFor="let week of weeklyData">
-        <div class="bar-track">
-          <div class="bar-fill" [style.height.%]="week.completionPercentage"></div>
+    <h2 class="section-title">Progress Overview</h2>
+    <div class="overview-grid">
+      <div class="overview-card chart-card">
+        <div class="card-header">
+          <span class="card-title">Weekly Completion</span>
+          <span class="card-badge">Dynamic</span>
         </div>
-        <span class="bar-label">{{ week.week }}</span>
-        <span class="bar-value">{{ week.completionPercentage }}%</span>
+        <div class="weekly-bars">
+          <div class="weekly-bar-item" *ngFor="let week of weeklyData">
+            <div class="bar-track">
+              <div class="bar-fill" [style.height.%]="week.completionPercentage"></div>
+            </div>
+            <span class="bar-label">{{ week.week }}</span>
+            <span class="bar-value">{{ week.completionPercentage }}%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="overview-card metrics-card" *ngIf="rankInfo">
+        <div class="card-header">
+          <span class="card-title">Next Milestone</span>
+          <span class="card-badge accent">{{ rankInfo.rank }}</span>
+        </div>
+        <div class="milestone-ring">
+          <div class="milestone-value">{{ rankInfo.xpProgress }}%</div>
+        </div>
+        <div class="milestone-copy">
+          <span>{{ rankInfo.currentLevel }} / {{ rankInfo.currentLevel + 1 }}</span>
+          <strong>{{ rankInfo.xpToNextLevel }} XP to next level</strong>
+        </div>
       </div>
     </div>
   </section>

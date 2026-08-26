@@ -318,7 +318,7 @@ input {
   justify-content: center;
   gap: 10px;
   padding: 12px 0;
-  color: #4dd9ff;
+  color: var(--color-primary);
   font-size: 0.9rem;
 }
 
@@ -349,14 +349,14 @@ input {
   width: 15px;
   height: 15px;
   border: 2px solid rgba(3, 6, 15, 0.3);
-  border-top-color: #03060f;
+  border-top-color: var(--color-bg-darker);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
   flex-shrink: 0;
 
   &.spinner-blue {
     border-color: rgba(77, 217, 255, 0.2);
-    border-top-color: #4dd9ff;
+    border-top-color: var(--color-primary);
   }
 }
 
@@ -377,7 +377,7 @@ input {
   text-decoration: underline;
 
   &:hover {
-    color: #4dd9ff;
+    color: var(--color-primary);
   }
 }
 
@@ -393,5 +393,5 @@ input {
 
 .spinner-blue {
   border-color: rgba(77, 217, 255, 0.2);
-  border-top-color: #4dd9ff;
+  border-top-color: var(--color-primary);
 }

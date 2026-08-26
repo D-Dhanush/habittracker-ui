@@ -105,7 +105,7 @@
 .btn-primary {
   background: linear-gradient(135deg, rgba(77,217,255,.25), rgba(77,217,255,.1));
   border: 1px solid rgba(77,217,255,.35);
-  color: #4dd9ff;
+  color: var(--color-primary);
 }
 
 .btn-ghost {

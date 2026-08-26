@@ -14,12 +14,12 @@ export interface ThemeOption {
 }
 
 const THEME_KEY = 'arclord_theme';
-const DEFAULT_THEME: ThemeId = 'theme-blue-black';
+const DEFAULT_THEME: ThemeId = 'theme-white-blue';
 
 // Order here is the order shown in the theme picker UI.
 export const THEME_OPTIONS: ThemeOption[] = [
-  { id: 'theme-blue-black', label: 'Igris (Blue-Black-Gold)', description: 'The default ARCLORD theme.' },
-  { id: 'theme-white-blue', label: 'White-Blue', description: 'A light, blue-accented theme.' },
+  { id: 'theme-white-blue', label: 'Navy Blue', description: 'Deep navy base with bright blue accents.' },
+  { id: 'theme-blue-black', label: 'Igris (Blue-Black-Gold)', description: 'The classic ARCLORD cyan-and-gold theme.' },
   { id: 'theme-gold-black', label: 'Gold-Black', description: 'Pure gold armor glow on black.' },
   { id: 'theme-red-black', label: 'Red-Black', description: 'Crimson armor glow on black.' },
   { id: 'theme-purple-black', label: 'Shadow Monarch (Purple-Black)', description: 'Violet flame on near-black.' }

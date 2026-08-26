@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { LeftnavComponent } from './leftnav.component';
+import { StatusComponent } from './status.component';
 
-describe('LeftnavComponent', () => {
-  let component: LeftnavComponent;
-  let fixture: ComponentFixture<LeftnavComponent>;
+describe('StatusComponent', () => {
+  let component: StatusComponent;
+  let fixture: ComponentFixture<StatusComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [LeftnavComponent]
+      imports: [StatusComponent]
     })
     .compileComponents();
-    
-    fixture = TestBed.createComponent(LeftnavComponent);
+
+    fixture = TestBed.createComponent(StatusComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

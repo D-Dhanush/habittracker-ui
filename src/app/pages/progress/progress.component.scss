@@ -1,279 +1,259 @@
 @use '../../../styles/theme' as *;
 
-:host {
-  display: block;
-}
+// ── Page shell ────────────────────────────────────────────────────────────────
 
-// ── Utility colours ──────────────────────────────────────────────────
-.text-gold   { color: $color-primary-gold; }
-.text-blue   { color: $color-accent-light-blue; }
-.text-purple { color: $color-primary-purple; }
-
-// ── Shell / header ───────────────────────────────────────────────────
 .progress-shell {
-  display: grid;
-  gap: $spacing-lg;
-  padding: $spacing-xl;
-
-  @media (max-width: $breakpoint-md) {
-    padding: $spacing-md;
-  }
+  padding: 32px 36px 64px;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  color: var(--color-text-primary);
 }
+
+// ── Header ─────────────────────────────────────────────────────────────────────
 
 .progress-header {
   h1 {
-    margin: 0 0 $spacing-xs;
-    font-size: clamp(1.75rem, 2.4vw, 2.5rem);
+    font-size: 32px;
+    margin: 0 0 6px;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
-
-  p {
-    margin: 0;
-    color: $color-text-secondary;
-  }
+  p { color: var(--color-text-secondary); font-size: 14px; margin: 0; }
 }
 
-// ── Loading / error states ────────────────────────────────────────────
+// ── States ─────────────────────────────────────────────────────────────────────
+
 .state-message {
   text-align: center;
-  padding: 60px 20px;
-  color: $color-text-secondary;
-  font-size: 1rem;
+  padding: 60px 0;
+  color: var(--color-text-secondary);
+  font-size: 14px;
 
-  &.state-error {
-    color: $color-danger;
+  &.state-error { color: var(--color-danger); }
 
-    button {
-      margin-top: $spacing-md;
-      display: block;
-      margin-inline: auto;
-      background: rgba($color-accent-light-blue, 0.12);
-      border: 1px solid rgba($color-accent-light-blue, 0.3);
-      color: $color-accent-light-blue;
-      padding: 6px 18px;
-      border-radius: $border-radius-md;
-      cursor: pointer;
-      font-size: 0.9rem;
-      transition: background $transition-fast;
-
-      &:hover {
-        background: rgba($color-accent-light-blue, 0.22);
-      }
-    }
+  button {
+    margin: 10px auto 0;
+    display: block;
+    padding: 7px 16px;
+    background: rgba(var(--color-primary-rgb), 0.1);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.25);
+    border-radius: $border-radius-md;
+    color: var(--color-primary);
+    cursor: pointer;
+    font-size: 13px;
   }
 }
 
-// ── Top metric tiles ──────────────────────────────────────────────────
+// ── Metric grid (3-up top row) ────────────────────────────────────────────────
+
 .metric-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: $spacing-md;
-
-  @media (max-width: $breakpoint-md) {
-    grid-template-columns: 1fr;
-  }
+  gap: 16px;
 }
 
 .metric-card {
-  @include glass-morphism;
-  display: flex;
-  align-items: center;
-  gap: $spacing-md;
-  padding: $spacing-md $spacing-lg !important;
-  border-radius: $border-radius-lg !important;
-  background: $color-bg-card !important;
-  border: 1px solid rgba($color-accent-light-blue, 0.14) !important;
-  box-shadow: $shadow-elevation-1 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 18px;
+  padding: 22px 24px !important;
+  background: var(--color-bg-card) !important;
+  border: 1px solid rgba(var(--color-primary-rgb), 0.14) !important;
+  border-radius: 18px !important;
+  box-shadow: none !important;
+  transition: border-color $transition-fast, box-shadow $transition-fast;
+
+  &:hover {
+    border-color: rgba(var(--color-primary-rgb), 0.32) !important;
+    box-shadow: 0 0 20px rgba(var(--color-primary-rgb), 0.07) !important;
+  }
 }
 
 .metric-icon {
-  @include flex-center;
-  width: 48px;
-  height: 48px;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: rgba(var(--color-primary-rgb), 0.09);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
-  border-radius: $border-radius-md;
-  background: rgba($color-accent-light-blue, 0.1);
-  color: $color-accent-light-blue;
 
   mat-icon {
-    font-size: 1.5rem;
-    width: 1.5rem;
-    height: 1.5rem;
+    font-size: 26px;
+    color: var(--color-primary);
   }
 }
 
 .metric-label {
-  color: $color-text-secondary;
-  font-size: 0.78rem;
+  font-size: 11px;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.07em;
-  margin-bottom: 2px;
+  color: var(--color-text-tertiary);
+  margin-bottom: 5px;
 }
 
 .metric-value {
-  font-size: 1.6rem;
-  font-weight: 700;
-  line-height: 1.1;
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 4px;
 }
 
-.metric-subtitle {
-  color: $color-text-tertiary;
-  font-size: 0.8rem;
-  margin-top: 2px;
-}
+.metric-subtitle { font-size: 12px; color: var(--color-text-tertiary); }
 
-// ── Analytics two-column grid ─────────────────────────────────────────
+// ── Analytics 2-column grid ───────────────────────────────────────────────────
+
 .analytics-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: $spacing-md;
-
-  @media (max-width: $breakpoint-md) {
-    grid-template-columns: 1fr;
-  }
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
 }
 
 .analytics-card {
-  @include glass-morphism;
-  padding: $spacing-lg !important;
-  border-radius: $border-radius-lg !important;
-  background: $color-bg-card !important;
-  border: 1px solid rgba($color-accent-light-blue, 0.12) !important;
-  box-shadow: $shadow-elevation-1 !important;
-
-  &.wide-card {
-    // stays within the 2-col grid but gets more vertical breathing room
-    padding-bottom: $spacing-xl !important;
-  }
+  padding: 22px 24px !important;
+  background: var(--color-bg-card) !important;
+  border: 1px solid rgba(var(--color-primary-rgb), 0.12) !important;
+  border-radius: 18px !important;
+  box-shadow: none !important;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
 }
 
-.card-title {
-  margin-bottom: $spacing-md;
-  padding-bottom: $spacing-sm;
-  border-bottom: 1px solid rgba($color-accent-light-blue, 0.10);
-
-  h2 {
-    margin: 0;
-    font-size: 1.05rem;
-    color: $color-text-primary;
-  }
+.card-title h2 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+  letter-spacing: 0.01em;
 }
 
-// ── Habit completion trend list ───────────────────────────────────────
-.trend-list {
-  display: grid;
-  gap: $spacing-xs;
-}
+// ── Habit trends list ─────────────────────────────────────────────────────────
+
+.trend-list { display: flex; flex-direction: column; gap: 10px; }
 
 .trend-row {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: $spacing-sm;
-  padding: $spacing-sm $spacing-md;
-  border-radius: $border-radius-md;
-  background: rgba($color-accent-light-blue, 0.04);
-  font-size: 0.9rem;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+
+  &:last-child { border-bottom: none; }
+  strong { font-size: 15px; font-weight: 700; }
 }
 
 .empty-state {
-  color: $color-text-secondary;
-  font-size: 0.9rem;
+  font-size: 13px;
+  color: var(--color-text-tertiary);
   text-align: center;
-  padding: $spacing-lg 0 $spacing-sm;
+  padding: 12px 0;
   margin: 0;
+  line-height: 1.6;
 }
 
-// ── Consistency metrics ───────────────────────────────────────────────
+// ── Consistency stats ─────────────────────────────────────────────────────────
+
 .consistency-stat {
-  display: grid;
-  gap: $spacing-sm;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 
   > div {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    gap: $spacing-sm;
-    padding: $spacing-sm $spacing-md;
-    border-radius: $border-radius-md;
-    background: rgba($color-accent-light-blue, 0.04);
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
 
-    strong {
-      font-size: 1.15rem;
-    }
-
-    span {
-      color: $color-text-secondary;
-      font-size: 0.88rem;
-    }
+    &:last-child { border-bottom: none; }
+    strong { font-size: 17px; font-weight: 700; }
   }
 }
 
-// ── XP progress bar ───────────────────────────────────────────────────
-.progress-stack {
-  display: grid;
-  gap: $spacing-sm;
-}
+// ── XP progression ────────────────────────────────────────────────────────────
+
+.progress-stack { display: flex; flex-direction: column; gap: 10px; }
 
 .progress-entry {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: $spacing-sm;
-  font-size: 0.9rem;
-  color: $color-text-secondary;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--color-text-secondary);
 
-  strong {
-    font-weight: 700;
-  }
-
-  &.last {
-    margin-top: $spacing-xs;
-  }
+  &.last { font-size: 12px; color: var(--color-text-tertiary); }
+  strong { font-weight: 700; }
 }
 
-// Material progress bar override
-::ng-deep .analytics-card mat-progress-bar {
+::ng-deep .mat-mdc-progress-bar {
   border-radius: 999px;
   height: 8px;
-  overflow: hidden;
 
+  .mdc-linear-progress__buffer-bar {
+    background: rgba(var(--color-primary-rgb), 0.09);
+  }
   .mdc-linear-progress__bar-inner {
-    border-color: $color-accent-light-blue;
+    border-color: var(--color-primary);
   }
 }
 
-// ── Rank grid ─────────────────────────────────────────────────────────
+// ── Rank grid ─────────────────────────────────────────────────────────────────
+
 .rank-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: $spacing-sm;
-  margin-bottom: $spacing-md;
-
-  @media (max-width: $breakpoint-sm) {
-    grid-template-columns: 1fr;
-  }
+  gap: 12px;
+  margin-bottom: 12px;
 }
 
 .rank-cell {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: $spacing-xs;
-  padding: $spacing-sm;
-  border-radius: $border-radius-md;
-  background: rgba($color-accent-light-blue, 0.05);
-  border: 1px solid rgba($color-accent-light-blue, 0.10);
+  gap: 5px;
   text-align: center;
+  padding: 12px 10px;
+  background: rgba(var(--color-primary-rgb), 0.05);
+  border-radius: $border-radius-md;
+  border: 1px solid rgba(var(--color-primary-rgb), 0.1);
 
   strong {
-    font-size: 0.78rem;
+    font-size: 10px;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.07em;
-    color: $color-text-secondary;
+    letter-spacing: 0.06em;
+    color: var(--color-text-tertiary);
   }
 
-  span {
-    font-size: 1.1rem;
-    font-weight: 700;
-  }
+  span { font-size: 16px; font-weight: 700; }
+}
+
+// ── Colour helpers ────────────────────────────────────────────────────────────
+
+.text-gold   { color: var(--color-xp); }
+.text-blue   { color: var(--color-primary); }
+.text-purple { color: var(--color-secondary); }
+
+// ── Responsive ────────────────────────────────────────────────────────────────
+
+@media (max-width: 900px) {
+  .analytics-grid   { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+  .progress-shell   { padding: 16px 14px 40px; }
+  .metric-grid      { grid-template-columns: 1fr; }
+  .rank-grid        { grid-template-columns: 1fr 1fr; }
 }

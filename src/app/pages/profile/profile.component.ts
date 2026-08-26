@@ -18,7 +18,7 @@ import { environment } from '../../../environments/environment';
 })
 export class ProfileComponent implements OnInit {
 
-  user = this.auth.currentUser();
+  user: ReturnType<AuthService['currentUser']>;
   stats: any = null;
   pwForm!: FormGroup;
   pwError      = '';
@@ -44,7 +44,9 @@ export class ProfileComponent implements OnInit {
     private toast:        ToastService,
     private fb:           FormBuilder,
     private http:         HttpClient
-  ) {}
+  ) {
+    this.user = this.auth.currentUser();
+  }
 
   ngOnInit(): void {
     this.buildPwForm();

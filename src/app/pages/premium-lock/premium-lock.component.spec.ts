@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { HabitCollectionComponent } from './habit-collection.component';
+import { PremiumLockComponent } from './premium-lock.component';
 
-describe('HabitCollectionComponent', () => {
-  let component: HabitCollectionComponent;
-  let fixture: ComponentFixture<HabitCollectionComponent>;
+describe('PremiumLockComponent', () => {
+  let component: PremiumLockComponent;
+  let fixture: ComponentFixture<PremiumLockComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [HabitCollectionComponent]
+      imports: [PremiumLockComponent]
     })
     .compileComponents();
-    
-    fixture = TestBed.createComponent(HabitCollectionComponent);
+
+    fixture = TestBed.createComponent(PremiumLockComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

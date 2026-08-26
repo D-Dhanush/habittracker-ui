@@ -27,7 +27,7 @@
 }
 
 .quest-icon {
-  color: #4dd9ff;
+  color: var(--color-primary);
   font-size: 20px;
 }
 
@@ -65,12 +65,12 @@
 .difficulty {
   &.difficulty-easy {
     background: rgba(77, 217, 255, 0.15);
-    color: #4dd9ff;
+    color: var(--color-primary);
     border: 1px solid rgba(77, 217, 255, 0.3);
   }
   &.difficulty-medium {
     background: rgba(168, 124, 224, 0.15);
-    color: #c9a8f0;
+    color: var(--color-secondary-light);
     border: 1px solid rgba(168, 124, 224, 0.3);
   }
   &.difficulty-hard {
@@ -145,7 +145,7 @@
 .progress-fill {
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(90deg, #1a8fb5, #4dd9ff);
+  background: linear-gradient(90deg, var(--color-primary-dim), var(--color-primary));
   transition: width 320ms ease;
 }
 
@@ -177,7 +177,7 @@
 .status {
   &.status-active {
     background: rgba(77, 217, 255, 0.12);
-    color: #4dd9ff;
+    color: var(--color-primary);
   }
   &.status-paused {
     background: rgba(255, 200, 90, 0.12);
@@ -266,5 +266,5 @@
 .confirm-no {
   background: rgba(77, 217, 255, 0.1);
   border: 1px solid rgba(77, 217, 255, 0.3);
-  color: #4dd9ff;
+  color: var(--color-primary);
 }

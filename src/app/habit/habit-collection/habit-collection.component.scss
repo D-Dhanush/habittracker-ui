@@ -13,6 +13,11 @@
 
   h2 {
     margin: 0;
+    font-family: 'Cinzel', serif;
+    font-size: 1.9rem;
+    letter-spacing: 0.03em;
+    color: var(--color-text-primary);
+    text-shadow: 0 0 18px rgba(var(--color-primary-rgb), 0.16);
   }
 }
 
@@ -21,16 +26,16 @@
   gap: $spacing-xs;
   padding: $spacing-sm $spacing-md;
   border-radius: $border-radius-md;
-  background: rgba($color-accent-light-blue, 0.15);
-  color: $color-accent-light-blue;
-  border: 1px solid rgba($color-accent-light-blue, 0.35);
+  background: rgba(var(--color-primary-rgb), 0.14);
+  color: var(--color-primary);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.3);
   font-weight: 600;
   text-decoration: none;
   transition: all $transition-fast;
 
   &:hover {
-    background: rgba($color-accent-light-blue, 0.25);
-    box-shadow: $glow-blue;
+    background: rgba(var(--color-primary-rgb), 0.22);
+    box-shadow: var(--glow-primary);
   }
 }
 

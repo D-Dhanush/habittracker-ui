@@ -1,0 +1,68 @@
+<div class="plans-page">
+
+  <header class="plans-header">
+    <span class="eyebrow">ArcLord Premium</span>
+    <h1>Level up your journey</h1>
+    <p class="subtitle">Unlock unlimited habits, quests, AI coaching and more.</p>
+  </header>
+
+  <div class="plans-loading" *ngIf="loading()">
+    <div class="spinner"></div>
+    <span>Loading plans…</span>
+  </div>
+
+  <div class="plan-grid" *ngIf="!loading()">
+    <article
+      *ngFor="let plan of plans(); trackBy: trackByPlan"
+      class="plan-card"
+      [class.plan-card--best-value]="plan.isBestValue"
+      [class.plan-card--current]="isCurrentPlan(plan.id)">
+
+      <span class="ribbon" *ngIf="plan.isBestValue">Best Value</span>
+      <span class="current-badge" *ngIf="isCurrentPlan(plan.id)">Current Plan</span>
+
+      <h2 class="plan-name">{{ plan.name }}</h2>
+      <p class="plan-tagline" *ngIf="plan.tagline">{{ plan.tagline }}</p>
+
+      <div class="plan-price">
+        <span class="currency">₹</span><span class="amount">{{ plan.priceInr }}</span>
+      </div>
+      <div class="plan-duration">{{ plan.durationLabel }}</div>
+
+      <button
+        class="plan-cta"
+        [class.plan-cta--best-value]="plan.isBestValue"
+        [disabled]="isCurrentPlan(plan.id)"
+        (click)="selectPlan(plan.id)">
+        {{ isCurrentPlan(plan.id) ? 'Active' : 'Choose ' + plan.name }}
+      </button>
+    </article>
+  </div>
+
+  <section class="comparison-section" *ngIf="!loading()">
+    <h2>Compare features</h2>
+
+    <div class="comparison-table-wrap">
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th class="feature-col">Feature</th>
+            <th *ngFor="let plan of plans()" [class.col--best-value]="plan.isBestValue">
+              {{ plan.name }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let feature of features(); trackBy: trackByFeature">
+            <td class="feature-col">{{ feature.label }}</td>
+            <td *ngFor="let plan of plans()" [class.col--best-value]="plan.isBestValue">
+              <span class="check-yes" *ngIf="feature.included[plan.id]">✓</span>
+              <span class="check-no" *ngIf="!feature.included[plan.id]">—</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</div>

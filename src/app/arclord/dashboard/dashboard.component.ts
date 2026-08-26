@@ -13,7 +13,6 @@ import {
   calculateRankProgress
 } from '../../models/analytics.model';
 import { UserProgressDto } from '../../models/quest.model';
-import { CalendarComponent } from '../components/calendar/calendar.component';
 
 /**
  * Fixed: previously built a calendarData$ Observable and tried to pass it
@@ -28,7 +27,7 @@ import { CalendarComponent } from '../components/calendar/calendar.component';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, CalendarComponent, StatCardComponent],
+  imports: [CommonModule, RouterModule, StatCardComponent],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })

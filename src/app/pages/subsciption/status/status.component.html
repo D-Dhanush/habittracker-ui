@@ -1,0 +1,90 @@
+<div class="status-page">
+
+  <div class="status-loading" *ngIf="loading()">
+    <div class="spinner"></div>
+  </div>
+
+  <ng-container *ngIf="!loading()">
+
+    <!-- ── No subscription at all ─────────────────────────────────────── -->
+    <div class="empty-state" *ngIf="subscription() as sub; else noSub">
+      <ng-container *ngIf="sub.status === 'none'">
+        <h1>No active plan</h1>
+        <p>Unlock unlimited habits, quests, and AI coaching with ArcLord Premium.</p>
+        <button class="primary-btn" (click)="goToPlans()">View Plans</button>
+      </ng-container>
+
+      <!-- ── Active / trial subscription ──────────────────────────────── -->
+      <div class="plan-summary" *ngIf="sub.status !== 'none'">
+        <div class="plan-summary-header">
+          <span class="status-pill" [class.status-pill--trial]="sub.isTrial">
+            {{ sub.isTrial ? 'Trial' : 'Active' }}
+          </span>
+          <h1>{{ sub.planName || 'Premium' }}</h1>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat">
+            <span class="stat-label">Days Remaining</span>
+            <span class="stat-value">{{ sub.daysRemaining }}</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Expiry Date</span>
+            <span class="stat-value">{{ expiryLabel() }}</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Auto Renew</span>
+            <span class="stat-value">{{ sub.autoRenew ? 'On' : 'Off' }}</span>
+          </div>
+        </div>
+
+        <div class="action-row">
+          <button class="primary-btn" (click)="renew()">Renew</button>
+          <button class="secondary-btn" (click)="goToPlans()">Upgrade Plan</button>
+          <button
+            class="text-btn"
+            *ngIf="!sub.isTrial"
+            [disabled]="autoRenewBusy()"
+            (click)="toggleAutoRenew()">
+            {{ sub.autoRenew ? 'Cancel Auto Renewal' : 'Enable Auto Renewal' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <ng-template #noSub>
+      <div class="empty-state">
+        <h1>No active plan</h1>
+        <p>Unlock unlimited habits, quests, and AI coaching with ArcLord Premium.</p>
+        <button class="primary-btn" (click)="goToPlans()">View Plans</button>
+      </div>
+    </ng-template>
+
+    <!-- ── Payment history ───────────────────────────────────────────── -->
+    <section class="history-section">
+      <h2>Payment History</h2>
+
+      <p class="empty-history" *ngIf="history().length === 0">No payments yet.</p>
+
+      <table class="history-table" *ngIf="history().length > 0">
+        <thead>
+          <tr><th>Plan</th><th>Amount</th><th>Method</th><th>Date</th><th>Status</th><th>Invoice</th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of history(); trackBy: trackByPayment">
+            <td>{{ item.planName }}</td>
+            <td>₹{{ item.amountInr }}</td>
+            <td>{{ item.paymentMethod }}</td>
+            <td>{{ item.createdAtUtc | date:'mediumDate' }}</td>
+            <td><span class="status-badge" [class]="'status-badge--' + item.status">{{ item.status }}</span></td>
+            <td>
+              <a *ngIf="item.invoiceUrl" [href]="item.invoiceUrl" target="_blank">Download</a>
+              <span *ngIf="!item.invoiceUrl">—</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+  </ng-container>
+</div>

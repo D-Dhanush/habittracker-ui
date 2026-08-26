@@ -158,6 +158,19 @@ export class AuthService {
     return localStorage.getItem(TOKEN_KEY);
   }
 
+  /**
+   * Persists a fresh access token in place, WITHOUT touching the refresh
+   * token, expiry, or refresh timer — used when another service (e.g.
+   * SubscriptionService, after a plan purchase changes entitlement claims)
+   * receives a re-issued access token but the login session itself hasn't
+   * changed length. Does not re-derive currentUser from the new token;
+   * callers that need updated profile fields should still go through the
+   * normal /api/auth/me flow (tryAutoLogin) if that ever becomes necessary.
+   */
+  updateAccessToken(newToken: string): void {
+    localStorage.setItem(TOKEN_KEY, newToken);
+  }
+
   // ── Private helpers ───────────────────────────────────────────────────────
 
   private storeSession(res: AuthResponse): void {

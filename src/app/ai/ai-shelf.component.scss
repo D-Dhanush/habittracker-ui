@@ -13,16 +13,15 @@
   top: 0;
   left: 0;
   z-index: 9990;
-  // transform set dynamically by component
+  --ai-accent: var(--color-primary, #4dd9ff);
+  --ai-accent-rgb: var(--color-primary-rgb, 77, 217, 255);
+  --ai-accent-strong: var(--color-primary-dim, #1a8fb5);
+  --ai-surface: rgba(2, 7, 16, 0.96);
   will-change: transform;
-  touch-action: none; // disable browser pan/zoom so pointer events fire
+  touch-action: none;
   user-select: none;
   -webkit-user-select: none;
-
-  // Default transition (snap animation). Removed during drag by TS.
   transition: transform 380ms cubic-bezier(0.34, 1.56, 0.64, 1);
-
-  // Cursor changes
   cursor: grab;
 
   &.arc-is-dragging {
@@ -31,12 +30,11 @@
     .arc-fab {
       transform: scale(1.08);
       box-shadow:
-        0 0 0 3px rgba(192, 57, 43, 0.8),
-        0 0 40px rgba(192, 57, 43, 0.5),
+        0 0 0 3px rgba(var(--ai-accent-rgb), 0.8),
+        0 0 40px rgba(var(--ai-accent-rgb), 0.45),
         0 16px 48px rgba(0, 0, 0, 0.7);
     }
 
-    // Suppress shelf opening during drag
     .ai-shelf { pointer-events: none !important; opacity: 0 !important; }
   }
 }
@@ -51,33 +49,30 @@
   height: 72px;
   border-radius: 50%;
   border: none;
-  background: radial-gradient(circle at 40% 35%, #2a0808 0%, #0c0203 60%, #000 100%);
-  cursor: inherit; // inherit grab/grabbing from root
+  background: radial-gradient(circle at 40% 35%, color-mix(in srgb, var(--ai-accent) 25%, #02050a) 0%, color-mix(in srgb, var(--ai-accent) 8%, #02050a) 55%, #000 100%);
+  cursor: inherit;
   padding: 0;
   outline: none;
   overflow: visible;
   flex-shrink: 0;
-  transition:
-    transform 250ms cubic-bezier(0.34, 1.56, 0.64, 1),
-    box-shadow 250ms ease;
+  transition: transform 250ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 250ms ease;
   box-shadow:
-    0 0 0 2px rgba(192, 57, 43, 0.45),
-    0 0 20px rgba(192, 57, 43, 0.3),
+    0 0 0 2px rgba(var(--ai-accent-rgb), 0.4),
+    0 0 20px rgba(var(--ai-accent-rgb), 0.24),
     0 8px 32px rgba(0, 0, 0, 0.65);
 
-  // Hover — only when not dragging
   .arc-drag-root:not(.arc-is-dragging) &:hover {
     transform: scale(1.08);
     box-shadow:
-      0 0 0 2px rgba(192, 57, 43, 0.75),
-      0 0 32px rgba(192, 57, 43, 0.5),
+      0 0 0 2px rgba(var(--ai-accent-rgb), 0.7),
+      0 0 32px rgba(var(--ai-accent-rgb), 0.4),
       0 8px 32px rgba(0, 0, 0, 0.65);
   }
 
   &.is-open {
     box-shadow:
-      0 0 0 2px rgba(192, 57, 43, 0.9),
-      0 0 40px rgba(192, 57, 43, 0.6),
+      0 0 0 2px rgba(var(--ai-accent-rgb), 0.85),
+      0 0 40px rgba(var(--ai-accent-rgb), 0.5),
       0 8px 32px rgba(0, 0, 0, 0.65);
     .arc-portrait { transform: scale(0.88); }
   }
@@ -133,14 +128,14 @@
 .arc-ring--outer {
   inset: -6px;
   border: 2px solid transparent;
-  border-top-color: rgba(192, 57, 43, 0.7);
-  border-right-color: rgba(192, 57, 43, 0.4);
+  border-top-color: rgba(var(--ai-accent-rgb), 0.7);
+  border-right-color: rgba(var(--ai-accent-rgb), 0.35);
   animation: ring-spin 4s linear infinite;
 }
 
 .arc-ring--inner {
   inset: -2px;
-  border: 1px solid rgba(192, 57, 43, 0.2);
+  border: 1px solid rgba(var(--ai-accent-rgb), 0.2);
 }
 
 // ── Portrait ──────────────────────────────────────────────────────────────────
@@ -245,13 +240,13 @@
   flex-direction: column;
   border-radius: 20px;
   overflow: hidden;
-  background: linear-gradient(160deg, #0e0606 0%, #08020a 100%);
-  border: 1px solid rgba(192, 57, 43, 0.25);
+  background: linear-gradient(160deg, color-mix(in srgb, var(--ai-accent) 8%, var(--ai-surface)) 0%, rgba(3, 8, 15, 0.98) 100%);
+  border: 1px solid rgba(var(--ai-accent-rgb), 0.24);
   box-shadow:
-    0 0 0 1px rgba(192, 57, 43, 0.1),
+    0 0 0 1px rgba(var(--ai-accent-rgb), 0.1),
     0 24px 80px rgba(0, 0, 0, 0.85),
-    0 0 60px rgba(192, 57, 43, 0.08);
-  z-index: 9991; // above the drag root
+    0 0 60px rgba(var(--ai-accent-rgb), 0.08);
+  z-index: 9991;
 
   // Hidden state
   opacity: 0;
@@ -283,8 +278,8 @@
   align-items: center;
   gap: 10px;
   padding: 14px 16px;
-  background: rgba(192, 57, 43, 0.06);
-  border-bottom: 1px solid rgba(192, 57, 43, 0.12);
+  background: rgba(var(--ai-accent-rgb), 0.08);
+  border-bottom: 1px solid rgba(var(--ai-accent-rgb), 0.12);
   flex-shrink: 0;
 }
 
@@ -294,7 +289,7 @@
   background: radial-gradient(circle, #2d0808, #0a0202);
   border: 1.5px solid rgba(192, 57, 43, 0.4);
   flex-shrink: 0;
-  box-shadow: 0 0 12px rgba(192, 57, 43, 0.3);
+  box-shadow: 0 0 12px rgba(var(--color-primary-rgb), 0.3);
 }
 
 .shelf-avatar-img {
@@ -305,11 +300,11 @@
 .shelf-header-info { flex: 1; display: flex; flex-direction: column; gap: 1px; }
 
 .shelf-name {
-  font-size: 15px; font-weight: 700; color: $color-text-primary;
+  font-size: 15px; font-weight: 700; color: var(--color-text-primary);
   font-family: 'Cinzel', serif; letter-spacing: 0.03em;
 }
 
-.shelf-sub { font-size: 11px; color: rgba(192, 57, 43, 0.75); font-weight: 500; }
+.shelf-sub { font-size: 11px; color: rgba(var(--ai-accent-rgb), 0.75); font-weight: 500; }
 
 .shelf-header-actions { display: flex; gap: 2px; }
 
@@ -321,7 +316,7 @@
   transition: background 150ms, color 150ms;
 
   .material-icons { font-size: 16px; }
-  &:hover { background: rgba(192,57,43,0.1); color: rgba(232,244,255,0.8); }
+  &:hover { background: rgba(var(--color-primary-rgb), 0.1); color: rgba(232,244,255,0.8); }
 }
 
 // ── Messages ──────────────────────────────────────────────────────────────────
@@ -341,14 +336,14 @@
 
 .suggestions-label {
   font-size: 10px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.1em; color: rgba(192,57,43,0.6); margin: 0 0 8px;
+  letter-spacing: 0.1em; color: rgba(var(--ai-accent-rgb), 0.7); margin: 0 0 8px;
 }
 
 .suggestions-grid { display: flex; flex-wrap: wrap; gap: 6px; }
 
 .suggestion-chip {
-  background: rgba(192,57,43,0.07);
-  border: 1px solid rgba(192,57,43,0.2);
+  background: rgba(var(--ai-accent-rgb), 0.08);
+  border: 1px solid rgba(var(--ai-accent-rgb), 0.2);
   border-radius: 999px;
   color: rgba(232,244,255,0.7);
   font-size: 11px; font-weight: 500;
@@ -357,9 +352,9 @@
   font-family: 'Poppins', sans-serif;
 
   &:hover {
-    background: rgba(192,57,43,0.18);
-    border-color: rgba(192,57,43,0.45);
-    color: $color-text-primary;
+    background: rgba(var(--ai-accent-rgb), 0.16);
+    border-color: rgba(var(--ai-accent-rgb), 0.4);
+    color: var(--color-text-primary);
   }
 }
 
@@ -374,7 +369,7 @@
 .ai-avatar-sm {
   width: 28px; height: 28px; border-radius: 50%; overflow: hidden;
   background: radial-gradient(circle, #2d0808, #0a0202);
-  border: 1px solid rgba(192,57,43,0.3);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.3);
   flex-shrink: 0; margin-top: 2px;
 }
 
@@ -388,15 +383,15 @@
   font-family: 'Poppins', sans-serif; word-break: break-word;
 
   &--user {
-    background: linear-gradient(135deg, #8b1a1a, #c0392b);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--ai-accent) 88%, #fff) 0%, color-mix(in srgb, var(--ai-accent-strong) 78%, #fff) 100%);
     color: #fff; border-bottom-right-radius: 4px;
-    box-shadow: 0 2px 12px rgba(192,57,43,0.3); max-width: 80%;
+    box-shadow: 0 2px 12px rgba(var(--ai-accent-rgb), 0.28); max-width: 80%;
   }
 
   &--ai {
-    background: rgba(20,8,8,0.85);
-    border: 1px solid rgba(192,57,43,0.12);
-    color: $color-text-primary; border-bottom-left-radius: 4px;
+    background: rgba(8, 14, 24, 0.85);
+    border: 1px solid rgba(var(--ai-accent-rgb), 0.14);
+    color: var(--color-text-primary); border-bottom-left-radius: 4px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.3);
   }
 }
@@ -410,7 +405,7 @@
 
   span {
     width: 6px; height: 6px; border-radius: 50%;
-    background: rgba(192,57,43,0.6);
+    background: rgba(var(--ai-accent-rgb), 0.65);
     animation: typing-dot 1.3s ease-in-out infinite;
     &:nth-child(2) { animation-delay: 0.22s; }
     &:nth-child(3) { animation-delay: 0.44s; }
@@ -427,7 +422,7 @@
   padding: 5px 10px; border-radius: 999px;
   background: rgba(61,186,110,0.08);
   border: 1px solid rgba(61,186,110,0.22);
-  color: $color-success; align-self: flex-start;
+  color: var(--color-success); align-self: flex-start;
   .material-icons { font-size: 13px; }
 }
 
@@ -435,49 +430,49 @@
 
 .shelf-input-area {
   padding: 10px 12px 14px;
-  border-top: 1px solid rgba(192,57,43,0.1);
+  border-top: 1px solid rgba(var(--color-primary-rgb), 0.1);
   flex-shrink: 0;
   background: rgba(8,2,2,0.5);
 }
 
 .shelf-input-wrap {
   display: flex; align-items: flex-end; gap: 8px;
-  background: rgba(16,5,5,0.55);
+  background: rgba(8, 14, 24, 0.56);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
-  border: 1px solid rgba(192,57,43,0.22);
+  border: 1px solid rgba(var(--ai-accent-rgb), 0.22);
   border-radius: 14px;
   padding: 8px 8px 8px 14px;
   transition: border-color 160ms, box-shadow 160ms;
 
   &:focus-within {
-    border-color: rgba(192,57,43,0.55);
-    box-shadow: 0 0 0 3px rgba(192,57,43,0.1);
+    border-color: rgba(var(--ai-accent-rgb), 0.55);
+    box-shadow: 0 0 0 3px rgba(var(--ai-accent-rgb), 0.12);
   }
 }
 
 .shelf-input {
   flex: 1; background: transparent; border: none; outline: none;
-  color: $color-text-primary; font-size: 13px;
+  color: var(--color-text-primary); font-size: 13px;
   font-family: 'Poppins', sans-serif; resize: none;
   max-height: 100px; line-height: 1.5;
 
-  &::placeholder { color: rgba(192,57,43,0.35); font-style: italic; }
+  &::placeholder { color: rgba(var(--color-primary-rgb), 0.35); font-style: italic; }
   &:disabled { opacity: 0.45; }
 }
 
 .send-btn {
   width: 36px; height: 36px; border-radius: 10px;
-  background: linear-gradient(135deg, #8b1a1a, #c0392b);
+  background: linear-gradient(135deg, var(--ai-accent), var(--ai-accent-strong));
   border: none; color: #fff; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
   transition: opacity 160ms, transform 120ms, box-shadow 160ms;
-  box-shadow: 0 0 12px rgba(192,57,43,0.35);
+  box-shadow: 0 0 12px rgba(var(--color-primary-rgb), 0.35);
 
   .material-icons { font-size: 17px; }
 
-  &:hover:not(:disabled) { transform: scale(1.06); box-shadow: 0 0 20px rgba(192,57,43,0.55); }
+  &:hover:not(:disabled) { transform: scale(1.06); box-shadow: 0 0 20px rgba(var(--color-primary-rgb), 0.55); }
   &:disabled { opacity: 0.3; cursor: not-allowed; }
 }
 
@@ -509,8 +504,8 @@
 }
 
 @keyframes arc-pulse {
-  0%, 100% { box-shadow: 0 0 0 2px rgba(192,57,43,0.4), 0 0 20px rgba(192,57,43,0.3), 0 8px 32px rgba(0,0,0,0.6); }
-  50%       { box-shadow: 0 0 0 4px rgba(192,57,43,0.7), 0 0 36px rgba(192,57,43,0.55), 0 8px 32px rgba(0,0,0,0.6); }
+  0%, 100% { box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.4), 0 0 20px rgba(var(--color-primary-rgb), 0.3), 0 8px 32px rgba(0,0,0,0.6); }
+  50%       { box-shadow: 0 0 0 4px rgba(var(--color-primary-rgb), 0.7), 0 0 36px rgba(var(--color-primary-rgb), 0.55), 0 8px 32px rgba(0,0,0,0.6); }
 }
 
 @keyframes ring-spin {
@@ -570,4 +565,80 @@
 .suggestion-chip:focus-visible {
   outline: 2px solid rgba(192, 57, 43, 0.6);
   outline-offset: 2px;
+}
+
+// ── Theme-driven overrides — appended so they win specificity ──────────────────
+// Replaces all the hardcoded red/orange Igris colours with the theme primary.
+// Character personality (Igris) stays, but his energy colour matches the app.
+
+.igris-visor,
+.visor-glow {
+  background: var(--color-primary) !important;
+  box-shadow: 0 0 10px var(--color-primary), 0 0 22px rgba(var(--color-primary-rgb), 0.4) !important;
+}
+
+.igris-core-inner,
+.energy-core-inner {
+  background: var(--color-primary) !important;
+  box-shadow: 0 0 8px var(--color-primary) !important;
+}
+
+.igris-glow-orb,
+.ground-glow {
+  background: radial-gradient(ellipse,
+    rgba(var(--color-primary-rgb), 0.55) 0%,
+    transparent 70%
+  ) !important;
+}
+
+.shadow-particle {
+  background: rgba(var(--color-primary-rgb), 0.5) !important;
+}
+
+// Chat panel: border & header use theme primary
+.chat-panel,
+.ai-panel {
+  border-color: rgba(var(--color-primary-rgb), 0.3) !important;
+}
+
+.panel-header,
+.ai-header {
+  background: linear-gradient(
+    90deg,
+    rgba(var(--color-primary-rgb), 0.14) 0%,
+    rgba(var(--color-primary-rgb), 0.05) 100%
+  ) !important;
+  border-bottom-color: rgba(var(--color-primary-rgb), 0.18) !important;
+}
+
+// User message bubble
+.bubble--user,
+.user-bubble {
+  background: rgba(var(--color-primary-rgb), 0.14) !important;
+  border-color: rgba(var(--color-primary-rgb), 0.28) !important;
+}
+
+// Send button
+.send-btn {
+  background: linear-gradient(
+    135deg,
+    rgba(var(--color-primary-rgb), 0.38),
+    rgba(var(--color-primary-rgb), 0.2)
+  ) !important;
+  border-color: rgba(var(--color-primary-rgb), 0.38) !important;
+}
+
+// Input focus ring
+.ai-textarea:focus,
+.ai-input:focus {
+  border-color: rgba(var(--color-primary-rgb), 0.5) !important;
+  box-shadow: 0 0 8px rgba(var(--color-primary-rgb), 0.15) !important;
+}
+
+// Igris notif dot stays red — it's a semantic alert colour, intentional
+// Igris "character" glow ring
+.igris-wrapper {
+  &:hover .igris-glow-orb {
+    opacity: 0.9 !important;
+  }
 }

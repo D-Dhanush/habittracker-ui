@@ -38,7 +38,7 @@
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, #d4af37, #a07820);
-  color: #060c18;
+  color: var(--color-bg);
   font-size: 28px;
   font-weight: 700;
 }
@@ -95,8 +95,8 @@
 
   &.gold   { color: #d4af37; }
   &.orange { color: #ff9a3c; }
-  &.blue   { color: #4dd9ff; }
-  &.purple { color: #c9a8f0; }
+  &.blue   { color: var(--color-primary); }
+  &.purple { color: var(--color-secondary-light); }
 }
 
 .stat-label {
@@ -244,7 +244,7 @@ input {
   padding: 0;
 
   &:hover:not(:disabled) {
-    color: #4dd9ff;
+    color: var(--color-primary);
   }
 
   &:disabled {
